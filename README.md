@@ -2,14 +2,28 @@
 
 *twenty-four embedded projects that prove without revealing*
 
-Twenty-four projects that take one paper apart into the primitives it is built from and put
-each one on hardware that is already on one bench: three Raspberry Pis, a NanoPi, a
-NUCLEO-H7A3ZI-Q, an ESP32, an ESP8266, three cellular HATs, a CAN and RS485 HAT, a DAQ HAT,
-two ST sensor shields, an STWIN.box, a time-of-flight sensor, a display and four LEDs. The
-paper is Berrang, Giacobbe, Swales and Yang, *Zero-Knowledge Model Checking*,
-arXiv:2605.00487v2. Nothing here needs to be bought.
+A **zero-knowledge proof** is a way for one computer to convince another that a statement
+about its own private data is true, while handing over nothing except the statement and a
+short proof. **Model checking** is a way of settling whether a piece of control logic always
+obeys a stated rule, over every run it could ever have rather than over the runs somebody
+thought to test. One paper, Berrang, Giacobbe, Swales and Yang, *Zero-Knowledge Model
+Checking*, arXiv:2605.00487v2, puts the two together so that a device can establish that
+its hidden control logic obeys a public rule. This volume takes that paper apart into the
+primitives it is built from and asks what each one costs on hardware this small.
 
-**24 chapters, 99 figures, 156 numbered statements, 67 proofs.** The statements are the theorems, lemmas, corollaries, propositions, definitions, examples and remarks, counted across the chapter sources on Friday 6 November 2026; the figures are four per chapter plus three in the companion. Each chapter stands on its
+Two words recur on every page. The **prover** is the side that holds something private and
+wants to be believed; here it is almost always a board with a sensor on it. The **verifier**
+is the side that will not take the prover's word for it and checks a proof instead; here it
+is almost always a Raspberry Pi on the same desk.
+
+Twenty-four projects, each on hardware that is already on one bench: three Raspberry Pis, a
+NanoPi, a NUCLEO-H7A3ZI-Q, an ESP32, an ESP8266, three cellular HATs, a CAN and RS485 HAT, a
+DAQ HAT, two ST sensor shields, an STWIN.box, a time-of-flight sensor, a display and four
+LEDs. Nothing here needs to be bought, and nothing here has yet been run on any of it: every
+number in the volume is a prediction and says so. For a reader with no background in any of
+this, [`BROCHURE.md`](BROCHURE.md) says what the work is in plain words first.
+
+**24 chapters, 99 figures, 156 numbered statements, 67 proofs.** The statements are the theorems, lemmas, corollaries, propositions, definitions, examples and remarks, counted across the chapter sources on Friday 6 November 2026; the figures are four per chapter plus three in the companion. Those four numbers measure how much has been written down, not how much has been run: see [What is not claimed](#what-is-not-claimed). Each chapter stands on its
 own: it names a secret, a public statement and the relation between them as a set, proves
 the property of the primitive it uses with every step written, gives the protocol, shows the
 code, and prices it on the board with an instrument that is named.
@@ -19,9 +33,11 @@ beside it. Start with
 [About this volume](chapters/00-about-this-volume.md), or take a chapter from the table
 below.
 
-**Or start further back.** [`docs/`](docs/) is the companion, which assumes nothing: the
-[prerequisites](docs/prerequisites.md), the [foundations](docs/foundations.md) from a state
-machine to a proof, a [tutorial](docs/tutorial.md) that runs one proof end to end by hand,
+**Or start further back.** [`docs/`](docs/) is the companion. It assumes school algebra and
+that you have seen a computer program, and nothing of cryptography, formal methods or
+embedded hardware: the [prerequisites](docs/prerequisites.md), with a self-check and two
+short routes for whoever misses it, the [foundations](docs/foundations.md) from a state
+machine to a proof, a [tutorial](docs/tutorial.md) that works one proof end to end by hand,
 and a [guide](docs/guide.md) to all twenty-four projects.
 
 There is deliberately no assembled volume to download. The PDF and the single-file HTML are
@@ -177,7 +193,7 @@ after the push:
 | `figures/NAME.svg` | every figure rendered, committed because the Markdown draws nothing without them. The TikZ source is not published |
 | `CONTENTS.md` | the chapter table, generated, which the table above follows |
 | `PITFALLS.md` | every pitfall in the volume, generated, alphabetical across chapters |
-| `tools/` | the three guards and the hook installer |
+| `tools/` | the four guards and the hook installer |
 | `.githooks/` | the pre-commit and commit-message hooks, installed per clone |
 
 Figure files carry a `z` prefix, as `z07_wiring.svg`, so that a copied figure cannot
@@ -185,9 +201,22 @@ silently resolve against another volume's files.
 
 ## Requirements
 
-Nothing, to read it. GitHub renders the Markdown, the figures are SVG, and the mathematics
-is written so that the host typesets it. To run the three checks, Python 3.10 or newer and
-no package outside the standard library.
+**To read it, nothing.** GitHub renders the Markdown, the figures are SVG, and the
+mathematics is written so that the host typesets it.
+
+**To run anything, read this first.** This repository is the written volume and nothing
+else. Of its tracked files, 26 are chapter Markdown, 99 are SVG figures, 4 are the companion,
+and the only code is four Python guards under `tools/` that check this repository's own
+hygiene. Every program in the volume appears as a listing inside the prose and not as a file
+you can run, and none of those listings has been compiled or executed by the author. A
+reader who wants to run something copies the listing out of the chapter, writes the
+manifest or build file themselves, and supplies the toolchain; the chapter's own Steps
+section says which machine each piece belongs on. The one exception is the tutorial's
+self-contained script, which uses only the standard library and prints the two lines the
+tutorial predicts.
+
+**To run the four checks,** Python 3.10 or newer and no package outside the standard
+library.
 
 ## Licence
 

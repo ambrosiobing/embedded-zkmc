@@ -1,3 +1,25 @@
+# Contents
+
+Twenty-four chapters, one project each. The numbering is a reading order: each chapter
+leans on earlier ones and names them where it does. One later dependency is worth
+knowing in advance: chapter 19 carries the proof of chapter 4 or of chapter 20, so a
+reader going in order meets chapter 20's proof one chapter before chapter 20.
+
+**Read the companion first.** [`docs/`](docs/) carries the prerequisites, the
+foundations, a tutorial that works one proof by hand, and a one-page guide to every
+chapter with the hardware each one assumes. The chapters assume it.
+
+**Chapter 3 before chapter 4.** Chapter 4 verifies the file that chapter 3 produces
+and verifies nothing without it. Every other chapter stands alone.
+
+**Nothing in this volume has been run on a board**, and every chapter's success
+condition names one, so reading is free and passing is not. What each chapter needs
+is in the [guide](docs/guide.md). A reader with no hardware has the whole text, every
+proof, every figure, and the tutorial's one self-contained script.
+
+**For a reader with no background**, [`BROCHURE.md`](BROCHURE.md) says what this is
+in plain words before any of it.
+
 | # | Project | Language |
 |---|---|---|
 | 1 | [The price list: field, group and pairing arithmetic on every board](chapters/01-the-price-list.md) | Rust |

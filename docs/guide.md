@@ -1,6 +1,8 @@
 ## A guide to the twenty-four projects
 
-The volume can be read in order, and it was written to be. It can also be entered from whatever is on the desk, which is what this guide is for. The table gives the number, the title, the language, the board and the primitive of all twenty-four projects; the entries after it give, for each one, what it assumes of the reader and of the earlier chapters, the one idea it exists to teach, what to read before the code, the trap that is easiest to fall into, and its own acceptance test in one line. Every entry is deliberately short: the chapter is the long form, and this is the index to it.
+The volume can be read in order, and it was written to be. It can also be entered from whatever is on the desk, which is what this guide is for. The table gives the number, the title, the language, the board and the primitive of all twenty-four projects; the entries after it give, for each one, what it assumes of the reader and of the earlier chapters, the one idea it exists to teach, what to read before the code, the trap that is easiest to fall into, its difficulty and effort as the chapter's own key-facts box states them, and its acceptance test in one line. Every entry is deliberately short: the chapter is the long form, and this is the index to it.
+
+If the desk is empty, start here instead. With no hardware at all, read the tutorial above and run its one complete script, then read Project 3 and Project 14, which are the two chapters whose work is a program and a proof rather than a measurement; the Lean development of Project 14 has not been elaborated on this bench, so what that chapter carries is a proof written in a language a machine can check and not yet a proof a machine has checked. The mathematics, the code and the alteration test of ten chapters, Projects 6, 8, 9, 12, 13, 14, 16, 17, 21 and 24, can be read and written on one laptop, and none of the twenty-four can be completed without hardware, which is a property of the volume and worth knowing before choosing: completing a chapter is passing the acceptance test at its end, and for each of those ten that test names a board, a display, an LED, a Raspberry Pi throttle register or a second machine in its pass condition. The smallest parts list among the chapters a reader can actually begin is Project 3 followed by Project 4, read as one pipeline in that order, because Project 4 verifies the file Project 3 produces and verifies nothing without it. No chapter in this volume is rated below 2 of 5, and the two lowest difficulty ratings are Project 1 and Project 15 at 2 of 5.
 
 | **No.** | **Project** | **Language** | **Board and parts** | **Primitive** |
 | --- | --- | --- | --- | --- |
@@ -37,6 +39,7 @@ Four groupings cut across the table and are worth knowing before choosing. Z1 an
 - **The idea** is that a cost claim is a count of operations multiplied by a price, and a price without a named instrument is not a price.
 - **Read first** its lemma on the operation counts of the two schemes, then the remark that turns the paper's Table 1 into a prediction for this bench.
 - **The trap** is the throttle register: `get_throttled` is sticky, so a non-zero reading before a run means reboot the board, not retry the run.
+- **Cost** difficulty 2 of 5; effort one afternoon per Linux board, one evening for the Nucleo `no_std` build on the build laptop, a second day for the repeat.
 - **Acceptance** six harness lines per board whose repeat spread is under 5 percent, with the throttle word `0x0` at both ends and the Nucleo's cycle count agreeing with the MCC 118 within 2 percent.
 
 ### Z2. A sensor reading committed on the microcontroller
@@ -45,14 +48,16 @@ Four groupings cut across the table and are worth knowing before choosing. Z1 an
 - **The idea** is that a microcontroller can bind itself to a reading it does not disclose, in 32 bytes, and that the binding is additive so a window can be summed without opening a single sample.
 - **Read first** the hiding and binding theorems of [Project 1](../chapters/01-the-price-list.md), because the whole chapter is those two statements running at 10 Hz.
 - **The trap** is reusing the randomness: two commitments under one $`r`$ give the difference of the samples to anyone who divides them, recoverable in at most 131071 trial exponentiations.
+- **Cost** difficulty 3 of 5; effort two evenings on the build laptop for the `no_std` build with the 32-bit backend and the CDC, one afternoon on the bench for the shield, the witness and the first hundred commitments.
 - **Acceptance** 100 consecutive commitments decode as ristretto points on the Pi 4B with no gap over 150 ms, ten requested openings verify and ten altered openings are refused.
 
 ### Z3. The modem's backoff machine, proved live-free in zero knowledge
 
-- **Assumes** the price list of [Project 1](../chapters/01-the-price-list.md) for its arithmetic, and it is the chapter the tutorial above is the small version of.
+- **Assumes** the price list of [Project 1](../chapters/01-the-price-list.md) for its arithmetic, and it is the chapter the tutorial above is the small version of. The two instances do not share their names, so here is the map, and it is worth holding in mind on the first reading: the tutorial's $`\mathrm{Idle}`$ is this chapter's single initial state $`(\mathrm{Closed}, 0, 0)`$; the tutorial's $`\mathrm{Pending}`$ is the whole family $`(\mathrm{Wait}, d, n)`$ with $`n \le 2`$, which is where the rank is finite and must fall; the tutorial's $`\mathrm{Done}`$ is the two absorbing families $`(\mathrm{Registered}, 0, n)`$ and $`(\mathrm{Exhausted}, 0, 3)`$, both of rank $`0`$; and the tutorial's $`\mathrm{Hold}`$, the one cell the certificate rules out, is $`(\mathrm{Wait}, d, 3)`$. The forbidden proposition is $`\mathsf{pending}`$ there and $`\mathrm{Wait}`$ here, and it is the same proposition playing the same part. What grows is only arithmetic: $`|S|`$ from 4 to 256, $`|T|`$ from 4 to 61, and the three batch sizes from 1, 3 and 2 to 16, 7976 and 5016. The proof file stays 192 bytes, which is the whole point.
 - **The idea** is the paper's central move: the certifier never touches the secret, it enumerates from public data every state and pair that would violate the ranking conditions, and the prover shows only that its secret misses them.
 - **Read first** Theorem 3.2 with its descent argument, then the Lagrange basis lemma, because the rest of the chapter is bookkeeping over those two.
 - **The trap** is enumerating only the reachable states: the batch sizes are public, so a batch over 33 reachable states instead of all 256 would disclose the transition relation through its own cardinality.
+- **Cost** difficulty 3 of 5; effort one day for the machine and the batches on the authoring laptop, one day for the commitments on the Pi 4B, most of it waiting for pure Python.
 - **Acceptance** the batch sizes 16, 7976, 5016 and 8088 agree between the authoring laptop and the board, the proof file is exactly 192 bytes, and the machine with one extra fair self-loop is refused at the division.
 
 ### Z4. Two group elements: the KZG batch verifier in C
@@ -61,6 +66,7 @@ Four groupings cut across the table and are worth knowing before choosing. Z1 an
 - **The idea** is that the verifier's work does not grow with the system: two pairings and one multi-scalar multiplication in the second group, whatever the number of states behind the commitment.
 - **Read first** the vanishing-is-disjointness lemma of [Project 3](../chapters/03-the-modems-backoff-machine.md), since the two pairing equations are that lemma in group form.
 - **The trap** is that decompression is not validation: a point on the curve but outside the prime-order subgroup decompresses without error and makes the pairing equation say nothing, so the subgroup check is mandatory and costs one more multiplication per element.
+- **Cost** difficulty 3 of 5; effort one evening on the build laptop for the `blst` cross build and the sysroot, one evening on the two Pis.
 - **Acceptance** the generator round-trips through both compression conventions, the honest file lights the green LED, and the same file with one flipped byte lights the red one.
 
 ### Z5. Farkas witnesses for a joystick program
@@ -69,6 +75,7 @@ Four groupings cut across the table and are worth knowing before choosing. Z1 an
 - **The idea** is that a ranking obligation over a secret linear program becomes the unsatisfiability of a linear system, and unsatisfiability has a short certificate by Farkas’ lemma: a witness the prover can commit to and prove in range.
 - **Read first** the uniform form of the three obligations and the dual, then the integer-lift lemma, because the range proofs are about the lifted witness and not the rational one.
 - **The trap** is the certificate's own disclosure: the public ranking function and the public automaton name the counter's limit and the beeping mode, so the secret here is the update matrices and never the specification.
+- **Cost** difficulty 4 of 5; effort two evenings for the encoder and the Z3 harness on the authoring laptop, one evening for the Rust prover on the build laptop, one afternoon on the Pi 4B with the Explorer700.
 - **Acceptance** an integer witness is found for every one of the 77 obligations, every entry lies in the stated bound, every range proof verifies, and a witness with one entry raised by one fails the equality check.
 
 ### Z6. Folding and the Salem-Spencer schedule, computed exactly
@@ -77,6 +84,7 @@ Four groupings cut across the table and are worth knowing before choosing. Z1 an
 - **The idea** is that many obligations can be checked as one if the exponent schedule keeps the cross terms apart, and that a progression-free set is exactly what keeps them apart.
 - **Read first** the identity that expands the folded product into diagonal and cross terms, then the bound on the size of the cross-term set, which is the chapter's one exact quantity.
 - **The trap** is testing the wrong thing: the folding identity holds for any matrices and any witnesses, so a script that alters a matrix and recomputes the cross terms proves nothing; only the committed coefficients may be altered.
+- **Cost** difficulty 3 of 5; effort one evening for the script on the authoring laptop, one afternoon to install Julia on the Pi 4B and run it, one hour to enumerate the STWIN.box over USB-C.
 - **Acceptance** the computed cross-term sizes for the thirteen instance sizes match the chapter's table on both machines, admissibility holds for every size, and the identity is false after one committed coefficient is altered.
 
 ### Z7. The ESP32 proves two commitments open to one calibration constant
@@ -85,6 +93,7 @@ Four groupings cut across the table and are worth knowing before choosing. Z1 an
 - **The idea** is the smallest useful zero-knowledge proof in the volume: a sigma protocol of three objects that discloses one bit, namely that two public group elements were formed from the same secret scalar.
 - **Read first** the special-soundness argument, because it is the one place where extraction from two transcripts is written out in full and it explains why the challenge must be a hash of the commitment.
 - **The trap** is the encoding boundary: a point sent uncompressed and read as compressed is a framing error and not a bad proof, and a verifier that reports the two the same way will send a reader looking for a cryptographic defect.
+- **Cost** difficulty 3 of 5; effort one evening for the ESP-IDF prover on the build laptop, one evening for the .NET verifier and the GPIO, a third session for the PPK2 position and the energy figure.
 - **Acceptance** a transcript from the module is accepted and lights green, one with a single byte of the response changed is rejected and lights red, and a transcript built for a different scalar is rejected.
 
 ### Z8. A ranking function as a circuit, verified in a kiosk browser
@@ -93,6 +102,7 @@ Four groupings cut across the table and are worth knowing before choosing. Z1 an
 - **The idea** is that a general-purpose circuit buys a constant proof of three group elements and a verifier small enough to run in a browser, at the cost of a circuit-specific setup.
 - **Read first** the comparison lemma that turns an inequality over the integers into one over a prime field, because every range check in the circuit exists to satisfy its hypothesis.
 - **The trap** is omitting those range checks: without them a witness can use entries near the modulus so that every row holds in the field while the inequality fails over the integers.
+- **Cost** difficulty 3 of 5; effort one evening for the circuit and the ceremony on the build laptop, one evening for the kiosk page and the display, a third session for the repeat.
 - **Acceptance** the honest proof shows accept on the touchscreen, the same proof with one public signal changed shows reject, and a transition that does not decrease the ranking function fails at witness generation.
 
 ### Z9. Nova versus one-shot folding on a Pi
@@ -101,6 +111,7 @@ Four groupings cut across the table and are worth knowing before choosing. Z1 an
 - **The idea** is that two folds with the same guarantee have different bills: one challenge over all instances, or one cross term per step with the verifier's own circuit folded in each time.
 - **Read first** the cost proposition, since the whole chapter is its two counts and the conditions under which each wins.
 - **The trap** is the recursion overhead paid per step whatever the obligation's size: for a four-column obligation it is most of the constraint count, which is why the conclusion here would reverse for an obligation of a few thousand rows.
+- **Cost** difficulty 4 of 5; effort two evenings for the step circuit on the authoring laptop, one evening to build on the build laptop, one afternoon on the Pi 4B.
 - **Acceptance** a recursive proof over the 77 obligations verifies with the step count recorded and the constraint count printed, and the same run with one witness entry raised by one fails to verify.
 
 ### Z10. The hardware hash unit commits to a transition log
@@ -109,6 +120,7 @@ Four groupings cut across the table and are worth knowing before choosing. Z1 an
 - **The idea** is that a device can fix a whole history with 32 bytes and then disclose a handful of rows from it, and that a hardware digest unit makes the cost of doing so per transition small.
 - **Read first** the Merkle membership argument, then the collision-resistance hypothesis it rests on, because the binding here is computational in a different way from the discrete-logarithm binding elsewhere.
 - **The trap** is the digest unit's byte-swap setting: a wrong data-type field produces a 32-byte digest that is wrong and looks right, which is why the published test vector is hashed before anything is committed.
+- **Cost** difficulty 3 of 5; effort one evening for the HAL hash and RNG bring-up on the build laptop, one evening for the state machine and the tree, one afternoon on the bench with the Pi recomputing roots.
 - **Acceptance** the unit's digest of the three-byte test input matches the published vector and the Pi's own library byte for byte, the root over 1024 rows is recomputed and matches, and eight openings verify while two altered ones are refused.
 
 ### Z11. The prover's cost: multi-scalar multiplication and FFT on two Pis
@@ -117,6 +129,7 @@ Four groupings cut across the table and are worth knowing before choosing. Z1 an
 - **The idea** is that every prover in the volume is paid for in two currencies, a multi-scalar multiplication and a transform, and that both have published asymptotics and a constant that only measurement supplies.
 - **Read first** the bucket-method count and the transform's operation count, so that the measured curve can be compared against a shape rather than against a hope.
 - **The trap** is the thermally limited board: the Pi 3B+ reaches its soft limit in about four minutes of sustained load with no fan on the bench, so a size whose run exceeds that window reads not measured with the reason, never a throttled number.
+- **Cost** difficulty 3 of 5; effort one evening on the build laptop for the `blst` build and the harness, one afternoon per board, a second day for the repeat.
 - **Acceptance** one line per size on the Pi 4B across the seven sizes with the throttle word `0x0` at both ends, the same on the Pi 3B+ up to its window, and the transform of a known vector inverting back to the input.
 
 ### Z12. A PLONK gate for the inductive step, verified on the NanoPi
@@ -125,6 +138,7 @@ Four groupings cut across the table and are worth knowing before choosing. Z1 an
 - **The idea** is that a universal setup removes the per-circuit ceremony, and that the question for an embedded verifier is then whether a pairing-based check fits in 512 MB on an armv7 part.
 - **Read first** the gate and permutation constraints, then the memory arithmetic for the verifier, because the board's limit is the chapter's real subject.
 - **The trap** is the unsafe setup helper: whichever way it draws its secret, the prover holds it, so the bench proof convinces only the bench and a product form needs a ceremony string read from a file.
+- **Cost** difficulty 3 of 5; effort one evening for the circuit and the prover on the Pi 4B, one evening for the armv7 cross build and the NanoPi's Wi-Fi, a third session for the repeat.
 - **Acceptance** the honest proof verifies on the NanoPi with peak resident memory under 200 MB and a repeat spread under 5 percent, the proof with one public value changed is rejected, and the out-of-range witness is refused by the prover.
 
 ### Z13. The obligation in Noir, proved with UltraHonk
@@ -133,6 +147,7 @@ Four groupings cut across the table and are worth knowing before choosing. Z1 an
 - **The idea** is that a typed circuit language inserts the range checks the two earlier chapters wrote by hand, and that a sumcheck prover replaces a large polynomial division.
 - **Read first** the comparison lemma of [Project 8](../chapters/08-a-ranking-function-as-a-circuit.md) once more, this time to see the compiler performing it, and then the chapter's note on which integer width the rows need.
 - **The trap** is the arithmetic type: a comparison on the native field type is not an integer comparison, and the narrower integer type overflows on an honest row, so the program uses the wider one throughout.
+- **Cost** difficulty 2 of 5 for the program, 4 of 5 for the backend on the board; effort one evening for the program and the tests on the build laptop, one session for `bb` on the Pi, a third for the repeat.
 - **Acceptance** the test suite passes on the instance, the honest proof verifies on the Pi, the proof with one public value changed is rejected, and the out-of-range witness is refused at execution with a failed assertion.
 
 ### Z14. Theorem 3.2 in Lean 4: the ranking-function rule and the descent lemma it rests on
@@ -141,6 +156,7 @@ Four groupings cut across the table and are worth knowing before choosing. Z1 an
 - **The idea** is that the one sentence every chapter rests on can be handed to a kernel, and that having a checked object is the precondition for later hiding the check itself.
 - **Read first** the Lean statement beside the paper's three conditions, so that each hypothesis in the formal text is matched to the equation it comes from.
 - **The trap** is the toolchain pin: a cache fetched for a different toolchain revision rebuilds the mathematics library from source, which is hours on the build laptop and is not attempted on the board at all.
+- **Cost** difficulty 4 of 5; effort one day on the build laptop for the toolchain and the Mathlib cache, one evening for the lemma, one afternoon for the Pi, open-ended for the theorem.
 - **Acceptance** the build ends with no error and exactly one outstanding placeholder, on the theorem and never on the lemma, the board reproduces the same verdict, and a deliberately broken hypothesis makes the lemma fail.
 
 ### Z15. A Zig verifier of Pedersen openings for the Pi 3B+
@@ -149,6 +165,7 @@ Four groupings cut across the table and are worth knowing before choosing. Z1 an
 - **The idea** is that a batch of openings can be checked under random weights for about half the group arithmetic, at a soundness error of one in the group order.
 - **Read first** the proposition on when the weights may be drawn, because drawing them before the batch is complete is what turns a sound batch check into an unsound one.
 - **The trap** is two independent implementations of one derivation: the generator the board derives and the generator the microcontroller derives must agree byte for byte, and that agreement is checked on the first line of every run rather than assumed.
+- **Cost** difficulty 2 of 5; effort one evening for the cross build and the generator check on the build laptop, one afternoon on the bench with the LEDs and the four-minute windows.
 - **Acceptance** the derived generator equals the microcontroller's byte for byte, 64 correct openings accept and 64 altered ones are refused both singly and in a batch, and every timed run stays inside the board's thermal window.
 
 ### Z16. The model proposes a ranking function; the certifier decides
@@ -157,6 +174,7 @@ Four groupings cut across the table and are worth knowing before choosing. Z1 an
 - **The idea** is the volume's model rule stated as a theorem: a proposer may be anything at all, because a wrong proposal is rejected by the certifier and costs completeness and never soundness.
 - **Read first** that theorem, then the grammar, in that order, because the grammar is only an efficiency measure once the theorem is understood.
 - **The trap** is reading an agreement rate without the control rule's rate on the same rows: if a small fraction of the candidate grid certifies, a proposer drawing at random scores that fraction and has learned nothing.
+- **Cost** difficulty 3 of 5; effort one evening for the Z3 encoding and the C check, one evening for the grammar and the harness, one afternoon on the Pi for the 100 proposals per model.
 - **Acceptance** at least 100 proposals per model, every one parsed by the grammar and every one certified or rejected with the independent check agreeing in every case, and the paper's own certificate accepted.
 
 ### Z17. From a sentence to a Buchi automaton with Spot
@@ -165,6 +183,7 @@ Four groupings cut across the table and are worth knowing before choosing. Z1 an
 - **The idea** is that the first half of the certificate has to be written by somebody, and that an equivalence check against a template turns a proposed formula into a decided one.
 - **Read first** the five templates with their negations, since the automaton the scheme needs is for the complement and a reader who builds it for the formula will get the wrong one.
 - **The trap** is operator binding in the concrete syntax: a negated eventually always with no space binds differently and names a proposition the machine does not have, which the grammar's atom list is there to prevent.
+- **Cost** difficulty 3 of 5; effort one evening for Spot on the Pi and the program, one afternoon for the grammar and the model harness, one afternoon per model for the 100 prompts.
 - **Acceptance** each of the five templates yields an automaton for the negated formula, the solver reports each template equivalent to a hand-written variant and not equivalent to a deliberately wrong one, and the paper's own automaton is reported equivalent to its formula.
 
 ### Z18. A proof over the wire: KZG elements in CAN frames
@@ -173,6 +192,7 @@ Four groupings cut across the table and are worth knowing before choosing. Z1 an
 - **The idea** is that a constant-size proof is a transport problem with an exact answer: a fixed number of frames, a computable bus time, and an integrity check that tells a damaged payload from an intact one.
 - **Read first** the frame accounting and the bus-time arithmetic, then the sentence that says what the integrity check cannot do, namely tell a stranger's payload from the prover's.
 - **The trap** is the interface name: the two controllers on this HAT exchange their names between boots, so the name is read from the kernel log every time and never remembered from the last session.
+- **Cost** difficulty 3 of 5; effort one evening for the Nucleo firmware on the build laptop, one for the Pi side, one on the bus with the two mutations.
 - **Acceptance** one capture records exactly 25 frames, the reassembled file is byte-identical to the prover's under comparison, a sender that skips one frame yields no file, and the reassembled file is accepted by [Project 4](../chapters/04-two-group-elements.md).
 
 ### Z19. A commitment over NB-IoT and the energy per proof byte
@@ -181,6 +201,7 @@ Four groupings cut across the table and are worth knowing before choosing. Z1 an
 - **The idea** is that privacy has a price in joules on a battery-class radio, and that the price is per payload byte, so a constant-size proof is an energy argument and not only a bandwidth one.
 - **Read first** the four radio windows the energy figure is split into, because an aggregate figure over a whole send hides which window a design change would move.
 - **The trap** is the meter's own limit: the current meter on the bench cannot meter a Raspberry Pi under load, so a trace taken on the board's own supply is a different and wrong quantity, and only the module's supply may be metered.
+- **Cost** difficulty 3 of 5; effort one evening for the driver and the replay log on the host, one afternoon on the Pi with the HAT and the PPK2, a second afternoon when a SIM exists.
 - **Acceptance** with a SIM every step of the attach and send sequence answers successfully and the four windows each have a repeat spread under 10 percent; without one the driver stops at the card check with the reason no SIM and replays the whole sequence through the same parser byte for byte.
 
 ### Z20. The occupancy counter that proves it stayed under the limit
@@ -189,6 +210,7 @@ Four groupings cut across the table and are worth knowing before choosing. Z1 an
 - **The idea** is a complete demonstration in one sentence: the device proves that a secret count is below a public limit without saying whether it was three or fifteen.
 - **Read first** the range-proof statement and the bound's decomposition, so that it is clear which inequality is proved and which is merely displayed.
 - **The trap** is the proof system's permitted bit widths: the library takes 8, 16, 32 and 64 only, so a limit that is not one of those is proved as two statements and the verifier must recompute the derived commitment itself rather than accept one.
+- **Cost** difficulty 4 of 5; effort one evening for the proof on the build laptop, one afternoon for the sensor and the LEDs on the Pi, one afternoon for the LCD and the sentence, a morning for the timings.
 - **Acceptance** the sensor's identity register reads its documented value, staged crossings of zero, five, fifteen and sixteen produce accept, accept, accept and reject with the matching LED, and the proof length equals the computed count.
 
 ### Z21. A zero-knowledge virtual machine on the bench
@@ -197,6 +219,7 @@ Four groupings cut across the table and are worth knowing before choosing. Z1 an
 - **The idea** is that a general machine proves the execution of a program rather than the satisfaction of a circuit, which buys the ability to prove any program at the cost of a factor the chapter counts.
 - **Read first** the trace-validity theorem with its soundness hypothesis, then the cost lemma, whose named constant is the quantity the accelerator literature is aimed at.
 - **The trap** is the prover's memory: if it does not fit the board the prover runs on the build laptop and only the verification happens on the Pi, and the figure is then drawn dashed rather than quietly attributed to the board.
+- **Cost** difficulty 4 of 5; effort one evening on the build laptop for the guest and the host, one further evening for the first proof run and its memory ceiling, one afternoon on the Pi 4B for the verifier and the two LEDs.
 - **Acceptance** cycles per instruction and bytes per proof recorded as not measured, with the brief's 192-byte wrapped proof carried as a claim to verify and never as a measurement.
 
 ### Z22. Embedded Swift on the microcontroller
@@ -205,6 +228,7 @@ Four groupings cut across the table and are worth knowing before choosing. Z1 an
 - **The idea** is that a typed register discipline is a guarantee about the firmware, not about the proof, and the chapter is explicit that the two are different kinds of assurance.
 - **Read first** the proposition that a well-typed access cannot reach a reserved field, and then the sentence that bounds what it claims.
 - **The trap** is the brief's own hardware claim, corrected here with arithmetic: a 4-bit quantisation of an eight-billion-parameter model needs about 5 GB and the smallest Linux board on the bench has 512 MB, so it does not fit by an order of magnitude.
+- **Cost** difficulty 4 of 5; effort two evenings on the build laptop for the toolchain, the generated module and the first image, one afternoon on the bench for the shield, the display and the first hundred windows.
 - **Acceptance** the committed window matches the one [Project 2](../chapters/02-a-sensor-reading-committed-on-the-microcontroller.md) produces for the same samples, and the register-access claim is checked against the reference manual rather than asserted from the type signature.
 
 ### Z23. Elixir and Nerves: the CAN node on the Erlang virtual machine
@@ -213,6 +237,7 @@ Four groupings cut across the table and are worth knowing before choosing. Z1 an
 - **The idea** is that a process-isolation runtime changes what the proof must cover rather than changing the cryptography: a supervisor that restarts a node is a new source of replayed frames.
 - **Read first** the theorem that a restart cannot replay a committed frame, which rests on a monotone sequence number and is the chapter's one new piece of mathematics.
 - **The trap** is the board correction the brief needs: this CAN HAT is for the Pi 4B and the Pi 5, so the Pi 3B+ the brief names is not used, and the isolated HAT still needs its CAN-side ground tied to the loose transceiver's.
+- **Cost** difficulty 4 of 5; effort one evening for the supervision tree and the counter, one for the native function on the build laptop, one on the bench for the two mutations and the twenty repeats.
 - **Acceptance** the frames a supervised node sends after a restart are refused as replays by sequence number, and the reassembled proof is accepted by [Project 4](../chapters/04-two-group-elements.md) exactly as the C sender's is.
 
 ### Z24. A one-bit model: ternary weights on the Pi
@@ -221,6 +246,7 @@ Four groupings cut across the table and are worth knowing before choosing. Z1 an
 - **The idea** is that a proposer can be reduced to additions and subtractions without touching soundness, because soundness never depended on the proposer in the first place.
 - **Read first** the lemma that a ternary matrix-vector product needs no multiplications, then the proposition on the decision boundary, which is the honest limit of the whole idea.
 - **The trap** is that limit: a margin smaller than the quantisation step is not preserved, so a proposal near the boundary is not merely less accurate but arbitrary, which is tolerable only because the certifier decides.
+- **Cost** difficulty 3 of 5; effort one evening for the decision path in C, one for the harness and the grammar, one afternoon on the Pi for the 100 windows per proposer.
 - **Acceptance** the addition count against the floating-point product matches the computed figure, every proposal is parsed and then certified or rejected, and a constructed instance with a margin below the step is shown to change its label.
 
 ---
