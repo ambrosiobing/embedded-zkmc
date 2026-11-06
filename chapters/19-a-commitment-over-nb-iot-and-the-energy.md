@@ -42,56 +42,64 @@ The paper's prover sends one commitment and one proof; the paper's Table 1 price
 
 The witness is the sample and the randomness, the statement is the commitment, and the relation is the opening relation of ristretto255 Pedersen commitments:
 
-$$
-\mathcal{R}_{\mathrm{open}} = \lbrace \thinspace  ((v, r), c) \thickspace :\thickspace  v \in [0, 2^{16}),\thickspace  r \in \mathbb{Z}_p,\thickspace 
-  c = g^v h^r \thinspace \rbrace , \tag{19.1}
-$$
+```math
+\mathcal{R}_{\mathrm{open}} = \{\, ((v, r), c) \;:\; v \in [0, 2^{16}),\; r \in \mathbb{Z}_p,\;
+  c = g^v h^r \,\},
+```
 
-with $`g`$ the ristretto255 base point and $`h`$ derived by hashing to the group so that $`\log_g h`$ is unknown to the device \[[3](#references), [4](#references)\]. What this chapter adds to the relation is the channel: the device's output is a byte string, and the verifier's view is a function of that string and of the time it arrived. Write $`\mathrm{View}_{\mathrm{clear}}(v) = \lbrace v\rbrace`$ for the strategy that sends the sample, and $`\mathrm{View}_{\mathrm{com}}(v, r) = \lbrace c\rbrace`$ with $`c = g^v h^r`$ for the strategy that sends the commitment. The quantity the chapter prices is the energy of producing each view on the SIM7070G, as a function of the payload length in bytes.
+*(19.1)*
+
+with $`g`$ the ristretto255 base point and $`h`$ derived by hashing to the group so that $`\log_g h`$ is unknown to the device \[[3](#references), [4](#references)\]. What this chapter adds to the relation is the channel: the device's output is a byte string, and the verifier's view is a function of that string and of the time it arrived. Write $`\mathrm{View}_{\mathrm{clear}}(v) = \{v\}`$ for the strategy that sends the sample, and $`\mathrm{View}_{\mathrm{com}}(v, r) = \{c\}`$ with $`c = g^v h^r`$ for the strategy that sends the commitment. The quantity the chapter prices is the energy of producing each view on the SIM7070G, as a function of the payload length in bytes.
 
 ## The mathematics
 
 **Definition Z19.1 (Energy per transmission).** Let a transmission of $`n`$ payload bytes on the module consist of a fixed sequence (power key, attach, PDP activation, socket open, socket close) and the transfer of the payload. Its energy is modelled as
 
-$$
-E(n) = E_{\mathrm{attach}} + n \cdot e_{\mathrm{byte}}, \tag{19.2}
-$$
+```math
+E(n) = E_{\mathrm{attach}} + n \cdot e_{\mathrm{byte}},
+```
 
-where $`E_{\mathrm{attach}}`$ is the energy of the fixed sequence and $`e_{\mathrm{byte}}`$ the marginal energy per payload byte, both measured as $`U \int I \thinspace dt`$ over the respective window of a PPK2 current trace, with $`U`$ the module rail voltage read once from the wiki and $`I`$ the metered current. Both constants are "not measured, no SIM" on this bench; the lemma below is about their ratio, not their values.
+*(19.2)*
+
+where $`E_{\mathrm{attach}}`$ is the energy of the fixed sequence and $`e_{\mathrm{byte}}`$ the marginal energy per payload byte, both measured as $`U \int I \, dt`$ over the respective window of a PPK2 current trace, with $`U`$ the module rail voltage read once from the wiki and $`I`$ the metered current. Both constants are "not measured, no SIM" on this bench; the lemma below is about their ratio, not their values.
 
 **Lemma Z19.2 (Per-sample energy and the two crossovers).** Let a sample be $`s`$ bytes in the clear and let a proof that covers $`k`$ samples be $`b`$ bytes. Consider three strategies: (A) send every sample in the clear, one transmission per sample; (B) send one proof of $`b`$ bytes per $`k`$ samples; (C) send the $`k`$ samples in the clear in one transmission per $`k`$ samples. Under (19.2) the energy per sample is
 
-$$
+```math
 \begin{aligned}
-E_A &= E_{\mathrm{attach}} + s \thinspace  e_{\mathrm{byte}},  \cr 
-  E_B(k) &= \frac{E_{\mathrm{attach}}}{k} + \frac{b \thinspace  e_{\mathrm{byte}}}{k},  \cr 
-  E_C(k) &= \frac{E_{\mathrm{attach}}}{k} + s \thinspace  e_{\mathrm{byte}}, \tag{19.3}
+E_A &= E_{\mathrm{attach}} + s \, e_{\mathrm{byte}},  \\
+  E_B(k) &= \frac{E_{\mathrm{attach}}}{k} + \frac{b \, e_{\mathrm{byte}}}{k},  \\
+  E_C(k) &= \frac{E_{\mathrm{attach}}}{k} + s \, e_{\mathrm{byte}},
 \end{aligned}
-$$
+```
+
+*(19.3)*
 
 and (i) $`E_B(k) < E_A`$ if and only if $`k > k^{*}`$ with
 
-$$
-k^{*} = \frac{E_{\mathrm{attach}} + b \thinspace  e_{\mathrm{byte}}}{E_{\mathrm{attach}} + s \thinspace  e_{\mathrm{byte}}}, \tag{19.4}
-$$
+```math
+k^{*} = \frac{E_{\mathrm{attach}} + b \, e_{\mathrm{byte}}}{E_{\mathrm{attach}} + s \, e_{\mathrm{byte}}},
+```
 
-(ii) $`E_B(k) < E_C(k)`$ if and only if $`k > b / s`$, and (iii) for every $`k`$, $`E_B(k) - E_C(k) = (b - k s) \thinspace e_{\mathrm{byte}} / k`$.
+*(19.4)*
 
-*Proof.* Strategy (A) makes one transmission of $`n = s`$ bytes per sample, so (19.2) gives (19.3) directly. Strategy (B) makes one transmission of $`n = b`$ bytes per $`k`$ samples, so the energy per $`k`$ samples is $`E_{\mathrm{attach}} + b \thinspace e_{\mathrm{byte}}`$, and dividing by $`k`$ gives (19.3). Strategy (C) makes one transmission of $`n = k s`$ bytes per $`k`$ samples, energy $`E_{\mathrm{attach}} + k s \thinspace e_{\mathrm{byte}}`$, and dividing by $`k`$ gives (19.3).
+(ii) $`E_B(k) < E_C(k)`$ if and only if $`k > b / s`$, and (iii) for every $`k`$, $`E_B(k) - E_C(k) = (b - k s) \, e_{\mathrm{byte}} / k`$.
 
-(i) $`E_B(k) < E_A`$ reads $`(E_{\mathrm{attach}} + b \thinspace e_{\mathrm{byte}}) / k < E_{\mathrm{attach}} + s \thinspace e_{\mathrm{byte}}`$. Both sides are positive since the energies are positive, so multiplying by $`k > 0`$ and dividing by the right-hand side preserves the inequality and gives $`k > k^{*}`$ as in (19.4). If $`b \le s`$ then $`k^{*} \le 1`$ and every $`k \ge 1`$ satisfies it, with equality only when $`b = s`$ and $`k = 1`$.
+*Proof.* Strategy (A) makes one transmission of $`n = s`$ bytes per sample, so (19.2) gives (19.3) directly. Strategy (B) makes one transmission of $`n = b`$ bytes per $`k`$ samples, so the energy per $`k`$ samples is $`E_{\mathrm{attach}} + b \, e_{\mathrm{byte}}`$, and dividing by $`k`$ gives (19.3). Strategy (C) makes one transmission of $`n = k s`$ bytes per $`k`$ samples, energy $`E_{\mathrm{attach}} + k s \, e_{\mathrm{byte}}`$, and dividing by $`k`$ gives (19.3).
 
-(ii) and (iii) Subtracting (19.3) from (19.3), the attach terms cancel: $`E_B(k) - E_C(k) = b \thinspace e_{\mathrm{byte}} / k - s \thinspace e_{\mathrm{byte}} = (b - k s) \thinspace e_{\mathrm{byte}} / k`$, which is (iii). Since $`e_{\mathrm{byte}} / k > 0`$, the difference is negative exactly when $`b - k s < 0`$, that is $`k > b / s`$, which is (ii). &#9632;
+(i) $`E_B(k) < E_A`$ reads $`(E_{\mathrm{attach}} + b \, e_{\mathrm{byte}}) / k < E_{\mathrm{attach}} + s \, e_{\mathrm{byte}}`$. Both sides are positive since the energies are positive, so multiplying by $`k > 0`$ and dividing by the right-hand side preserves the inequality and gives $`k > k^{*}`$ as in (19.4). If $`b \le s`$ then $`k^{*} \le 1`$ and every $`k \ge 1`$ satisfies it, with equality only when $`b = s`$ and $`k = 1`$.
 
-**Remark Z19.7.** Part (iii) is the chapter's price tag. Against batched clear text, the privacy of a batch costs exactly $`(b - k s) \thinspace e_{\mathrm{byte}}`$ joules, the energy of the proof bytes beyond the sample bytes; the attach cost is paid by both. With the range proofs of [Project 20](20-the-occupancy-counter-that-proves-it-stayed-under.md), counted there as 960 bytes for two single 8-bit proofs or 544 bytes for the aggregated pair, and $`s = 2`$ bytes per 16-bit sample, the proof route beats batched clear text only past $`k = 480`$ or $`k = 272`$ samples per batch. With the KZG proof of [Project 4](04-two-group-elements.md) at two $`\mathbb{G}_1`$ elements plus two commitments, $`b = 192`$ bytes, the crossover is $`k = 96`$.
+(ii) and (iii) Subtracting (19.3) from (19.3), the attach terms cancel: $`E_B(k) - E_C(k) = b \, e_{\mathrm{byte}} / k - s \, e_{\mathrm{byte}} = (b - k s) \, e_{\mathrm{byte}} / k`$, which is (iii). Since $`e_{\mathrm{byte}} / k > 0`$, the difference is negative exactly when $`b - k s < 0`$, that is $`k > b / s`$, which is (ii). &#9632;
 
-**Definition Z19.4 (The verifier's view and its consistent set).** For a view $`\omega`$ of the channel, the consistent set is $`S(\omega) = \lbrace \thinspace v' \in [0, 2^{16}) \mid \exists r' \in \mathbb{Z}_p .\thickspace \omega \text{ is the view produced by } (v', r') \thinspace \rbrace`$, the set of samples the verifier cannot rule out after seeing $`\omega`$.
+**Remark Z19.7.** Part (iii) is the chapter's price tag. Against batched clear text, the privacy of a batch costs exactly $`(b - k s) \, e_{\mathrm{byte}}`$ joules, the energy of the proof bytes beyond the sample bytes; the attach cost is paid by both. With the range proofs of [Project 20](20-the-occupancy-counter-that-proves-it-stayed-under.md), counted there as 960 bytes for two single 8-bit proofs or 544 bytes for the aggregated pair, and $`s = 2`$ bytes per 16-bit sample, the proof route beats batched clear text only past $`k = 480`$ or $`k = 272`$ samples per batch. With the KZG proof of [Project 4](04-two-group-elements.md) at two $`\mathbb{G}_1`$ elements plus two commitments, $`b = 192`$ bytes, the crossover is $`k = 96`$.
 
-**Proposition Z19.5 (What each strategy reveals).** (a) $`S(\mathrm{View}_{\mathrm{clear}}(v)) = \lbrace v\rbrace`$. (b) For every $`v`$ and every $`r`$, $`S(\mathrm{View}_{\mathrm{com}}(v, r)) = [0, 2^{16})`$, the whole message space. (c) For $`r`$ uniform in $`\mathbb{Z}_p`$ the distribution of $`\mathrm{View}_{\mathrm{com}}(v, r)`$ is the same for every $`v`$, so no test on the view, however expensive, separates two samples. (d) The byte cost of (b) over (a) is $`32 - s`$ bytes per sample on the wire, and $`b`$ bytes per batch when the proof travels too.
+**Definition Z19.4 (The verifier's view and its consistent set).** For a view $`\omega`$ of the channel, the consistent set is $`S(\omega) = \{\, v' \in [0, 2^{16}) \mid \exists r' \in \mathbb{Z}_p .\; \omega \text{ is the view produced by } (v', r') \,\}`$, the set of samples the verifier cannot rule out after seeing $`\omega`$.
 
-*Proof.* (a) The view is the sample itself; a sample $`v'`$ produces the view $`\lbrace v'\rbrace`$, which equals $`\lbrace v\rbrace`$ if and only if $`v' = v`$.
+**Proposition Z19.5 (What each strategy reveals).** (a) $`S(\mathrm{View}_{\mathrm{clear}}(v)) = \{v\}`$. (b) For every $`v`$ and every $`r`$, $`S(\mathrm{View}_{\mathrm{com}}(v, r)) = [0, 2^{16})`$, the whole message space. (c) For $`r`$ uniform in $`\mathbb{Z}_p`$ the distribution of $`\mathrm{View}_{\mathrm{com}}(v, r)`$ is the same for every $`v`$, so no test on the view, however expensive, separates two samples. (d) The byte cost of (b) over (a) is $`32 - s`$ bytes per sample on the wire, and $`b`$ bytes per batch when the proof travels too.
 
-(b) Let $`c = g^v h^r`$ be the view. For any $`v' \in [0, 2^{16})`$ we ask for $`r'`$ with $`g^{v'} h^{r'} = c`$, that is $`h^{r'} = c \thinspace g^{-v'}`$. By the proof of Theorem thm:z01\_hiding the map $`r' \mapsto h^{r'}`$ is a bijection from $`\mathbb{Z}_p`$ onto $`\mathbb{G}`$, because $`p`$ is prime and $`h \ne 1`$; so the element $`c \thinspace g^{-v'} \in \mathbb{G}`$ has exactly one preimage $`r' = \log_h(c \thinspace g^{-v'})`$, and $`(v', r')`$ produces the same view. Hence every $`v'`$ lies in $`S(c)`$.
+*Proof.* (a) The view is the sample itself; a sample $`v'`$ produces the view $`\{v'\}`$, which equals $`\{v\}`$ if and only if $`v' = v`$.
+
+(b) Let $`c = g^v h^r`$ be the view. For any $`v' \in [0, 2^{16})`$ we ask for $`r'`$ with $`g^{v'} h^{r'} = c`$, that is $`h^{r'} = c \, g^{-v'}`$. By the proof of Theorem thm:z01\_hiding the map $`r' \mapsto h^{r'}`$ is a bijection from $`\mathbb{Z}_p`$ onto $`\mathbb{G}`$, because $`p`$ is prime and $`h \ne 1`$; so the element $`c \, g^{-v'} \in \mathbb{G}`$ has exactly one preimage $`r' = \log_h(c \, g^{-v'})`$, and $`(v', r')`$ produces the same view. Hence every $`v'`$ lies in $`S(c)`$.
 
 (c) This is Theorem thm:z01\_hiding: for each $`v`$ the random variable $`g^v h^r`$ with $`r`$ uniform is uniform on $`\mathbb{G}`$, and the uniform distribution on $`\mathbb{G}`$ does not depend on $`v`$. Two identical distributions give identical acceptance probabilities to every test.
 
@@ -110,7 +118,7 @@ The transport protocol, written as the AT dialogue it is, with the PPK2 windows 
 5. `AT+CAOPEN=0,0,"UDP","<host>",<port>` (to verify); the window **socket**.
 6. Commit: $`v`$ is read from `/sys/class/thermal/thermal_zone0/temp` as a 16-bit integer in tenths of a degree; $`r`$ is 32 random bytes; $`c = g^v h^r`$ in 32 bytes.
 7. `AT+CASEND=0,32`, the prompt, the 32 bytes, `OK` (to verify); the window **send**; then `AT+CACLOSE=0` and `AT+CNACT=0,0`.
-8. The PPK2 trace is cut at the four window marks the driver prints with its own monotonic clock, and each window's energy is $`U \int I \thinspace dt`$.
+8. The PPK2 trace is cut at the four window marks the driver prints with its own monotonic clock, and each window's energy is $`U \int I \, dt`$.
 
 ## The code
 

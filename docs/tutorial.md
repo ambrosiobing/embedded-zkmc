@@ -25,33 +25,39 @@ The mathematics behind the certificate is Theorem 3.2 of the paper \[[1](#refere
 
 The machine is the bench's own verdict indicator. It sits idle, a request puts it in a pending state, it reaches a verdict, and it then either clears to idle or holds the verdict. A fourth state exists in the public state space and is the interesting one: a state that observes as pending and loops on itself, which is exactly the behaviour the specification forbids. The secret is that the machine never enters it.
 
-Let $`\Pi = \lbrace \mathsf{idle}, \mathsf{pending}, \mathsf{done}\rbrace`$ and $`\Sigma = 2^\Pi`$. The state space is public:
+Let $`\Pi = \{\mathsf{idle}, \mathsf{pending}, \mathsf{done}\}`$ and $`\Sigma = 2^\Pi`$. The state space is public:
 
-$$
-S = \lbrace \thinspace  \mathrm{Idle},\thickspace  \mathrm{Pending},\thickspace  \mathrm{Done},\thickspace  \mathrm{Hold} \thinspace \rbrace ,
-  \qquad |S| = 4 \thickspace \text{(counted)}, \tag{1}
-$$
+```math
+S = \{\, \mathrm{Idle},\; \mathrm{Pending},\; \mathrm{Done},\; \mathrm{Hold} \,\},
+  \qquad |S| = 4 \;\text{(counted)},
+```
+
+*(1)*
 
 with the observation function
 
-$$
-\langle\negthinspace \langle \mathrm{Idle} \rangle\negthinspace \rangle = \lbrace \mathsf{idle}\rbrace , \quad
-  \langle\negthinspace \langle \mathrm{Pending} \rangle\negthinspace \rangle = \lbrace \mathsf{pending}\rbrace , \quad
-  \langle\negthinspace \langle \mathrm{Done} \rangle\negthinspace \rangle = \lbrace \mathsf{done}\rbrace , \quad
-  \langle\negthinspace \langle \mathrm{Hold} \rangle\negthinspace \rangle = \lbrace \mathsf{pending}\rbrace . \tag{2}
-$$
+```math
+\langle\!\langle \mathrm{Idle} \rangle\!\rangle = \{\mathsf{idle}\}, \quad
+  \langle\!\langle \mathrm{Pending} \rangle\!\rangle = \{\mathsf{pending}\}, \quad
+  \langle\!\langle \mathrm{Done} \rangle\!\rangle = \{\mathsf{done}\}, \quad
+  \langle\!\langle \mathrm{Hold} \rangle\!\rangle = \{\mathsf{pending}\}.
+```
+
+*(2)*
 
 Two states observe as pending, and that is deliberate. The verifier sees letters, never states, so no amount of watching tells $`\mathrm{Pending}`$ from $`\mathrm{Hold}`$, and the proof has to do the work instead.
 
 The secret part of $`\mathcal{M}`$ is the pair
 
-$$
+```math
 \begin{gathered}
-S_0 = \lbrace \thinspace  \mathrm{Idle} \thinspace \rbrace , \cr 
-  T = \lbrace \thinspace  (\mathrm{Idle}, \mathrm{Pending}),\thickspace  (\mathrm{Pending}, \mathrm{Done}),\thickspace 
-    (\mathrm{Done}, \mathrm{Idle}),\thickspace  (\mathrm{Done}, \mathrm{Done}) \thinspace \rbrace , \tag{3}
+S_0 = \{\, \mathrm{Idle} \,\}, \\
+  T = \{\, (\mathrm{Idle}, \mathrm{Pending}),\; (\mathrm{Pending}, \mathrm{Done}),\;
+    (\mathrm{Done}, \mathrm{Idle}),\; (\mathrm{Done}, \mathrm{Done}) \,\},
 \end{gathered}
-$$
+```
+
+*(3)*
 
 so $`|S_0| = 1`$ and $`|T| = 4`$ (both counted). Note what is absent: no pair has $`\mathrm{Hold}`$ as a target, and no pair has $`\mathrm{Pending}`$ as both source and target. Those two absences are the entire content of the proof.
 
@@ -67,10 +73,12 @@ stateDiagram-v2
 
 The public specification is one sentence: the indicator does not stay pending forever.
 
-$$
-\phi = \neg\thinspace  \mathrm{F}\thinspace \mathrm{G}\thinspace  \mathsf{pending}, \qquad
-  \neg\phi = \mathrm{F}\thinspace \mathrm{G}\thinspace  \mathsf{pending} . \tag{4}
-$$
+```math
+\phi = \neg\, \mathrm{F}\,\mathrm{G}\, \mathsf{pending}, \qquad
+  \neg\phi = \mathrm{F}\,\mathrm{G}\, \mathsf{pending} .
+```
+
+*(4)*
 
 Read $`\phi`$ carefully, because the machine of (3) does visit $`\mathrm{Pending}`$ infinitely often along the cycle $`\mathrm{Idle} \to \mathrm{Pending} \to \mathrm{Done} \to \mathrm{Idle}`$. Infinitely often is permitted; what $`\phi`$ forbids is eventually always. A reader who confuses the two will build the wrong automaton and then wonder why an honest system is refused.
 
@@ -78,17 +86,19 @@ Read $`\phi`$ carefully, because the machine of (3) does visit $`\mathrm{Pending
 
 The certificate is public, and it is the pair $`v_\phi = (\mathcal{A}_{\neg\phi}, V)`$. The automaton is the paper's Figure 2b with $`\mathsf{pending}`$ in place of its own proposition \[[1](#references)\]:
 
-$$
+```math
 \begin{gathered}
-Q = \lbrace q_0, q_1\rbrace , \qquad Q_0 = \lbrace q_0\rbrace , \cr 
-  \delta = \lbrace \thinspace  (q_0, \sigma, q_0) \mid \sigma \in \Sigma \thinspace \rbrace  \cup
-    \lbrace \thinspace  (q_0, \sigma, q_1),\thinspace  (q_1, \sigma, q_1) \mid \mathsf{pending} \in \sigma \thinspace \rbrace ,
-    \cr 
-  F = \lbrace \thinspace  (q_1, \sigma, q_1) \mid \mathsf{pending} \in \sigma \thinspace \rbrace . \tag{5}
+Q = \{q_0, q_1\}, \qquad Q_0 = \{q_0\}, \\
+  \delta = \{\, (q_0, \sigma, q_0) \mid \sigma \in \Sigma \,\} \cup
+    \{\, (q_0, \sigma, q_1),\, (q_1, \sigma, q_1) \mid \mathsf{pending} \in \sigma \,\},
+    \\
+  F = \{\, (q_1, \sigma, q_1) \mid \mathsf{pending} \in \sigma \,\}.
 \end{gathered}
-$$
+```
 
-In words: $`q_0`$ waits for as long as it likes, guesses at some point that the pending phase has begun, moves to $`q_1`$, and from then on can only continue while every letter carries $`\mathsf{pending}`$; the fair transitions are exactly those continuations. An accepting run is a guess that was right forever, which is the meaning of $`\mathrm{F}\thinspace \mathrm{G}`$.
+*(5)*
+
+In words: $`q_0`$ waits for as long as it likes, guesses at some point that the pending phase has begun, moves to $`q_1`$, and from then on can only continue while every letter carries $`\mathsf{pending}`$; the fair transitions are exactly those continuations. An accepting run is a guess that was right forever, which is the meaning of $`\mathrm{F}\,\mathrm{G}`$.
 
 The ranking function has eight cells. It is a public object: a reader, or a model as in [Project 16](../chapters/16-the-model-proposes-a-ranking-function-the-certifier.md), may propose it, and the certifier checks it.
 
@@ -105,34 +115,40 @@ Theorem 3.2 of the paper asks three conditions of $`V`$, its Equations 4, 5 and 
 
 Here is the step that makes the whole construction possible, and it is worth saying slowly. The certifier never checks the three conditions against $`S_0`$ and $`T`$, because it does not have them. It negates each consequent and enumerates, from public data only, every state and every pair that *would* violate a condition. Those are the paper's Equations 7 to 9:
 
-$$
+```math
 \begin{aligned}
-B_{\mathrm{init}} &= \lbrace \thinspace  s \in S \mid \exists q \in Q_0 .\thickspace  V(s, q) = \infty \thinspace \rbrace ,
-    \cr 
-  B_{\mathrm{step}} &= \lbrace \thinspace  (s, s') \in S \times S \mid \exists q, q' .\thickspace  V(s, q) \ne \infty
-    \wedge (q, \langle\negthinspace \langle s \rangle\negthinspace \rangle, q') \in \delta \wedge V(s, q) < V(s', q') \thinspace \rbrace ,
-    \cr 
-  B_{\mathrm{fair}} &= \lbrace \thinspace  (s, s') \in S \times S \mid \exists q, q' .\thickspace  V(s, q) \ne \infty
-    \wedge (q, \langle\negthinspace \langle s \rangle\negthinspace \rangle, q') \in F \wedge V(s, q) \le V(s', q') \thinspace \rbrace , \tag{6}
+B_{\mathrm{init}} &= \{\, s \in S \mid \exists q \in Q_0 .\; V(s, q) = \infty \,\},
+    \\
+  B_{\mathrm{step}} &= \{\, (s, s') \in S \times S \mid \exists q, q' .\; V(s, q) \ne \infty
+    \wedge (q, \langle\!\langle s \rangle\!\rangle, q') \in \delta \wedge V(s, q) < V(s', q') \,\},
+    \\
+  B_{\mathrm{fair}} &= \{\, (s, s') \in S \times S \mid \exists q, q' .\; V(s, q) \ne \infty
+    \wedge (q, \langle\!\langle s \rangle\!\rangle, q') \in F \wedge V(s, q) \le V(s', q') \,\},
 \end{aligned}
-$$
+```
+
+*(6)*
 
 with $`V(s, q) < \infty`$ for every finite value. The prover then has to show only that its secret avoids them, which is the paper's Equation 10:
 
-$$
+```math
 S_0 \cap B_{\mathrm{init}} = \emptyset, \qquad
   T \cap B_{\mathrm{step}} = \emptyset, \qquad
-  T \cap B_{\mathrm{fair}} = \emptyset . \tag{7}
-$$
+  T \cap B_{\mathrm{fair}} = \emptyset .
+```
 
-**The first set.** $`Q_0 = \lbrace q_0\rbrace`$, so (6) reads off the first numeric column of the table: one cell is $`+\infty`$, and
+*(7)*
 
-$$
-B_{\mathrm{init}} = \lbrace \thinspace  \mathrm{Hold} \thinspace \rbrace , \qquad |B_{\mathrm{init}}| = 1
-  \thickspace \text{(computed)}. \tag{8}
-$$
+**The first set.** $`Q_0 = \{q_0\}`$, so (6) reads off the first numeric column of the table: one cell is $`+\infty`$, and
 
-**The second set.** Work source by source. The automaton steps available from a source $`s`$ depend only on $`\langle\negthinspace \langle s \rangle\negthinspace \rangle`$: from $`\mathrm{Idle}`$ and $`\mathrm{Done}`$, whose letters carry no $`\mathsf{pending}`$, the only step is $`q_0 \to q_0`$; from $`\mathrm{Pending}`$ and $`\mathrm{Hold}`$ the steps are $`q_0 \to q_0`$, $`q_0 \to q_1`$ and $`q_1 \to q_1`$. A source cell with $`V(s, q) = \infty`$ contributes nothing, because the premise of (6) fails there.
+```math
+B_{\mathrm{init}} = \{\, \mathrm{Hold} \,\}, \qquad |B_{\mathrm{init}}| = 1
+  \;\text{(computed)}.
+```
+
+*(8)*
+
+**The second set.** Work source by source. The automaton steps available from a source $`s`$ depend only on $`\langle\!\langle s \rangle\!\rangle`$: from $`\mathrm{Idle}`$ and $`\mathrm{Done}`$, whose letters carry no $`\mathsf{pending}`$, the only step is $`q_0 \to q_0`$; from $`\mathrm{Pending}`$ and $`\mathrm{Hold}`$ the steps are $`q_0 \to q_0`$, $`q_0 \to q_1`$ and $`q_1 \to q_1`$. A source cell with $`V(s, q) = \infty`$ contributes nothing, because the premise of (6) fails there.
 
 | **Source $`s`$** | **Finite cells** | **Steps $`(q, q')`$** | **Targets with a strictly larger value, and the pairs they give** |
 | --- | --- | --- | --- |
@@ -141,27 +157,33 @@ $$
 | $`\mathrm{Done}`$ | $`q_0 \mapsto 1`$, $`q_1 \mapsto 0`$ | $`(q_0, q_0)`$ only | only $`\mathrm{Hold}`$ again: $`(\mathrm{Done}, \mathrm{Hold})`$ |
 | $`\mathrm{Hold}`$ | none | not reached | both cells are $`+\infty`$, so this source contributes no pair at all |
 
-$$
-B_{\mathrm{step}} = \lbrace \thinspace  (\mathrm{Idle}, \mathrm{Hold}),\thickspace 
-    (\mathrm{Pending}, \mathrm{Hold}),\thickspace  (\mathrm{Done}, \mathrm{Hold}) \thinspace \rbrace , \qquad
-  |B_{\mathrm{step}}| = 3 \thickspace \text{(computed)}. \tag{9}
-$$
+```math
+B_{\mathrm{step}} = \{\, (\mathrm{Idle}, \mathrm{Hold}),\;
+    (\mathrm{Pending}, \mathrm{Hold}),\; (\mathrm{Done}, \mathrm{Hold}) \,\}, \qquad
+  |B_{\mathrm{step}}| = 3 \;\text{(computed)}.
+```
+
+*(9)*
 
 **The third set.** $`F`$ holds only the steps $`q_1 \to q_1`$ on a pending letter, so the source is $`\mathrm{Pending}`$ or $`\mathrm{Hold}`$ and the cell is the $`q_1`$ one. The $`\mathrm{Hold}`$ cell is $`+\infty`$ and contributes nothing. From $`V(\mathrm{Pending}, q_1) = 1`$ the condition is $`1 \le V(s', q_1)`$, and $`V(\cdot, q_1) = (0, 1, 0, \infty)`$ satisfies it at $`\mathrm{Pending}`$ itself, where $`1 \le 1`$, and at $`\mathrm{Hold}`$:
 
-$$
-B_{\mathrm{fair}} = \lbrace \thinspace  (\mathrm{Pending}, \mathrm{Pending}),\thickspace 
-    (\mathrm{Pending}, \mathrm{Hold}) \thinspace \rbrace , \qquad
-  |B_{\mathrm{fair}}| = 2 \thickspace \text{(computed)}, \tag{10}
-$$
+```math
+B_{\mathrm{fair}} = \{\, (\mathrm{Pending}, \mathrm{Pending}),\;
+    (\mathrm{Pending}, \mathrm{Hold}) \,\}, \qquad
+  |B_{\mathrm{fair}}| = 2 \;\text{(computed)},
+```
+
+*(10)*
 
 and therefore
 
-$$
-B_{\mathrm{step}} \cup B_{\mathrm{fair}} = \lbrace \thinspace  (\mathrm{Idle}, \mathrm{Hold}),\thickspace 
-  (\mathrm{Pending}, \mathrm{Hold}),\thickspace  (\mathrm{Done}, \mathrm{Hold}),\thickspace 
-  (\mathrm{Pending}, \mathrm{Pending}) \thinspace \rbrace , \tag{11}
-$$
+```math
+B_{\mathrm{step}} \cup B_{\mathrm{fair}} = \{\, (\mathrm{Idle}, \mathrm{Hold}),\;
+  (\mathrm{Pending}, \mathrm{Hold}),\; (\mathrm{Done}, \mathrm{Hold}),\;
+  (\mathrm{Pending}, \mathrm{Pending}) \,\},
+```
+
+*(11)*
 
 of size $`4`$ (computed). Compare (11) with the secret $`T`$ of (3): the four forbidden pairs and the four real ones share no member, and $`\mathrm{Idle} \ne \mathrm{Hold}`$ settles the first condition of (7). The system satisfies $`\phi`$, and the reason is now a statement about two four-element sets of public pairs rather than about a machine.
 
@@ -227,33 +249,41 @@ The sets are public; the system is not. The prover now binds itself to $`S_0`$ a
 
 Index the states in the order of (1), so $`\mathrm{idx}(\mathrm{Idle}) = 0`$, $`\mathrm{idx}(\mathrm{Pending}) = 1`$, $`\mathrm{idx}(\mathrm{Done}) = 2`$ and $`\mathrm{idx}(\mathrm{Hold}) = 3`$. Let $`\mathbb{F}_r`$ be the scalar field of BLS12-381, let $`\omega_1`$ be a primitive fourth root of unity in $`\mathbb{F}_r`$ and $`\omega_2`$ a primitive sixteenth root, both of which exist because $`2^{32}`$ divides $`r - 1`$. The two embeddings are
 
-$$
+```math
 e_1(s) = \omega_1^{\mathrm{idx}(s)}, \qquad
-  e_2(s, s') = \omega_2^{\mathrm{idx}(s) + 4\thinspace \mathrm{idx}(s')}, \tag{12}
-$$
+  e_2(s, s') = \omega_2^{\mathrm{idx}(s) + 4\,\mathrm{idx}(s')},
+```
+
+*(12)*
 
 injective because every exponent is below the order of its root. The exponents of the secret relation are, pair by pair from (3),
 
-$$
-J_T = \lbrace \thinspace  0 + 4 \cdot 1,\thickspace  1 + 4 \cdot 2,\thickspace  2 + 4 \cdot 0,\thickspace  2 + 4 \cdot 2 \thinspace \rbrace 
-      = \lbrace \thinspace  4,\thickspace  9,\thickspace  2,\thickspace  10 \thinspace \rbrace  \thickspace \text{(computed)}, \tag{13}
-$$
+```math
+J_T = \{\, 0 + 4 \cdot 1,\; 1 + 4 \cdot 2,\; 2 + 4 \cdot 0,\; 2 + 4 \cdot 2 \,\}
+      = \{\, 4,\; 9,\; 2,\; 10 \,\} \;\text{(computed)},
+```
+
+*(13)*
 
 and the exponents of the public batch, from (11), are
 
-$$
-J_E = \lbrace \thinspace  0 + 4 \cdot 3,\thickspace  1 + 4 \cdot 3,\thickspace  2 + 4 \cdot 3,\thickspace  1 + 4 \cdot 1 \thinspace \rbrace 
-      = \lbrace \thinspace  12,\thickspace  13,\thickspace  14,\thickspace  5 \thinspace \rbrace  \thickspace \text{(computed)}. \tag{14}
-$$
+```math
+J_E = \{\, 0 + 4 \cdot 3,\; 1 + 4 \cdot 3,\; 2 + 4 \cdot 3,\; 1 + 4 \cdot 1 \,\}
+      = \{\, 12,\; 13,\; 14,\; 5 \,\} \;\text{(computed)}.
+```
+
+*(14)*
 
 $`J_T`$ and $`J_E`$ are disjoint, which is (7) read in exponents, and it is worth checking that by eye once: the four numbers $`2, 4, 9, 10`$ against the four numbers $`5, 12, 13, 14`$.
 
 The indicator polynomials come from the Lagrange basis over the roots of unity, which has a closed form and needs no linear system solved; the lemma and its proof are Lemma Z3.9 in [Project 3](../chapters/03-the-modems-backoff-machine.md). With $`L_j(X) = n^{-1} \sum_{i=0}^{n-1} \omega^{-ij} X^i`$,
 
-$$
+```math
 p_{S_0} = L_0 \text{ over } \omega_1 \text{ with } n = 4, \qquad
-  p_T = \sum_{j \in J_T} L_j \text{ over } \omega_2 \text{ with } n = 16, \tag{15}
-$$
+  p_T = \sum_{j \in J_T} L_j \text{ over } \omega_2 \text{ with } n = 16,
+```
+
+*(15)*
 
 of degrees at most $`3`$ and $`15`$ (computed). Each is then blinded by adding $`(b_0 + b_1 X)(X^n - 1)`$ with $`b_0, b_1`$ drawn uniformly from $`\mathbb{F}_r`$, the technique PLONK uses on its wire polynomials \[[3](#references)\]: the mask vanishes on every $`n`$-th root of unity, so no evaluation the protocol uses changes, and the degrees rise to $`5`$ and $`17`$ (computed). Without the mask, a verifier facing only four states could guess a relation, recompute its polynomial and compare commitments, so the blinding is not an optional flourish.
 
@@ -267,21 +297,25 @@ The commitments are KZG \[[2](#references)\]: $`c = g_1^{p(\tau)}`$, evaluated a
 
 The proof is the pair of batch openings. Let
 
-$$
+```math
 Z_{E_{\mathrm{init}}}(X) = X - \omega_1^{3}, \qquad
-  Z_E(X) = (X - \omega_2^{5})(X - \omega_2^{12})(X - \omega_2^{13})(X - \omega_2^{14}), \tag{16}
-$$
+  Z_E(X) = (X - \omega_2^{5})(X - \omega_2^{12})(X - \omega_2^{13})(X - \omega_2^{14}),
+```
+
+*(16)*
 
 of degrees $`1`$ and $`4`$ (computed), and divide:
 
-$$
+```math
 q_{S_0} = \frac{p_{S_0}}{Z_{E_{\mathrm{init}}}}, \qquad
-  q_T = \frac{p_T}{Z_E}, \tag{17}
-$$
+  q_T = \frac{p_T}{Z_E},
+```
+
+*(17)*
 
 of degrees $`4`$ and $`13`$ (computed). Each division is carried out root by root by synthetic division, and each leaves a remainder that the prover checks to be zero before it continues. That check is the prover's own refusal, and it is the reason the deliberate error below never produces a file at all. The proof is $`\pi_{S_0} = g_1^{q_{S_0}(\tau)}`$ and $`\pi_T = g_1^{q_T(\tau)}`$, two more compressed $`\mathbb{G}_1`$ elements.
 
-So the artefact is $`c_{S_0} \thinspace \Vert \thinspace c_T \thinspace \Vert \thinspace \pi_{S_0} \thinspace \Vert \thinspace \pi_T`$, four compressed elements of 48 bytes, that is 192 bytes (computed), whatever the size of the system. That constancy is the point of the explicit-state scheme and is what [Project 18](../chapters/18-a-proof-over-the-wire.md) carries over a CAN bus in 25 frames.
+So the artefact is $`c_{S_0} \,\|\, c_T \,\|\, \pi_{S_0} \,\|\, \pi_T`$, four compressed elements of 48 bytes, that is 192 bytes (computed), whatever the size of the system. That constancy is the point of the explicit-state scheme and is what [Project 18](../chapters/18-a-proof-over-the-wire.md) carries over a CAN bus in 25 frames.
 
 **Step 1.** On the Pi 4B, divide and open. Confirm that both remainders print as zero, that the file is exactly 192 bytes, and that its four elements decompress back to the points they were made from. A file of any other length is a serialisation defect and not a proof.
 
@@ -289,10 +323,12 @@ So the artefact is $`c_{S_0} \thinspace \Vert \thinspace c_T \thinspace \Vert \t
 
 The verifier holds no secret. It has the state space, the automaton, the ranking table, the setup and the 192 bytes, and it does three things: it recomputes the three sets from (6) to (6) itself and compares the sizes with the prover's, it decompresses the four elements and checks that each lies in $`\mathbb{G}_1`$, and it evaluates two pairing equations:
 
-$$
-e(c_{S_0}, g_2) = e\big(\pi_{S_0},\thinspace  g_2^{Z_{E_{\mathrm{init}}}(\tau)}\big), \qquad
-  e(c_T, g_2) = e\big(\pi_T,\thinspace  g_2^{Z_E(\tau)}\big), \tag{18}
-$$
+```math
+e(c_{S_0}, g_2) = e\big(\pi_{S_0},\, g_2^{Z_{E_{\mathrm{init}}}(\tau)}\big), \qquad
+  e(c_T, g_2) = e\big(\pi_T,\, g_2^{Z_E(\tau)}\big),
+```
+
+*(18)*
 
 accepting only if both hold. The second step is not a formality: a point on the curve but outside $`\mathbb{G}_1`$ decompresses without error and makes (18) meaningless, which is the first pitfall of [Project 4](../chapters/04-two-group-elements.md) and costs one subgroup check per element.
 
@@ -306,10 +342,12 @@ This is the part of the exercise that matters. A tutorial in which everything is
 
 The error is one transition. Add to the secret relation the pair $`(\mathrm{Pending}, \mathrm{Pending})`$, so that the indicator may stay pending for one more tick:
 
-$$
-T' = T \cup \lbrace \thinspace  (\mathrm{Pending}, \mathrm{Pending}) \thinspace \rbrace , \qquad |T'| = 5
-  \thickspace \text{(counted)}. \tag{19}
-$$
+```math
+T' = T \cup \{\, (\mathrm{Pending}, \mathrm{Pending}) \,\}, \qquad |T'| = 5
+  \;\text{(counted)}.
+```
+
+*(19)*
 
 Nothing else changes: the state space, the specification, the automaton, the ranking table and all three violation sets are public and untouched. And $`T'`$ is a system that genuinely violates $`\phi`$: the execution $`\mathrm{Idle}, \mathrm{Pending}, \mathrm{Pending}, \dots`$ stays pending forever, the automaton's guess at the first pending letter is right forever, and the run is accepting. The property has failed, so a sound verifier must refuse, and here is the chain by which it does.
 

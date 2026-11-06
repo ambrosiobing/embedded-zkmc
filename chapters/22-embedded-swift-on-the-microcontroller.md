@@ -41,50 +41,60 @@ The brief proposes this firmware as the flight logic of a small aircraft \[[2](#
 
 Let $`s_1, \ldots, s_n`$ with $`n = 64`$ be the signed 16-bit samples of one window, and let
 
-$$
-v \thickspace =\thickspace  \Big(\sum_{i=1}^{n} s_i\Big) \bmod p \tag{22.1}
-$$
+```math
+v \;=\; \Big(\sum_{i=1}^{n} s_i\Big) \bmod p
+```
+
+*(22.1)*
 
 be the reduction the firmware computes, with $`p`$ the order of the ristretto255 group \[[7](#references)\]. The relation is the one of [Project 2](02-a-sensor-reading-committed-on-the-microcontroller.md) with the window of this chapter substituted:
 
-$$
-\mathcal{R}_{\mathrm{win}} = \mathsf{PoK}\Big\lbrace \thinspace  \underbrace{(s_1, \ldots, s_n, r)}_{w} ;\thickspace 
-  \underbrace{(c, t)}_{u} \thickspace :\thickspace 
-  c = g^{\thinspace v} h^{\thinspace r} \thickspace \wedge\thickspace 
-  v = \Big(\sum_{i=1}^{n} s_i\Big) \bmod p \thinspace \Big\rbrace , \tag{22.2}
-$$
+```math
+\mathcal{R}_{\mathrm{win}} = \mathsf{PoK}\Big\{\, \underbrace{(s_1, \ldots, s_n, r)}_{w} ;\;
+  \underbrace{(c, t)}_{u} \;:\;
+  c = g^{\,v} h^{\,r} \;\wedge\;
+  v = \Big(\sum_{i=1}^{n} s_i\Big) \bmod p \,\Big\},
+```
+
+*(22.2)*
 
 with $`t`$ the sequence number the verifier uses to order the stream. The witness set is
 
-$$
-W = \lbrace \thinspace  (s_1, \ldots, s_{64}, r) \in (\lbrace -2^{15}, \ldots, 2^{15} - 1\rbrace )^{64} \times \mathbb{Z}_p \thinspace \rbrace ,
-$$
+```math
+W = \{\, (s_1, \ldots, s_{64}, r) \in (\{-2^{15}, \ldots, 2^{15} - 1\})^{64} \times \mathbb{Z}_p \,\},
+```
 
-and the statement set is $`U = \lbrace \thinspace (c, t) \in \mathbb{G} \times \mathbb{N} \thinspace \rbrace`$. The two properties the relation rests on are proved once in [Project 1](01-the-price-list.md) and are cited here and not reproved: the commitment is perfectly hiding by Theorem thm:z01\_hiding, so the 32 bytes carry no information about the window at all, and it is binding under the discrete logarithm assumption by Theorem thm:z01\_binding, so an opening the Nucleo later supplies is the window it actually held.
+and the statement set is $`U = \{\, (c, t) \in \mathbb{G} \times \mathbb{N} \,\}`$. The two properties the relation rests on are proved once in [Project 1](01-the-price-list.md) and are cited here and not reproved: the commitment is perfectly hiding by Theorem thm:z01\_hiding, so the 32 bytes carry no information about the window at all, and it is binding under the discrete logarithm assumption by Theorem thm:z01\_binding, so an opening the Nucleo later supplies is the window it actually held.
 
 ## The mathematics
 
 The new content of this chapter is not cryptographic. It is a statement about what a generated register interface guarantees, written precisely enough that the boundary of the guarantee is visible.
 
-**Definition Z22.1 (Register layout and its typed view).** Let $`\mathcal{A}`$ be the set of word addresses of a peripheral block. A *register layout* is a finite set $`\mathcal{F}`$ of fields, each a tuple $`f = (a_f, \ell_f, h_f, \kappa_f)`$ with an address $`a_f \in \mathcal{A}`$, a bit range $`0 \le \ell_f \le h_f \le 31`$, and a kind $`\kappa_f \in \lbrace \mathsf{rw}, \mathsf{ro}, \mathsf{wo}, \mathsf{res}\rbrace`$, where $`\mathsf{res}`$ marks a reserved field. Write
+**Definition Z22.1 (Register layout and its typed view).** Let $`\mathcal{A}`$ be the set of word addresses of a peripheral block. A *register layout* is a finite set $`\mathcal{F}`$ of fields, each a tuple $`f = (a_f, \ell_f, h_f, \kappa_f)`$ with an address $`a_f \in \mathcal{A}`$, a bit range $`0 \le \ell_f \le h_f \le 31`$, and a kind $`\kappa_f \in \{\mathsf{rw}, \mathsf{ro}, \mathsf{wo}, \mathsf{res}\}`$, where $`\mathsf{res}`$ marks a reserved field. Write
 
-$$
-\mathrm{bits}(f) = \lbrace \thinspace  (a_f, j) \mid \ell_f \le j \le h_f \thinspace \rbrace \tag{22.3}
-$$
+```math
+\mathrm{bits}(f) = \{\, (a_f, j) \mid \ell_f \le j \le h_f \,\}
+```
 
-for the *footprint* of $`f`$. The layout is *disjoint* when $`\mathrm{bits}(f) \cap \mathrm{bits}(g) = \emptyset`$ for all $`f \ne g`$ in $`\mathcal{F}`$. Write $`\mathcal{F}_{\mathrm{acc}} = \lbrace \thinspace f \in \mathcal{F} \mid \kappa_f \ne \mathsf{res} \thinspace \rbrace`$ for the accessible fields, and define the *typed view* of the layout as the map
+*(22.3)*
 
-$$
+for the *footprint* of $`f`$. The layout is *disjoint* when $`\mathrm{bits}(f) \cap \mathrm{bits}(g) = \emptyset`$ for all $`f \ne g`$ in $`\mathcal{F}`$. Write $`\mathcal{F}_{\mathrm{acc}} = \{\, f \in \mathcal{F} \mid \kappa_f \ne \mathsf{res} \,\}`$ for the accessible fields, and define the *typed view* of the layout as the map
+
+```math
 T : \mathcal{F}_{\mathrm{acc}} \to 2^{\mathbb{N}}, \qquad
-  T(f) = \lbrace \thinspace  0, 1, \ldots, 2^{\thinspace h_f - \ell_f + 1} - 1 \thinspace \rbrace . \tag{22.4}
-$$
+  T(f) = \{\, 0, 1, \ldots, 2^{\,h_f - \ell_f + 1} - 1 \,\}.
+```
+
+*(22.4)*
 
 A *well-typed read* of $`f \in \mathcal{F}_{\mathrm{acc}}`$ from a word $`W_{a_f} = \sum_{j=0}^{31} b_j 2^j`$ is the value
 
-$$
-\mathrm{rd}(f) \thickspace =\thickspace  \big\lfloor W_{a_f} / 2^{\thinspace \ell_f} \big\rfloor
-  \thickspace \bmod\thickspace  2^{\thinspace h_f - \ell_f + 1}, \tag{22.5}
-$$
+```math
+\mathrm{rd}(f) \;=\; \big\lfloor W_{a_f} / 2^{\,\ell_f} \big\rfloor
+  \;\bmod\; 2^{\,h_f - \ell_f + 1},
+```
+
+*(22.5)*
 
 which is the shift and mask the generated accessor emits. A code generator is *faithful* to the layout when it emits an accessor for every $`f \in \mathcal{F}_{\mathrm{acc}}`$ and for no other field.
 
@@ -96,34 +106,36 @@ which is the shift and mask the generated accessor emits. A code generator is *f
 
 *Proof.* (1) Let $`g \in \mathcal{F}`$ with $`\kappa_g = \mathsf{res}`$. Since $`f \in \mathcal{F}_{\mathrm{acc}}`$ we have $`\kappa_f \ne \mathsf{res}`$, so $`\kappa_f \ne \kappa_g`$ and therefore $`f \ne g`$ as tuples. The layout is disjoint, so $`\mathrm{bits}(f) \cap \mathrm{bits}(g) = \emptyset`$.
 
-(2) Write $`\ell = \ell_f`$, $`h = h_f`$ and $`m = h - \ell + 1`$, and write $`W_{a_f} = \sum_{j=0}^{31} b_j 2^j`$ with $`b_j \in \lbrace 0,1\rbrace`$. Split the sum at $`\ell`$:
+(2) Write $`\ell = \ell_f`$, $`h = h_f`$ and $`m = h - \ell + 1`$, and write $`W_{a_f} = \sum_{j=0}^{31} b_j 2^j`$ with $`b_j \in \{0,1\}`$. Split the sum at $`\ell`$:
 
-$$
-W_{a_f} \thickspace =\thickspace  \sum_{j=0}^{\ell-1} b_j 2^j \thickspace +\thickspace  2^{\ell}\sum_{j=\ell}^{31} b_j 2^{\thinspace j-\ell}.
-$$
+```math
+W_{a_f} \;=\; \sum_{j=0}^{\ell-1} b_j 2^j \;+\; 2^{\ell}\sum_{j=\ell}^{31} b_j 2^{\,j-\ell}.
+```
 
 The first sum is at most $`2^{\ell} - 1`$, so it contributes nothing to the integer quotient and
 
-$$
-\big\lfloor W_{a_f} / 2^{\ell} \big\rfloor \thickspace =\thickspace  \sum_{j=\ell}^{31} b_j 2^{\thinspace j-\ell}.
-$$
+```math
+\big\lfloor W_{a_f} / 2^{\ell} \big\rfloor \;=\; \sum_{j=\ell}^{31} b_j 2^{\,j-\ell}.
+```
 
 Now split that sum at $`j = h`$:
 
-$$
-\sum_{j=\ell}^{31} b_j 2^{\thinspace j-\ell}
-  \thickspace =\thickspace  \sum_{j=\ell}^{h} b_j 2^{\thinspace j-\ell} \thickspace +\thickspace  2^{m}\sum_{j=h+1}^{31} b_j 2^{\thinspace j-h-1}.
-$$
+```math
+\sum_{j=\ell}^{31} b_j 2^{\,j-\ell}
+  \;=\; \sum_{j=\ell}^{h} b_j 2^{\,j-\ell} \;+\; 2^{m}\sum_{j=h+1}^{31} b_j 2^{\,j-h-1}.
+```
 
-The second term is a multiple of $`2^m`$ and so vanishes modulo $`2^m`$; the first term is at most $`\sum_{j=\ell}^{h} 2^{\thinspace j-\ell} = 2^{m} - 1 < 2^m`$ and so is its own residue. Therefore
+The second term is a multiple of $`2^m`$ and so vanishes modulo $`2^m`$; the first term is at most $`\sum_{j=\ell}^{h} 2^{\,j-\ell} = 2^{m} - 1 < 2^m`$ and so is its own residue. Therefore
 
-$$
-\mathrm{rd}(f) \thickspace =\thickspace  \sum_{j=\ell}^{h} b_j 2^{\thinspace j-\ell}, \tag{22.6}
-$$
+```math
+\mathrm{rd}(f) \;=\; \sum_{j=\ell}^{h} b_j 2^{\,j-\ell},
+```
+
+*(22.6)*
 
 whose terms are indexed exactly by $`\ell \le j \le h`$, that is by $`\mathrm{bits}(f)`$ of Equation (22.3). No $`b_j`$ outside that range appears, so by part (1) no bit of any reserved field appears.
 
-(3) From Equation (22.6), $`\mathrm{rd}(f) \ge 0`$ and $`\mathrm{rd}(f) \le \sum_{j=\ell}^{h} 2^{\thinspace j-\ell} = 2^{m} - 1`$, so $`\mathrm{rd}(f) \in \lbrace 0, \ldots, 2^m - 1\rbrace = T(f)`$ by Equation (22.4). &#9632;
+(3) From Equation (22.6), $`\mathrm{rd}(f) \ge 0`$ and $`\mathrm{rd}(f) \le \sum_{j=\ell}^{h} 2^{\,j-\ell} = 2^{m} - 1`$, so $`\mathrm{rd}(f) \in \{0, \ldots, 2^m - 1\} = T(f)`$ by Equation (22.4). &#9632;
 
 **Remark Z22.3.** Read the hypotheses and not only the conclusion. The proposition assumes the layout is disjoint and the generator is faithful; both are properties of the description file and of the tool, not of the Swift compiler, so the gate that enforces them is the acceptance test's script over the description file and nothing else. And the conclusion is about firmware. It says a correct accessor reads the bits its field names; it says nothing about whether the sample those bits carry is the right sample, nothing about the commitment, and nothing about the proof. A commitment to a wrongly read window is a perfectly valid commitment to a wrong value, and [Project 16](16-the-model-proposes-a-ranking-function-the-certifier.md) is where that distinction is given its theorem. The language buys a class of firmware defect. It does not buy soundness, and this chapter does not claim it does.
 
@@ -131,16 +143,16 @@ whose terms are indexed exactly by $`\ell \le j \le h`$, that is by $`\mathrm{bi
 
 *Proof.* Each parameter occupies $`b`$ bits, so $`P`$ parameters occupy $`P b`$ bits, which is $`P b / 8`$ bytes; this is a floor and not an estimate because nothing has yet been allocated for the activation buffers, the key and value cache, the runtime or the operating system. For $`P = 8 \times 10^{9}`$ and $`b = 4`$:
 
-$$
-\frac{P b}{8} \thickspace =\thickspace  \frac{8 \times 10^{9} \times 4}{8} \thickspace =\thickspace  4.0 \times 10^{9}
+```math
+\frac{P b}{8} \;=\; \frac{8 \times 10^{9} \times 4}{8} \;=\; 4.0 \times 10^{9}
   \ \text{bytes}.
-$$
+```
 
 The board's DRAM is $`512 \times 2^{20} = 512 \times 1048576 = 536870912 \approx 5.37 \times 10^{8}`$ bytes. The ratio is
 
-$$
-\frac{4.0 \times 10^{9}}{5.37 \times 10^{8}} \thickspace =\thickspace  7.45,
-$$
+```math
+\frac{4.0 \times 10^{9}}{5.37 \times 10^{8}} \;=\; 7.45,
+```
 
 so the weights alone need about seven and a half times the memory the board has. For $`b = 2`$ the floor halves to $`2.0 \times 10^{9}`$ bytes and the ratio is $`2.0 \times 10^{9} / 5.37 \times 10^{8} = 3.72`$. A ratio above one is a refusal, so both cases refuse, and the 8 GB of eMMC does not change this: paging weights from flash changes the latency per token by orders of magnitude and does not change the resident requirement that produced the ratio. &#9632;
 

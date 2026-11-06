@@ -42,23 +42,25 @@ Every cost claim in the nineteen chapters that follow is a count of operations m
 
 The chapter proves nothing in zero knowledge, so its relation is the volume's. The paper states the whole task as one proof of knowledge \[[1](#references)\], its Equation 2:
 
-$$
-\mathcal{R} = \mathsf{PoK}\Big\lbrace \thinspace  \underbrace{(\mathcal{M}, r)}_{w} ;\thickspace  \underbrace{(v_\phi, c_\mathcal{M})}_{u} \thickspace :\thickspace 
-    \mathsf{Cert}(\mathcal{M}, \phi) \rightsquigarrow v_\phi \thickspace \wedge\thickspace  \mathsf{Com}(\mathsf{sp}, \mathcal{M}; r) = c_\mathcal{M} \thinspace \Big\rbrace . \tag{1.1}
-$$
+```math
+\mathcal{R} = \mathsf{PoK}\Big\{\, \underbrace{(\mathcal{M}, r)}_{w} ;\; \underbrace{(v_\phi, c_\mathcal{M})}_{u} \;:\;
+    \mathsf{Cert}(\mathcal{M}, \phi) \rightsquigarrow v_\phi \;\wedge\; \mathsf{Com}(\mathsf{sp}, \mathcal{M}; r) = c_\mathcal{M} \,\Big\}.
+```
+
+*(1.1)*
 
 The witness $`w`$ is the secret system and the randomness of its commitment; the statement $`u`$ is the public certificate and the public commitment. Every later chapter instantiates one part of this relation on one board. What this chapter measures is the set of operations that any prover or verifier of $`\mathcal{R}`$ must execute,
 
-$$
-\mathrm{Ops} = \lbrace \thinspace  \mathsf{fmul},\thickspace  \mathsf{smul}_{\mathbb{G}_1},\thickspace  \mathsf{msm}_{\mathbb{G}_1}^{(n)},\thickspace 
-  \mathsf{pair},\thickspace  \mathsf{rmul},\thickspace  \mathsf{hash} \thinspace \rbrace ,
-$$
+```math
+\mathrm{Ops} = \{\, \mathsf{fmul},\; \mathsf{smul}_{\mathbb{G}_1},\; \mathsf{msm}_{\mathbb{G}_1}^{(n)},\;
+  \mathsf{pair},\; \mathsf{rmul},\; \mathsf{hash} \,\},
+```
 
 and the price list is a partial function $`\mathrm{cost} : \mathrm{Boards} \times \mathrm{Ops} \rightharpoonup \mathbb{R}_{\ge 0}`$ whose undefined cells read **not measured** with a reason, never a guess.
 
 ## The mathematics
 
-**Definition Z1.1 (Commitment scheme).** Let $`\lambda`$ be a security parameter. A commitment scheme over a message space $`M`$ and a randomness space $`R`$ is a pair of algorithms $`(\mathsf{Setup}, \mathsf{Com})`$ with $`\mathsf{sp} \leftarrow \mathsf{Setup}(1^\lambda)`$ and $`\mathsf{Com} : \lbrace \mathsf{sp}\rbrace \times M \times R \to C`$. It is *hiding* if for all $`m_0, m_1 \in M`$ the distributions $`\lbrace \mathsf{Com}(\mathsf{sp}, m_0; r) : r \leftarrow R\rbrace`$ and $`\lbrace \mathsf{Com}(\mathsf{sp}, m_1; r) : r \leftarrow R\rbrace`$ are indistinguishable, and *binding* if no efficient adversary outputs $`(m, r, m', r')`$ with $`m \ne m'`$ and $`\mathsf{Com}(\mathsf{sp}, m; r) = \mathsf{Com}(\mathsf{sp}, m'; r')`$ except with probability $`\mathrm{negl}(\lambda)`$ \[[4](#references)\].
+**Definition Z1.1 (Commitment scheme).** Let $`\lambda`$ be a security parameter. A commitment scheme over a message space $`M`$ and a randomness space $`R`$ is a pair of algorithms $`(\mathsf{Setup}, \mathsf{Com})`$ with $`\mathsf{sp} \leftarrow \mathsf{Setup}(1^\lambda)`$ and $`\mathsf{Com} : \{\mathsf{sp}\} \times M \times R \to C`$. It is *hiding* if for all $`m_0, m_1 \in M`$ the distributions $`\{\mathsf{Com}(\mathsf{sp}, m_0; r) : r \leftarrow R\}`$ and $`\{\mathsf{Com}(\mathsf{sp}, m_1; r) : r \leftarrow R\}`$ are indistinguishable, and *binding* if no efficient adversary outputs $`(m, r, m', r')`$ with $`m \ne m'`$ and $`\mathsf{Com}(\mathsf{sp}, m; r) = \mathsf{Com}(\mathsf{sp}, m'; r')`$ except with probability $`\mathrm{negl}(\lambda)`$ \[[4](#references)\].
 
 **Definition Z1.2 (Pedersen commitment).** Let $`\mathbb{G}`$ be a cyclic group of prime order $`p`$ with generators $`g, h`$ such that $`\log_g h`$ is unknown. For $`v \in \mathbb{Z}_p`$ and $`r \in \mathbb{Z}_p`$, $`\mathsf{Com}(v; r) = g^v h^r`$ \[[3](#references)\].
 

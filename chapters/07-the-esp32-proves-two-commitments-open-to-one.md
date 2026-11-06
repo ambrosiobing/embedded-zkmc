@@ -41,10 +41,12 @@ The paper's symbolic scheme commits to a secret matrix column by column and must
 
 Let $`\mathbb{G}`$ be the group of points of the curve P-256 (secp256r1), which has prime order; this chapter writes that order $`p`$ to match Definition def:z01\_pedersen, and never needs the curve's coordinate field. Let $`g`$ be the standard base point and $`h`$ a second point obtained by hashing a fixed label to the curve by try-and-increment, so that $`\log_g h`$ is known to nobody; Section [Project 2](02-a-sensor-reading-committed-on-the-microcontroller.md) derives its $`h`$ the same way. The witness and the statement are
 
-$$
-\mathcal{R}_{\mathrm{eq}} = \big\lbrace \thinspace  (x ;\thickspace  (g, h, y_1, y_2)) \in \mathbb{Z}_p \times \mathbb{G}^4
-    \thickspace :\thickspace  y_1 = g^x \thickspace \wedge\thickspace  y_2 = h^x \thinspace \big\rbrace . \tag{7.1}
-$$
+```math
+\mathcal{R}_{\mathrm{eq}} = \big\{\, (x ;\; (g, h, y_1, y_2)) \in \mathbb{Z}_p \times \mathbb{G}^4
+    \;:\; y_1 = g^x \;\wedge\; y_2 = h^x \,\big\}.
+```
+
+*(7.1)*
 
 The paper's relation $`\mathcal{R}_{\mathsf{zkeq}}`$ carries several commitments $`c^{(j)}`$ with public matrices $`A^{(j)}`$ and randomness $`r^{(j)}`$, and its Figure 4 extracts bases $`\hat g_i`$ from the setup and hashes the first messages into one challenge \[[1](#references)\]; Equation (7.1) is the case of one matrix equal to the identity and no randomness, which is the kernel that the batched version repeats.
 
@@ -52,13 +54,15 @@ On the bench the secret is tied to a sensor. The calibration offset $`v`$ of Sec
 
 ## The mathematics
 
-**Definition Z7.1 (Sigma protocol).** Let $`\mathcal{R} \subseteq W \times U`$ be a relation and $`E`$ a finite challenge set. A sigma protocol for $`\mathcal{R}`$ is a three-move protocol between a prover $`\mathcal{P}`$ holding $`(w, u) \in \mathcal{R}`$ and a verifier $`\mathcal{V}`$ holding $`u`$: $`\mathcal{P}`$ sends a commitment $`a`$, $`\mathcal{V}`$ sends a challenge $`e \leftarrow E`$ chosen uniformly, $`\mathcal{P}`$ sends a response $`z`$, and $`\mathcal{V}`$ applies a deterministic predicate $`\mathsf{V}(u, a, e, z) \in \lbrace 0, 1\rbrace`$. A triple $`(a, e, z)`$ with $`\mathsf{V}(u, a, e, z) = 1`$ is an accepting transcript. The protocol is *complete* if an honest $`\mathcal{P}`$ always produces an accepting transcript; *special sound* if there is an efficient extractor $`\mathsf{Ext}`$ which, from any two accepting transcripts $`(a, e, z)`$ and $`(a, e', z')`$ for the same $`u`$ with $`e \ne e'`$, outputs $`w`$ with $`(w, u) \in \mathcal{R}`$; and *honest-verifier zero knowledge* if there is an efficient simulator $`\mathsf{Sim}`$ which on input $`(u, e)`$ outputs $`(a, e, z)`$ whose distribution equals the distribution of an honest transcript with challenge $`e`$ \[[6](#references), [7](#references)\].
+**Definition Z7.1 (Sigma protocol).** Let $`\mathcal{R} \subseteq W \times U`$ be a relation and $`E`$ a finite challenge set. A sigma protocol for $`\mathcal{R}`$ is a three-move protocol between a prover $`\mathcal{P}`$ holding $`(w, u) \in \mathcal{R}`$ and a verifier $`\mathcal{V}`$ holding $`u`$: $`\mathcal{P}`$ sends a commitment $`a`$, $`\mathcal{V}`$ sends a challenge $`e \leftarrow E`$ chosen uniformly, $`\mathcal{P}`$ sends a response $`z`$, and $`\mathcal{V}`$ applies a deterministic predicate $`\mathsf{V}(u, a, e, z) \in \{0, 1\}`$. A triple $`(a, e, z)`$ with $`\mathsf{V}(u, a, e, z) = 1`$ is an accepting transcript. The protocol is *complete* if an honest $`\mathcal{P}`$ always produces an accepting transcript; *special sound* if there is an efficient extractor $`\mathsf{Ext}`$ which, from any two accepting transcripts $`(a, e, z)`$ and $`(a, e', z')`$ for the same $`u`$ with $`e \ne e'`$, outputs $`w`$ with $`(w, u) \in \mathcal{R}`$; and *honest-verifier zero knowledge* if there is an efficient simulator $`\mathsf{Sim}`$ which on input $`(u, e)`$ outputs $`(a, e, z)`$ whose distribution equals the distribution of an honest transcript with challenge $`e`$ \[[6](#references), [7](#references)\].
 
 **Definition Z7.2 (The Chaum-Pedersen protocol).** For $`\mathcal{R}_{\mathrm{eq}}`$ of Equation (7.1) with $`E = \mathbb{Z}_p`$: $`\mathcal{P}`$ draws $`r \leftarrow \mathbb{Z}_p`$ uniformly and sends $`a = (a_1, a_2) = (g^r, h^r)`$; $`\mathcal{V}`$ sends $`e \leftarrow \mathbb{Z}_p`$; $`\mathcal{P}`$ sends $`z = r + e x \bmod p`$; $`\mathcal{V}`$ accepts iff
 
-$$
-g^z = a_1 \thinspace  y_1^{\thinspace e} \qquad \text{and} \qquad h^z = a_2 \thinspace  y_2^{\thinspace e}. \tag{7.2}
-$$
+```math
+g^z = a_1 \, y_1^{\,e} \qquad \text{and} \qquad h^z = a_2 \, y_2^{\,e}.
+```
+
+*(7.2)*
 
 This is the protocol of Chaum and Pedersen \[[5](#references)\].
 
@@ -66,29 +70,29 @@ This is the protocol of Chaum and Pedersen \[[5](#references)\].
 
 *Proof.* *Completeness.* Let $`(x, (g, h, y_1, y_2)) \in \mathcal{R}_{\mathrm{eq}}`$, so $`y_1 = g^x`$ and $`y_2 = h^x`$, and let $`z = r + ex \bmod p`$. Since $`g`$ has order $`p`$, exponents may be reduced modulo $`p`$, and
 
-$$
+```math
 \begin{aligned}
-g^{z} &= g^{r + ex} = g^{r} \thinspace  g^{ex} = g^{r} \thinspace  (g^{x})^{e} = a_1 \thinspace  y_1^{\thinspace e}, \cr 
-  h^{z} &= h^{r + ex} = h^{r} \thinspace  h^{ex} = h^{r} \thinspace  (h^{x})^{e} = a_2 \thinspace  y_2^{\thinspace e},
+g^{z} &= g^{r + ex} = g^{r} \, g^{ex} = g^{r} \, (g^{x})^{e} = a_1 \, y_1^{\,e}, \\
+  h^{z} &= h^{r + ex} = h^{r} \, h^{ex} = h^{r} \, (h^{x})^{e} = a_2 \, y_2^{\,e},
 \end{aligned}
-$$
+```
 
 which are the two equations of (7.2). So an honest transcript is always accepted.
 
 *Special soundness.* Let $`(a_1, a_2, e, z)`$ and $`(a_1, a_2, e', z')`$ be accepting with $`e \ne e'`$. From the first equation of (7.2) for both transcripts, $`g^{z} = a_1 y_1^{e}`$ and $`g^{z'} = a_1 y_1^{e'}`$. Dividing,
 
-$$
-g^{z - z'} = y_1^{\thinspace e - e'}.
-$$
+```math
+g^{z - z'} = y_1^{\,e - e'}.
+```
 
 Because $`p`$ is prime and $`e \ne e'`$ in $`\mathbb{Z}_p`$, the element $`e - e'`$ is invertible; write $`x^\ast = (z - z')(e - e')^{-1} \bmod p`$. Raising both sides to the power $`(e - e')^{-1}`$, which is legitimate because exponents of elements of a group of order $`p`$ live in $`\mathbb{Z}_p`$,
 
-$$
-g^{x^\ast} = \big(g^{z - z'}\big)^{(e - e')^{-1}} = \big(y_1^{\thinspace e - e'}\big)^{(e - e')^{-1}}
+```math
+g^{x^\ast} = \big(g^{z - z'}\big)^{(e - e')^{-1}} = \big(y_1^{\,e - e'}\big)^{(e - e')^{-1}}
   = y_1 .
-$$
+```
 
-The same two steps on the second equation of (7.2) give $`h^{z - z'} = y_2^{\thinspace e - e'}`$ and hence $`h^{x^\ast} = y_2`$. So $`(x^\ast, (g, h, y_1, y_2)) \in \mathcal{R}_{\mathrm{eq}}`$, and the extractor computed $`x^\ast`$ with one subtraction, one inversion and one product in $`\mathbb{Z}_p`$. Note that the extractor never used that $`a_1`$ and $`a_2`$ were formed with the same $`r`$: the two equations of (7.2) bind them through the shared $`z`$ and $`e`$ alone.
+The same two steps on the second equation of (7.2) give $`h^{z - z'} = y_2^{\,e - e'}`$ and hence $`h^{x^\ast} = y_2`$. So $`(x^\ast, (g, h, y_1, y_2)) \in \mathcal{R}_{\mathrm{eq}}`$, and the extractor computed $`x^\ast`$ with one subtraction, one inversion and one product in $`\mathbb{Z}_p`$. Note that the extractor never used that $`a_1`$ and $`a_2`$ were formed with the same $`r`$: the two equations of (7.2) bind them through the shared $`z`$ and $`e`$ alone.
 
 *Honest-verifier zero knowledge.* Fix the statement $`u = (g, h, y_1, y_2)`$ with $`y_1 = g^x`$, $`y_2 = h^x`$, and a challenge $`e`$. An honest transcript with challenge $`e`$ is $`(g^r, h^r, e, r + ex)`$ for $`r`$ uniform in $`\mathbb{Z}_p`$. The map $`r \mapsto z = r + ex`$ is a bijection of $`\mathbb{Z}_p`$ (its inverse is $`z \mapsto z - ex`$), so $`z`$ is uniform in $`\mathbb{Z}_p`$, and given $`z`$ the commitment is determined: $`a_1 = g^{r} = g^{z - ex} = g^z y_1^{-e}`$ and $`a_2 = h^{r} = h^{z - ex} = h^z y_2^{-e}`$. The simulator draws $`z \leftarrow \mathbb{Z}_p`$ uniformly and outputs $`(g^z y_1^{-e}, h^z y_2^{-e}, e, z)`$. Both distributions are the image of the uniform distribution on $`z \in \mathbb{Z}_p`$ under the same map $`z \mapsto (g^z y_1^{-e}, h^z y_2^{-e}, e, z)`$, so they are identical, not merely indistinguishable. The simulator used $`u`$ and $`e`$ and never $`x`$. &#9632;
 
@@ -96,9 +100,9 @@ The same two steps on the second equation of (7.2) give $`h^{z - z'} = y_2^{\thi
 
 *Proof.* Each side of each equation of (7.2) is one scalar multiplication ($`g^z`$, $`y_1^{e}`$, $`h^z`$, $`y_2^{e}`$) and the right-hand sides need one addition each to form $`a_1 y_1^{e}`$ and $`a_2 y_2^{e}`$: four multiplications and two additions. Rewriting the first equation as $`g^{z} y_1^{-e} a_1^{-1} = 1`$ makes it one double-scalar multiplication plus a negation, which Straus’ trick evaluates in one pass over the bits of $`z`$ and $`e`$; the second equation likewise. The prover computes $`a_1 = g^r`$ and $`a_2 = h^r`$ (two multiplications), hashes six encoded points, and forms $`z = r + ex \bmod p`$ (one product and one sum in $`\mathbb{Z}_p`$); $`y_1`$ and $`y_2`$ are computed once when $`x`$ is installed, not per proof. &#9632;
 
-**Remark Z7.5 (Fiat-Shamir).** On the bench there is no interactive verifier in the middle of a USB cable, so the challenge is $`e = H(g \thinspace \Vert \thinspace h \thinspace \Vert \thinspace y_1 \thinspace \Vert \thinspace y_2 \thinspace \Vert \thinspace a_1 \thinspace \Vert \thinspace a_2) \bmod p`$ with $`H`$ SHA-256 over the compressed encodings, exactly as the paper's Figure 4 hashes the first messages with the commitments \[[1](#references)\]. The verifier recomputes $`e`$ and applies (7.2). In the random oracle model the special soundness of Theorem **Theorem Z7.3** turns into a proof of knowledge for the non-interactive version through the forking argument of Fiat and Shamir \[[4](#references)\] and Bellare and Rogaway \[[3](#references)\]; the HVZK simulator becomes a full zero-knowledge simulator because the verifier no longer chooses anything \[[2](#references)\]. Including $`y_1`$ and $`y_2`$ in the hash is what stops a transcript for one statement from being replayed for another.
+**Remark Z7.5 (Fiat-Shamir).** On the bench there is no interactive verifier in the middle of a USB cable, so the challenge is $`e = H(g \,\|\, h \,\|\, y_1 \,\|\, y_2 \,\|\, a_1 \,\|\, a_2) \bmod p`$ with $`H`$ SHA-256 over the compressed encodings, exactly as the paper's Figure 4 hashes the first messages with the commitments \[[1](#references)\]. The verifier recomputes $`e`$ and applies (7.2). In the random oracle model the special soundness of Theorem **Theorem Z7.3** turns into a proof of knowledge for the non-interactive version through the forking argument of Fiat and Shamir \[[4](#references)\] and Bellare and Rogaway \[[3](#references)\]; the HVZK simulator becomes a full zero-knowledge simulator because the verifier no longer chooses anything \[[2](#references)\]. Including $`y_1`$ and $`y_2`$ in the hash is what stops a transcript for one statement from being replayed for another.
 
-**Remark Z7.6 (What is hidden about the calibration offset).** Theorem **Theorem Z7.3** says the transcript reveals nothing about $`x`$ beyond the statement. The statement itself, $`y_1 = g^x`$, hides $`x`$ only in the computational sense: if $`x`$ were the bare 16-bit offset $`v`$, an observer would recover it in at most $`2^{16}`$ scalar multiplications by trying every value, which is minutes on the Pi 4B. That is why the ESP32 pads $`x = v + 2^{16} s`$. No theorem in this volume says that the low 16 bits of a discrete logarithm are hidden by $`g^x`$; Theorem thm:z01\_hiding is about the Pedersen form $`g^v h^r`$ and is perfect. The clean statement, "two Pedersen commitments open to the same $`v`$", is the relation $`\lbrace ((v, r_1, r_2); (c_1, c_2)) : c_1 = g^v h^{r_1} \wedge c_2 = g^v h^{r_2}\rbrace`$, which the same three-move shape proves with one more response scalar; it is the next step after the acceptance test passes, and the extractor and simulator are the ones above with $`r_1, r_2`$ carried along.
+**Remark Z7.6 (What is hidden about the calibration offset).** Theorem **Theorem Z7.3** says the transcript reveals nothing about $`x`$ beyond the statement. The statement itself, $`y_1 = g^x`$, hides $`x`$ only in the computational sense: if $`x`$ were the bare 16-bit offset $`v`$, an observer would recover it in at most $`2^{16}`$ scalar multiplications by trying every value, which is minutes on the Pi 4B. That is why the ESP32 pads $`x = v + 2^{16} s`$. No theorem in this volume says that the low 16 bits of a discrete logarithm are hidden by $`g^x`$; Theorem thm:z01\_hiding is about the Pedersen form $`g^v h^r`$ and is perfect. The clean statement, "two Pedersen commitments open to the same $`v`$", is the relation $`\{((v, r_1, r_2); (c_1, c_2)) : c_1 = g^v h^{r_1} \wedge c_2 = g^v h^{r_2}\}`$, which the same three-move shape proves with one more response scalar; it is the next step after the acceptance test passes, and the extractor and simulator are the ones above with $`r_1, r_2`$ carried along.
 
 ## The protocol
 

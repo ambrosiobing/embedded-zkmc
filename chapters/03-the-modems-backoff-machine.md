@@ -16,7 +16,7 @@
 > - **Language and library:** Python 3.12 or later, the paper's own front-end language \[[1](#references), [2](#references)\]; `py_ecc` for BLS12-381 (version and module names to verify, see the Sources)
 > - **Primitive:** the explicit-state scheme's encoder: the Kripke structure, the Buchi automaton of the paper's Figure 2b, the ranking function of its Example 3.4, the three batches of its Equations 7 to 9, the embeddings $`e_1, e_2`$ and the KZG commitments to $`p_{S_0}`$ and $`p_T`$
 > - **Secret:** $`S_0`$ and $`T`$ of the modem machine, $`|S_0| = 1`$ and $`|T| = 61`$ (computed)
-> - **Public:** $`\phi = \neg\mathrm{FG}\thinspace \mathrm{Wait}`$, the automaton $`\mathcal{A}_{\neg\phi}`$, the ranking function $`V`$, the state space $`S`$ with $`|S| = 256`$ (computed), the commitments $`c_{S_0}, c_T`$ and the proof $`\pi = (\pi_{S_0}, \pi_T)`$
+> - **Public:** $`\phi = \neg\mathrm{FG}\,\mathrm{Wait}`$, the automaton $`\mathcal{A}_{\neg\phi}`$, the ranking function $`V`$, the state space $`S`$ with $`|S| = 256`$ (computed), the commitments $`c_{S_0}, c_T`$ and the proof $`\pi = (\pi_{S_0}, \pi_T)`$
 > - **Model:** none
 > - **Acceptance:** the proof file is exactly 192 bytes, the prover's and the verifier's batch sizes agree at 16 and 8088 points, every synthetic division leaves remainder zero, and the mutated machine with one fair self-loop is refused by the encoder
 > - **Difficulty:** 3 of 5
@@ -41,90 +41,96 @@ The paper's running example is a 3-way handshake with exponential backoff \[[1](
 
 The witness is the pair of polynomials that encode the secret initial states and the secret transition relation, with their blinding scalars; the statement is the pair of commitments and the three public batches. The paper writes the relation as $`\mathcal{R}_e`$ after its Equation 14 \[[1](#references)\]; with this chapter's sets it reads
 
-$$
-\mathcal{R}_e = \mathsf{PoK}\Big\lbrace \thinspace  \underbrace{(p_{S_0}, p_T, b_{S_0}, b_T)}_{w} ;\thickspace 
-    \underbrace{(c_{S_0}, c_T, E_{\mathrm{init}}, E_{\mathrm{step}}, E_{\mathrm{fair}})}_{u} \thickspace :\thickspace 
+```math
+\mathcal{R}_e = \mathsf{PoK}\Big\{\, \underbrace{(p_{S_0}, p_T, b_{S_0}, b_T)}_{w} ;\;
+    \underbrace{(c_{S_0}, c_T, E_{\mathrm{init}}, E_{\mathrm{step}}, E_{\mathrm{fair}})}_{u} \;:\;
     \begin{array}{l}
-      \forall e \in E_{\mathrm{init}} .\thickspace  p_{S_0}(e) = 0 \thickspace \wedge\thickspace 
-      \forall e \in E_{\mathrm{step}} \cup E_{\mathrm{fair}} .\thickspace  p_T(e) = 0 \cr 
-      \wedge\thickspace  \mathsf{Com}(p_{S_0}; b_{S_0}) = c_{S_0} \thickspace \wedge\thickspace  \mathsf{Com}(p_T; b_T) = c_T
-    \end{array} \Big\rbrace . \tag{3.1}
-$$
+      \forall e \in E_{\mathrm{init}} .\; p_{S_0}(e) = 0 \;\wedge\;
+      \forall e \in E_{\mathrm{step}} \cup E_{\mathrm{fair}} .\; p_T(e) = 0 \\
+      \wedge\; \mathsf{Com}(p_{S_0}; b_{S_0}) = c_{S_0} \;\wedge\; \mathsf{Com}(p_T; b_T) = c_T
+    \end{array} \Big\}.
+```
+
+*(3.1)*
 
 The specific sets of this project are
 
-$$
+```math
 \begin{gathered}
-\Pi = \lbrace \mathrm{Closed}, \mathrm{Wait}, \mathrm{Registered}, \mathrm{Exhausted}\rbrace , \qquad
-  S = \Pi \times \lbrace 0, \dots, 15\rbrace  \times \lbrace 0, 1, 2, 3\rbrace , \qquad |S| = 256, \cr 
-  S_0 = \lbrace (\mathrm{Closed}, 0, 0)\rbrace , \qquad T \subseteq S \times S \text{ with } |T| = 61, \cr 
+\Pi = \{\mathrm{Closed}, \mathrm{Wait}, \mathrm{Registered}, \mathrm{Exhausted}\}, \qquad
+  S = \Pi \times \{0, \dots, 15\} \times \{0, 1, 2, 3\}, \qquad |S| = 256, \\
+  S_0 = \{(\mathrm{Closed}, 0, 0)\}, \qquad T \subseteq S \times S \text{ with } |T| = 61, \\
   E_{\mathrm{init}} = e_1[B_{\mathrm{init}}] \subset \mathbb{F}_r, \quad
   E_{\mathrm{step}} \cup E_{\mathrm{fair}} = e_2[B_{\mathrm{step}} \cup B_{\mathrm{fair}}] \subset \mathbb{F}_r,
   \quad |E_{\mathrm{init}}| = 16, \quad |E_{\mathrm{step}} \cup E_{\mathrm{fair}}| = 8088,
 \end{gathered}
-$$
+```
 
 where $`\mathbb{F}_r`$ is the scalar field of BLS12-381 and the three cardinalities were computed by the enumeration script on the authoring laptop on Friday 6 November 2026 (the sets $`B_\star`$ are defined in Equations 3.4 to 3.4 below). A state is a triple (mode, delay, done); the mode is one of the four propositions, exclusive; delay is the remaining backoff in poll periods; done is the number of failed attempts. The public state space is deliberately the whole product, 256 triples, although only 33 of them are reachable (computed): the verifier must not learn which, and the batches are enumerated over all of $`S`$ and all of $`S \times S`$.
 
 ## The mathematics
 
-**Definition Z3.1 (State transition system, execution, trace, language).** Let $`\Pi`$ be a finite set of atomic propositions and $`\Sigma = 2^\Pi`$. A state transition system is $`\mathcal{M} = (S, S_0, T, \langle\negthinspace \langle \cdot \rangle\negthinspace \rangle)`$ with a state space $`S`$, initial states $`S_0 \subseteq S`$, a transition relation $`T \subseteq S \times S`$ and an observation function $`\langle\negthinspace \langle \cdot \rangle\negthinspace \rangle : S \to \Sigma`$. An execution is a sequence $`(s_i)_{i \in \mathbb{N}}`$ with $`s_0 \in S_0`$ and $`(s_i, s_{i+1}) \in T`$ for every $`i \in \mathbb{N}`$; its trace is $`(\langle\negthinspace \langle s_i \rangle\negthinspace \rangle)_{i \in \mathbb{N}} \in \Sigma^\omega`$; the language $`\mathcal{L}_\mathcal{M} \subseteq \Sigma^\omega`$ is the set of traces of all executions \[[1](#references), [7](#references)\].
+**Definition Z3.1 (State transition system, execution, trace, language).** Let $`\Pi`$ be a finite set of atomic propositions and $`\Sigma = 2^\Pi`$. A state transition system is $`\mathcal{M} = (S, S_0, T, \langle\!\langle \cdot \rangle\!\rangle)`$ with a state space $`S`$, initial states $`S_0 \subseteq S`$, a transition relation $`T \subseteq S \times S`$ and an observation function $`\langle\!\langle \cdot \rangle\!\rangle : S \to \Sigma`$. An execution is a sequence $`(s_i)_{i \in \mathbb{N}}`$ with $`s_0 \in S_0`$ and $`(s_i, s_{i+1}) \in T`$ for every $`i \in \mathbb{N}`$; its trace is $`(\langle\!\langle s_i \rangle\!\rangle)_{i \in \mathbb{N}} \in \Sigma^\omega`$; the language $`\mathcal{L}_\mathcal{M} \subseteq \Sigma^\omega`$ is the set of traces of all executions \[[1](#references), [7](#references)\].
 
-**Definition Z3.2 (Nondeterministic Buchi automaton and acceptance).** An automaton is $`\mathcal{A} = (Q, Q_0, \delta, F)`$ with finite $`Q`$, $`Q_0 \subseteq Q`$, $`\delta \subseteq Q \times \Sigma \times Q`$ and fair transitions $`F \subseteq \delta`$. A run of $`\mathcal{A}`$ on $`\sigma = (\sigma_i)_{i \in \mathbb{N}}`$ is a sequence $`(q_i)_{i \in \mathbb{N}}`$ with $`q_0 \in Q_0`$ and $`(q_i, \sigma_i, q_{i+1}) \in \delta`$ for every $`i`$; it is accepting if $`\lbrace \thinspace i \in \mathbb{N} \mid (q_i, \sigma_i, q_{i+1}) \in F \thinspace \rbrace`$ is infinite, which the paper writes as $`\sum_{i=0}^{\infty} \mathbf{1}_F(q_i, \sigma_i, q_{i+1}) = \infty`$. The language $`\mathcal{L}_\mathcal{A}`$ is the set of $`\sigma \in \Sigma^\omega`$ that have an accepting run \[[5](#references), [6](#references)\].
+**Definition Z3.2 (Nondeterministic Buchi automaton and acceptance).** An automaton is $`\mathcal{A} = (Q, Q_0, \delta, F)`$ with finite $`Q`$, $`Q_0 \subseteq Q`$, $`\delta \subseteq Q \times \Sigma \times Q`$ and fair transitions $`F \subseteq \delta`$. A run of $`\mathcal{A}`$ on $`\sigma = (\sigma_i)_{i \in \mathbb{N}}`$ is a sequence $`(q_i)_{i \in \mathbb{N}}`$ with $`q_0 \in Q_0`$ and $`(q_i, \sigma_i, q_{i+1}) \in \delta`$ for every $`i`$; it is accepting if $`\{\, i \in \mathbb{N} \mid (q_i, \sigma_i, q_{i+1}) \in F \,\}`$ is infinite, which the paper writes as $`\sum_{i=0}^{\infty} \mathbf{1}_F(q_i, \sigma_i, q_{i+1}) = \infty`$. The language $`\mathcal{L}_\mathcal{A}`$ is the set of $`\sigma \in \Sigma^\omega`$ that have an accepting run \[[5](#references), [6](#references)\].
 
-**Definition Z3.3 (Synchronous composition and fair execution).** A fair execution of the synchronous composition of $`\mathcal{M}`$ and $`\mathcal{A}`$ is a sequence $`((s_i, q_i))_{i \in \mathbb{N}}`$ over $`S \times Q`$ such that (i) $`s_0 \in S_0`$ and $`q_0 \in Q_0`$, (ii) $`(s_i, s_{i+1}) \in T`$ and $`(q_i, \langle\negthinspace \langle s_i \rangle\negthinspace \rangle, q_{i+1}) \in \delta`$ for every $`i`$, and (iii) $`\lbrace \thinspace i \mid (q_i, \langle\negthinspace \langle s_i \rangle\negthinspace \rangle, q_{i+1}) \in F \thinspace \rbrace`$ is infinite. By Definitions **Definition Z3.1** and **Definition Z3.2**, a trace lies in $`\mathcal{L}_\mathcal{M} \cap \mathcal{L}_\mathcal{A}`$ exactly when it is the trace of the $`S`$-component of a fair execution of the composition: the execution supplies the $`s_i`$, the accepting run supplies the $`q_i`$, and the two conditions read on the same letters $`\sigma_i = \langle\negthinspace \langle s_i \rangle\negthinspace \rangle`$.
+**Definition Z3.3 (Synchronous composition and fair execution).** A fair execution of the synchronous composition of $`\mathcal{M}`$ and $`\mathcal{A}`$ is a sequence $`((s_i, q_i))_{i \in \mathbb{N}}`$ over $`S \times Q`$ such that (i) $`s_0 \in S_0`$ and $`q_0 \in Q_0`$, (ii) $`(s_i, s_{i+1}) \in T`$ and $`(q_i, \langle\!\langle s_i \rangle\!\rangle, q_{i+1}) \in \delta`$ for every $`i`$, and (iii) $`\{\, i \mid (q_i, \langle\!\langle s_i \rangle\!\rangle, q_{i+1}) \in F \,\}`$ is infinite. By Definitions **Definition Z3.1** and **Definition Z3.2**, a trace lies in $`\mathcal{L}_\mathcal{M} \cap \mathcal{L}_\mathcal{A}`$ exactly when it is the trace of the $`S`$-component of a fair execution of the composition: the execution supplies the $`s_i`$, the accepting run supplies the $`q_i`$, and the two conditions read on the same letters $`\sigma_i = \langle\!\langle s_i \rangle\!\rangle`$.
 
-**Definition Z3.4 (The modem machine, instanced).** Let $`\Pi`$ and $`S`$ be as above, with $`\langle\negthinspace \langle (m, d, n) \rangle\negthinspace \rangle = \lbrace m\rbrace`$, $`S_0 = \lbrace (\mathrm{Closed}, 0, 0)\rbrace`$, and let $`T`$ be the union of the following sets, with $`D_0 = 4`$ the initial backoff range and $`D_n = D_0 \cdot 2^n`$:
+**Definition Z3.4 (The modem machine, instanced).** Let $`\Pi`$ and $`S`$ be as above, with $`\langle\!\langle (m, d, n) \rangle\!\rangle = \{m\}`$, $`S_0 = \{(\mathrm{Closed}, 0, 0)\}`$, and let $`T`$ be the union of the following sets, with $`D_0 = 4`$ the initial backoff range and $`D_n = D_0 \cdot 2^n`$:
 
-$$
+```math
 \begin{aligned}
-&\lbrace \thinspace ((\mathrm{Closed}, 0, 0), (\mathrm{Wait}, d, 0)) \mid 0 \le d < D_0\thinspace \rbrace  &&\text{attach sent, backoff drawn}\cr 
-  &\lbrace \thinspace ((\mathrm{Wait}, d, n), (\mathrm{Wait}, d - 1, n)) \mid 0 \le n \le 2,\thickspace  1 \le d < D_n\thinspace \rbrace  &&\text{a poll answered 0}\cr 
-  &\lbrace \thinspace ((\mathrm{Wait}, 0, n), (\mathrm{Registered}, 0, n)) \mid 0 \le n \le 2\thinspace \rbrace  &&\text{a poll answered 1}\cr 
-  &\lbrace \thinspace ((\mathrm{Wait}, 0, n), (\mathrm{Wait}, d, n + 1)) \mid 0 \le n \le 1,\thickspace  0 \le d < D_{n+1}\thinspace \rbrace  &&\text{retry, range doubled}\cr 
-  &\lbrace \thinspace ((\mathrm{Wait}, 0, 2), (\mathrm{Exhausted}, 0, 3))\thinspace \rbrace  &&\text{third failure}\cr 
-  &\lbrace \thinspace ((\mathrm{Registered}, 0, n), (\mathrm{Registered}, 0, n)) \mid 0 \le n \le 2\thinspace \rbrace  \cup
-    \lbrace \thinspace ((\mathrm{Exhausted}, 0, 3), (\mathrm{Exhausted}, 0, 3))\thinspace \rbrace  &&\text{absorbing}
+&\{\,((\mathrm{Closed}, 0, 0), (\mathrm{Wait}, d, 0)) \mid 0 \le d < D_0\,\} &&\text{attach sent, backoff drawn}\\
+  &\{\,((\mathrm{Wait}, d, n), (\mathrm{Wait}, d - 1, n)) \mid 0 \le n \le 2,\; 1 \le d < D_n\,\} &&\text{a poll answered 0}\\
+  &\{\,((\mathrm{Wait}, 0, n), (\mathrm{Registered}, 0, n)) \mid 0 \le n \le 2\,\} &&\text{a poll answered 1}\\
+  &\{\,((\mathrm{Wait}, 0, n), (\mathrm{Wait}, d, n + 1)) \mid 0 \le n \le 1,\; 0 \le d < D_{n+1}\,\} &&\text{retry, range doubled}\\
+  &\{\,((\mathrm{Wait}, 0, 2), (\mathrm{Exhausted}, 0, 3))\,\} &&\text{third failure}\\
+  &\{\,((\mathrm{Registered}, 0, n), (\mathrm{Registered}, 0, n)) \mid 0 \le n \le 2\,\} \cup
+    \{\,((\mathrm{Exhausted}, 0, 3), (\mathrm{Exhausted}, 0, 3))\,\} &&\text{absorbing}
 \end{aligned}
-$$
+```
 
-Counting: $`4 + (3 + 7 + 15) + 3 + (8 + 16) + 1 + 4 = 61`$. The automaton for $`\neg\phi = \mathrm{FG}\thinspace \mathrm{Wait}`$ is the paper's Figure 2b: $`Q = \lbrace q_0, q_1\rbrace`$, $`Q_0 = \lbrace q_0\rbrace`$, $`\delta = \lbrace (q_0, \sigma, q_0) \mid \sigma \in \Sigma\rbrace \cup \lbrace (q_0, \sigma, q_1), (q_1, \sigma, q_1) \mid \mathrm{Wait} \in \sigma\rbrace`$ and $`F = \lbrace (q_1, \sigma, q_1) \mid \mathrm{Wait} \in \sigma\rbrace`$. The ranking function is the paper's Example 3.4 with its $`2^8`$ read as $`2^4 = 16`$, the largest backoff range here:
+Counting: $`4 + (3 + 7 + 15) + 3 + (8 + 16) + 1 + 4 = 61`$. The automaton for $`\neg\phi = \mathrm{FG}\,\mathrm{Wait}`$ is the paper's Figure 2b: $`Q = \{q_0, q_1\}`$, $`Q_0 = \{q_0\}`$, $`\delta = \{(q_0, \sigma, q_0) \mid \sigma \in \Sigma\} \cup \{(q_0, \sigma, q_1), (q_1, \sigma, q_1) \mid \mathrm{Wait} \in \sigma\}`$ and $`F = \{(q_1, \sigma, q_1) \mid \mathrm{Wait} \in \sigma\}`$. The ranking function is the paper's Example 3.4 with its $`2^8`$ read as $`2^4 = 16`$, the largest backoff range here:
 
-$$
+```math
 V(s, q_1) = \begin{cases}
-    3 \cdot 2^4 & \text{if Closed}\cr 
-    2^5 + 1 - 2^4 \cdot \mathrm{done} + \mathrm{delay} & \text{if Wait} \wedge \mathrm{done} \le 2\cr 
-    0 & \text{if Registered or Exhausted}\cr 
+    3 \cdot 2^4 & \text{if Closed}\\
+    2^5 + 1 - 2^4 \cdot \mathrm{done} + \mathrm{delay} & \text{if Wait} \wedge \mathrm{done} \le 2\\
+    0 & \text{if Registered or Exhausted}\\
     +\infty & \text{if Wait} \wedge \mathrm{done} = 3
   \end{cases}
   \qquad
   V(s, q_0) = \begin{cases}
-    +\infty & \text{if Wait} \wedge \mathrm{done} = 3\cr 
+    +\infty & \text{if Wait} \wedge \mathrm{done} = 3\\
     3 \cdot 2^4 & \text{otherwise.}
-  \end{cases} \tag{3.2}
-$$
+  \end{cases}
+```
 
-**Theorem Z3.5 (Ranking functions certify emptiness; the paper's Theorem 3.2).** Let $`\Sigma`$ be finite, $`\mathcal{M} = (S, S_0, T, \langle\negthinspace \langle \cdot \rangle\negthinspace \rangle)`$ a state transition system and $`\mathcal{A} = (Q, Q_0, \delta, F)`$ a nondeterministic Buchi automaton. Suppose $`V : S \times Q \to \mathbb{N} \cup \lbrace +\infty\rbrace`$ satisfies, for every $`s, s' \in S`$ and $`q, q' \in Q`$,
+*(3.2)*
 
-$$
+**Theorem Z3.5 (Ranking functions certify emptiness; the paper's Theorem 3.2).** Let $`\Sigma`$ be finite, $`\mathcal{M} = (S, S_0, T, \langle\!\langle \cdot \rangle\!\rangle)`$ a state transition system and $`\mathcal{A} = (Q, Q_0, \delta, F)`$ a nondeterministic Buchi automaton. Suppose $`V : S \times Q \to \mathbb{N} \cup \{+\infty\}`$ satisfies, for every $`s, s' \in S`$ and $`q, q' \in Q`$,
+
+```math
 \begin{aligned}
-s \in S_0 &\implies \big(q \in Q_0 \implies V(s, q) \ne \infty\big), \cr 
-  (s, s') \in T &\implies \big(V(s, q) \ne \infty \wedge (q, \langle\negthinspace \langle s \rangle\negthinspace \rangle, q') \in \delta
-    \implies V(s, q) \ge V(s', q')\big), \cr 
-  (s, s') \in T &\implies \big(V(s, q) \ne \infty \wedge (q, \langle\negthinspace \langle s \rangle\negthinspace \rangle, q') \in F
-    \implies V(s, q) > V(s', q')\big), \tag{3.3}
+s \in S_0 &\implies \big(q \in Q_0 \implies V(s, q) \ne \infty\big), \\
+  (s, s') \in T &\implies \big(V(s, q) \ne \infty \wedge (q, \langle\!\langle s \rangle\!\rangle, q') \in \delta
+    \implies V(s, q) \ge V(s', q')\big), \\
+  (s, s') \in T &\implies \big(V(s, q) \ne \infty \wedge (q, \langle\!\langle s \rangle\!\rangle, q') \in F
+    \implies V(s, q) > V(s', q')\big),
 \end{aligned}
-$$
+```
+
+*(3.3)*
 
 which are the paper's Equations 4, 5 and 6 \[[1](#references)\]. Then $`\mathcal{L}_\mathcal{M} \cap \mathcal{L}_\mathcal{A} = \emptyset`$.
 
-*Proof.* Suppose, for a contradiction, that $`\sigma \in \mathcal{L}_\mathcal{M} \cap \mathcal{L}_\mathcal{A}`$. By Definition **Definition Z3.3** there is a fair execution $`((s_i, q_i))_{i \in \mathbb{N}}`$ of the composition whose $`S`$-component has trace $`\sigma`$: $`s_0 \in S_0`$, $`q_0 \in Q_0`$, $`(s_i, s_{i+1}) \in T`$ and $`(q_i, \langle\negthinspace \langle s_i \rangle\negthinspace \rangle, q_{i+1}) \in \delta`$ for all $`i`$, and the set $`I = \lbrace \thinspace i \mid (q_i, \langle\negthinspace \langle s_i \rangle\negthinspace \rangle, q_{i+1}) \in F \thinspace \rbrace`$ is infinite. Write $`v_i = V(s_i, q_i)`$.
+*Proof.* Suppose, for a contradiction, that $`\sigma \in \mathcal{L}_\mathcal{M} \cap \mathcal{L}_\mathcal{A}`$. By Definition **Definition Z3.3** there is a fair execution $`((s_i, q_i))_{i \in \mathbb{N}}`$ of the composition whose $`S`$-component has trace $`\sigma`$: $`s_0 \in S_0`$, $`q_0 \in Q_0`$, $`(s_i, s_{i+1}) \in T`$ and $`(q_i, \langle\!\langle s_i \rangle\!\rangle, q_{i+1}) \in \delta`$ for all $`i`$, and the set $`I = \{\, i \mid (q_i, \langle\!\langle s_i \rangle\!\rangle, q_{i+1}) \in F \,\}`$ is infinite. Write $`v_i = V(s_i, q_i)`$.
 
 Step 1, the base case. Since $`s_0 \in S_0`$ and $`q_0 \in Q_0`$, condition (3.3) gives $`v_0 \ne \infty`$, so $`v_0 \in \mathbb{N}`$.
 
-Step 2, finiteness and monotonicity. We show by induction on $`i`$ that $`v_i \in \mathbb{N}`$ and $`v_{i+1} \le v_i`$. The base $`v_0 \in \mathbb{N}`$ is Step 1. Assume $`v_i \in \mathbb{N}`$. Then $`(s_i, s_{i+1}) \in T`$, $`v_i = V(s_i, q_i) \ne \infty`$ and $`(q_i, \langle\negthinspace \langle s_i \rangle\negthinspace \rangle, q_{i+1}) \in \delta`$, so condition (3.3) with $`s = s_i`$, $`s' = s_{i+1}`$, $`q = q_i`$, $`q' = q_{i+1}`$ gives $`v_i \ge v_{i+1}`$. Because $`v_i \in \mathbb{N}`$ and no element of $`\mathbb{N}`$ is at least $`+\infty`$, $`v_{i+1} \ne \infty`$, hence $`v_{i+1} \in \mathbb{N}`$, which closes the induction. So $`(v_i)_{i \in \mathbb{N}}`$ is a non-increasing sequence of natural numbers.
+Step 2, finiteness and monotonicity. We show by induction on $`i`$ that $`v_i \in \mathbb{N}`$ and $`v_{i+1} \le v_i`$. The base $`v_0 \in \mathbb{N}`$ is Step 1. Assume $`v_i \in \mathbb{N}`$. Then $`(s_i, s_{i+1}) \in T`$, $`v_i = V(s_i, q_i) \ne \infty`$ and $`(q_i, \langle\!\langle s_i \rangle\!\rangle, q_{i+1}) \in \delta`$, so condition (3.3) with $`s = s_i`$, $`s' = s_{i+1}`$, $`q = q_i`$, $`q' = q_{i+1}`$ gives $`v_i \ge v_{i+1}`$. Because $`v_i \in \mathbb{N}`$ and no element of $`\mathbb{N}`$ is at least $`+\infty`$, $`v_{i+1} \ne \infty`$, hence $`v_{i+1} \in \mathbb{N}`$, which closes the induction. So $`(v_i)_{i \in \mathbb{N}}`$ is a non-increasing sequence of natural numbers.
 
-Step 3, strict decrease on fair indices. Let $`i \in I`$. Then $`(q_i, \langle\negthinspace \langle s_i \rangle\negthinspace \rangle, q_{i+1}) \in F`$, $`(s_i, s_{i+1}) \in T`$ and $`v_i \ne \infty`$ by Step 2, so condition (3.3) gives $`v_i > v_{i+1}`$, that is, $`v_{i+1} \le v_i - 1`$ in $`\mathbb{N}`$.
+Step 3, strict decrease on fair indices. Let $`i \in I`$. Then $`(q_i, \langle\!\langle s_i \rangle\!\rangle, q_{i+1}) \in F`$, $`(s_i, s_{i+1}) \in T`$ and $`v_i \ne \infty`$ by Step 2, so condition (3.3) gives $`v_i > v_{i+1}`$, that is, $`v_{i+1} \le v_i - 1`$ in $`\mathbb{N}`$.
 
 Step 4, the descent. Enumerate $`I`$ in increasing order as $`i_0 < i_1 < i_2 < \cdots`$, which is possible because $`I`$ is infinite. For every $`k`$, Step 3 gives $`v_{i_k + 1} \le v_{i_k} - 1`$, and Step 2 applied along the indices $`i_k + 1 \le i_{k+1}`$ gives $`v_{i_{k+1}} \le v_{i_k + 1}`$. Together, $`v_{i_{k+1}} \le v_{i_k} - 1`$. By induction on $`k`$, $`v_{i_k} \le v_{i_0} - k`$ for every $`k \in \mathbb{N}`$. Take $`k = v_{i_0} + 1`$: then $`v_{i_k} \le -1`$, which contradicts $`v_{i_k} \in \mathbb{N}`$. Hence no such $`\sigma`$ exists and $`\mathcal{L}_\mathcal{M} \cap \mathcal{L}_\mathcal{A} = \emptyset`$. &#9632;
 
@@ -134,48 +140,54 @@ Step 4, the descent. Enumerate $`I`$ in increasing order as $`i_0 < i_1 < i_2 < 
 
 The certifier does not check (3.3) to (3.3) on the secret $`S_0`$ and $`T`$ directly; it negates the consequents and enumerates, from public data only, the states and transitions that would violate them. These are the paper's Equations 7, 8 and 9:
 
-$$
+```math
 \begin{aligned}
-B_{\mathrm{init}} &= \lbrace \thinspace  s \in S \mid \exists q \in Q_0 .\thickspace  V(s, q) = \infty \thinspace \rbrace , \cr 
-  B_{\mathrm{step}} &= \lbrace \thinspace  (s, s') \in S \times S \mid \exists q, q' .\thickspace  V(s, q) \ne \infty \wedge
-    (q, \langle\negthinspace \langle s \rangle\negthinspace \rangle, q') \in \delta \wedge V(s, q) < V(s', q') \thinspace \rbrace , \cr 
-  B_{\mathrm{fair}} &= \lbrace \thinspace  (s, s') \in S \times S \mid \exists q, q' .\thickspace  V(s, q) \ne \infty \wedge
-    (q, \langle\negthinspace \langle s \rangle\negthinspace \rangle, q') \in F \wedge V(s, q) \le V(s', q') \thinspace \rbrace , \tag{3.4}
+B_{\mathrm{init}} &= \{\, s \in S \mid \exists q \in Q_0 .\; V(s, q) = \infty \,\}, \\
+  B_{\mathrm{step}} &= \{\, (s, s') \in S \times S \mid \exists q, q' .\; V(s, q) \ne \infty \wedge
+    (q, \langle\!\langle s \rangle\!\rangle, q') \in \delta \wedge V(s, q) < V(s', q') \,\}, \\
+  B_{\mathrm{fair}} &= \{\, (s, s') \in S \times S \mid \exists q, q' .\; V(s, q) \ne \infty \wedge
+    (q, \langle\!\langle s \rangle\!\rangle, q') \in F \wedge V(s, q) \le V(s', q') \,\},
 \end{aligned}
-$$
+```
+
+*(3.4)*
 
 where $`V(s, q) < \infty`$ holds for every finite $`V(s, q)`$. The three conditions of the theorem hold exactly when (the paper's Equation 10)
 
-$$
+```math
 S_0 \cap B_{\mathrm{init}} = \emptyset, \qquad T \cap B_{\mathrm{step}} = \emptyset, \qquad
-  T \cap B_{\mathrm{fair}} = \emptyset . \tag{3.5}
-$$
+  T \cap B_{\mathrm{fair}} = \emptyset .
+```
+
+*(3.5)*
 
 For the modem machine the enumeration computed $`|B_{\mathrm{init}}| = 16`$ (the sixteen states Wait with done $`= 3`$), $`|B_{\mathrm{step}}| = 7976`$, $`|B_{\mathrm{fair}}| = 5016`$, $`|B_{\mathrm{step}} \cup B_{\mathrm{fair}}| = 8088`$, and all three intersections empty, on Friday 6 November 2026; so Corollary **Corollary Z3.6** applies and the modem never waits forever.
 
-**Definition Z3.7 (Embeddings and indicator polynomials).** Let $`r`$ be the order of the BLS12-381 scalar field $`\mathbb{F}_r`$; $`2^{32}`$ divides $`r - 1`$. Let $`\omega_1`$ be a primitive $`256`$-th and $`\omega_2`$ a primitive $`2^{16}`$-th root of unity in $`\mathbb{F}_r`$, and let $`\mathrm{idx} : S \to \lbrace 0, \dots, 255\rbrace`$ be the bijection $`\mathrm{idx}(m, d, n) = 64\thinspace m + 4\thinspace d + n`$ with the modes numbered 0 to 3. The embeddings are
+**Definition Z3.7 (Embeddings and indicator polynomials).** Let $`r`$ be the order of the BLS12-381 scalar field $`\mathbb{F}_r`$; $`2^{32}`$ divides $`r - 1`$. Let $`\omega_1`$ be a primitive $`256`$-th and $`\omega_2`$ a primitive $`2^{16}`$-th root of unity in $`\mathbb{F}_r`$, and let $`\mathrm{idx} : S \to \{0, \dots, 255\}`$ be the bijection $`\mathrm{idx}(m, d, n) = 64\, m + 4\, d + n`$ with the modes numbered 0 to 3. The embeddings are
 
-$$
+```math
 e_1(s) = \omega_1^{\mathrm{idx}(s)}, \qquad
-  e_2(s, s') = \omega_2^{\mathrm{idx}(s) + 256\thinspace  \mathrm{idx}(s')},
-$$
+  e_2(s, s') = \omega_2^{\mathrm{idx}(s) + 256\, \mathrm{idx}(s')},
+```
 
 both injective because the exponents are distinct and smaller than the orders. The indicator polynomials are any $`p_{S_0}, p_T \in \mathbb{F}_r[X]`$ with (the paper's Equations 11 and 12)
 
-$$
-\forall s \in S .\thickspace  \mathbf{1}_{S_0}(s) = p_{S_0}(e_1(s)), \qquad
-  \forall (s, s') \in S \times S .\thickspace  \mathbf{1}_T(s, s') = p_T(e_2(s, s')). \tag{3.6}
-$$
+```math
+\forall s \in S .\; \mathbf{1}_{S_0}(s) = p_{S_0}(e_1(s)), \qquad
+  \forall (s, s') \in S \times S .\; \mathbf{1}_T(s, s') = p_T(e_2(s, s')).
+```
+
+*(3.6)*
 
 The public evaluation sets are $`E_{\mathrm{init}} = e_1[B_{\mathrm{init}}]`$, $`E_{\mathrm{step}} = e_2[B_{\mathrm{step}}]`$ and $`E_{\mathrm{fair}} = e_2[B_{\mathrm{fair}}]`$.
 
-**Lemma Z3.8 (Lagrange basis over the roots of unity).** Let $`n`$ be a power of two, $`\omega`$ a primitive $`n`$-th root of unity in $`\mathbb{F}_r`$, and for $`0 \le j < n`$ let $`L_j(X) = n^{-1} \sum_{i=0}^{n-1} \omega^{-ij} X^i`$. Then $`L_j(\omega^k) = 1`$ if $`k = j`$ and $`L_j(\omega^k) = 0`$ if $`k \ne j`$, for $`0 \le k < n`$. Consequently, for any $`J \subseteq \lbrace 0, \dots, n-1\rbrace`$, the polynomial $`\sum_{j \in J} L_j`$ has degree below $`n`$ and takes the value $`1`$ on $`\lbrace \omega^j \mid j \in J\rbrace`$ and $`0`$ on the other $`n`$-th roots of unity.
+**Lemma Z3.8 (Lagrange basis over the roots of unity).** Let $`n`$ be a power of two, $`\omega`$ a primitive $`n`$-th root of unity in $`\mathbb{F}_r`$, and for $`0 \le j < n`$ let $`L_j(X) = n^{-1} \sum_{i=0}^{n-1} \omega^{-ij} X^i`$. Then $`L_j(\omega^k) = 1`$ if $`k = j`$ and $`L_j(\omega^k) = 0`$ if $`k \ne j`$, for $`0 \le k < n`$. Consequently, for any $`J \subseteq \{0, \dots, n-1\}`$, the polynomial $`\sum_{j \in J} L_j`$ has degree below $`n`$ and takes the value $`1`$ on $`\{\omega^j \mid j \in J\}`$ and $`0`$ on the other $`n`$-th roots of unity.
 
 *Proof.* $`n`$ is invertible in $`\mathbb{F}_r`$ because $`r`$ is odd and $`n`$ is a power of two. Fix $`j, k`$ and put $`\zeta = \omega^{k - j}`$. Then $`L_j(\omega^k) = n^{-1} \sum_{i=0}^{n-1} \omega^{-ij} \omega^{ik} = n^{-1} \sum_{i=0}^{n-1} \zeta^i`$. If $`k = j`$ then $`\zeta = 1`$, every term is $`1`$, the sum is $`n`$ and $`L_j(\omega^j) = 1`$. If $`k \ne j`$ then $`0 < |k - j| < n`$, so $`\zeta \ne 1`$ because $`\omega`$ is primitive, while $`\zeta^n = \omega^{n(k-j)} = 1`$; multiplying the sum by $`\zeta - 1 \ne 0`$ telescopes it to $`\zeta^n - 1 = 0`$, so the sum is $`0`$ and $`L_j(\omega^k) = 0`$. The consequence follows by summing the $`L_j`$ over $`j \in J`$: at $`\omega^k`$ exactly one summand is $`1`$ when $`k \in J`$ and none otherwise, and the degree of every $`L_j`$ is at most $`n - 1`$. &#9632;
 
-With $`n = 256`$, $`\omega = \omega_1`$ and $`J = \mathrm{idx}[S_0]`$ the lemma produces $`p_{S_0}`$; with $`n = 2^{16}`$, $`\omega = \omega_2`$ and $`J = \lbrace \mathrm{idx}(s) + 256\thinspace \mathrm{idx}(s') \mid (s, s') \in T\rbrace`$ it produces $`p_T`$, of degree at most $`65535`$. This is the construction the code below performs, and it is why the embeddings are roots of unity rather than the integers $`1`$ to $`256`$: the basis has a closed form and no linear system is solved.
+With $`n = 256`$, $`\omega = \omega_1`$ and $`J = \mathrm{idx}[S_0]`$ the lemma produces $`p_{S_0}`$; with $`n = 2^{16}`$, $`\omega = \omega_2`$ and $`J = \{\mathrm{idx}(s) + 256\,\mathrm{idx}(s') \mid (s, s') \in T\}`$ it produces $`p_T`$, of degree at most $`65535`$. This is the construction the code below performs, and it is why the embeddings are roots of unity rather than the integers $`1`$ to $`256`$: the basis has a closed form and no linear system is solved.
 
-**Lemma Z3.9 (Vanishing is disjointness).** Let $`e_2`$ be injective and let $`p_T`$ satisfy the second half of (3.6). Let $`B = B_{\mathrm{step}} \cup B_{\mathrm{fair}}`$ and $`E = e_2[B]`$. Then $`\forall e \in E .\thickspace p_T(e) = 0`$ if and only if $`T \cap B = \emptyset`$. The same holds for $`p_{S_0}`$, $`e_1`$, $`B_{\mathrm{init}}`$ and $`E_{\mathrm{init}}`$.
+**Lemma Z3.9 (Vanishing is disjointness).** Let $`e_2`$ be injective and let $`p_T`$ satisfy the second half of (3.6). Let $`B = B_{\mathrm{step}} \cup B_{\mathrm{fair}}`$ and $`E = e_2[B]`$. Then $`\forall e \in E .\; p_T(e) = 0`$ if and only if $`T \cap B = \emptyset`$. The same holds for $`p_{S_0}`$, $`e_1`$, $`B_{\mathrm{init}}`$ and $`E_{\mathrm{init}}`$.
 
 *Proof.* Only if. Suppose $`p_T`$ vanishes on $`E`$ and, for a contradiction, that $`(s, s') \in T \cap B`$. Then $`e_2(s, s') \in E`$, so $`p_T(e_2(s, s')) = 0`$. But by (3.6), $`p_T(e_2(s, s')) = \mathbf{1}_T(s, s') = 1`$ because $`(s, s') \in T`$, and $`1 \ne 0`$ in a field. Hence $`T \cap B = \emptyset`$.
 

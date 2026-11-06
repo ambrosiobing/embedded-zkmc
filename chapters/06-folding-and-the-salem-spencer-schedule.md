@@ -39,36 +39,40 @@
 
 Index the obligations by $`i \in [N]`$ and abbreviate, as the paper does, $`A_i = A_{s,i}^\top`$, $`b_i = -b_{s,i}^\top`$, $`G_i = -G_{p,i}^\top`$, $`h_i = -h_{p,i}^\top`$, so that the equality of [Project 5](05-farkas-witnesses-for-a-joystick-program.md)'s Equation 25 becomes the four families of the paper's Equation 26:
 
-$$
+```math
 \underbrace{A_i \lambda_i = \alpha_i, \quad b_i \lambda_i = \beta_i}_{\text{secret, secret}}
   \qquad
-  \underbrace{G_i \mu_i = \alpha_i, \quad h_i \mu_i = \gamma_i}_{\text{public, secret}} \tag{6.1}
-$$
+  \underbrace{G_i \mu_i = \alpha_i, \quad h_i \mu_i = \gamma_i}_{\text{public, secret}}
+```
+
+*(6.1)*
 
 with $`A_i \in \mathbb{Z}_p^{d \times n_i}`$, $`\lambda_i \in \mathbb{Z}_p^{n_i}`$ and $`\alpha_i \in \mathbb{Z}_p^{d}`$. The chapter treats the first family in full; the other three fold identically. The witness and the statement of the folded instance are
 
-$$
+```math
 \begin{aligned}
-w &= \big(\thinspace  \lbrace A_i, \lambda_i, \alpha_i\rbrace _{i \in [N]},\thickspace  \lbrace C^A_k\rbrace _{k \in K},\thickspace 
-       \text{randomness} \thinspace \big), \cr 
-  u &= \big(\thinspace  C = \lbrace c_1, \dots, c_N\rbrace ,\thickspace  r,\thickspace 
-       \lbrace c_{A_i}, c_{\lambda_i}, c_{\alpha_i}\rbrace _{i \in [N]},\thickspace  \lbrace c_{C^A_k}\rbrace _{k \in K} \thinspace \big),
+w &= \big(\, \{A_i, \lambda_i, \alpha_i\}_{i \in [N]},\; \{C^A_k\}_{k \in K},\;
+       \text{randomness} \,\big), \\
+  u &= \big(\, C = \{c_1, \dots, c_N\},\; r,\;
+       \{c_{A_i}, c_{\lambda_i}, c_{\alpha_i}\}_{i \in [N]},\; \{c_{C^A_k}\}_{k \in K} \,\big),
 \end{aligned}
-$$
+```
 
 and the relation the verifier checks, the paper's $`\mathcal{R}_{\mathsf{f}}`$ after the fold, is
 
-$$
-\mathcal{R}_{06} = \Big\lbrace \thinspace  (w, u) \thickspace \Big|\thickspace 
-    A^* \lambda^* = \alpha^* \thickspace \wedge\thickspace  2C \cap K = \emptyset \thickspace \wedge\thickspace 
-    \text{every } c_\star \text{ opens to its value} \thinspace \Big\rbrace , \tag{6.2}
-$$
+```math
+\mathcal{R}_{06} = \Big\{\, (w, u) \;\Big|\;
+    A^* \lambda^* = \alpha^* \;\wedge\; 2C \cap K = \emptyset \;\wedge\;
+    \text{every } c_\star \text{ opens to its value} \,\Big\},
+```
 
-where $`A^* = \sum_i r^{c_i} A_i`$, $`\lambda^* = \sum_i r^{c_i} \lambda_i`$, $`K = \lbrace c_i + c_j \mid i \ne j\rbrace`$, and $`\alpha^* = \sum_i r^{2c_i} \alpha_i + \sum_{k \in K} r^k C^A_k`$ with $`C^A_k = \sum_{c_i + c_j = k,\thinspace i \ne j} A_i \lambda_j`$. The verifier never sees an $`A_i`$ or a $`\lambda_i`$; it recomputes the folded commitments from the per-obligation ones by the homomorphism of Theorem thm:z01\_hiding's scheme and asks for one zkmm run on the folded triple instead of $`N`$. On this bench the commitment layer has no pairing library, so the script checks $`A^* \lambda^* = \alpha^*`$ on the values; that is said again under **learn**.
+*(6.2)*
+
+where $`A^* = \sum_i r^{c_i} A_i`$, $`\lambda^* = \sum_i r^{c_i} \lambda_i`$, $`K = \{c_i + c_j \mid i \ne j\}`$, and $`\alpha^* = \sum_i r^{2c_i} \alpha_i + \sum_{k \in K} r^k C^A_k`$ with $`C^A_k = \sum_{c_i + c_j = k,\, i \ne j} A_i \lambda_j`$. The verifier never sees an $`A_i`$ or a $`\lambda_i`$; it recomputes the folded commitments from the per-obligation ones by the homomorphism of Theorem thm:z01\_hiding's scheme and asks for one zkmm run on the folded triple instead of $`N`$. On this bench the commitment layer has no pairing library, so the script checks $`A^* \lambda^* = \alpha^*`$ on the values; that is said again under **learn**.
 
 ## The mathematics
 
-**Definition Z6.1 (Exponent schedule and cross-term set).** An exponent schedule for $`N`$ obligations is a set $`C = \lbrace c_1, \dots, c_N\rbrace \subset \mathbb{N}`$ of $`N`$ distinct non-negative integers. Its cross-term set is $`K = \lbrace \thinspace c_i + c_j \mid i, j \in [N],\thickspace i \ne j \thinspace \rbrace`$ and its diagonal set is $`2C = \lbrace \thinspace 2c_i \mid i \in [N] \thinspace \rbrace`$. The schedule is admissible if $`2C \cap K = \emptyset`$, the paper's Equation 28.
+**Definition Z6.1 (Exponent schedule and cross-term set).** An exponent schedule for $`N`$ obligations is a set $`C = \{c_1, \dots, c_N\} \subset \mathbb{N}`$ of $`N`$ distinct non-negative integers. Its cross-term set is $`K = \{\, c_i + c_j \mid i, j \in [N],\; i \ne j \,\}`$ and its diagonal set is $`2C = \{\, 2c_i \mid i \in [N] \,\}`$. The schedule is admissible if $`2C \cap K = \emptyset`$, the paper's Equation 28.
 
 **Definition Z6.2 (Salem-Spencer set).** A set $`S \subset \mathbb{N}`$ is 3-AP-free, or a Salem-Spencer set, if there are no $`a, b, c \in S`$ with $`a \ne c`$ and $`a + c = 2b`$ \[[5](#references), [6](#references)\].
 
@@ -76,15 +80,15 @@ where $`A^* = \sum_i r^{c_i} A_i`$, $`\lambda^* = \sum_i r^{c_i} \lambda_i`$, $`
 
 *Proof.* Suppose $`C`$ is not admissible: some $`2c_k \in K`$, so $`2c_k = c_i + c_j`$ with $`i \ne j`$. Since the $`c_i`$ are distinct, $`i \ne j`$ gives $`c_i \ne c_j`$, so $`(a, b, c) = (c_i, c_k, c_j)`$ is a three-term progression with $`a \ne c`$ in $`C`$, and $`C`$ is not 3-AP-free. Conversely, suppose $`a, b, c \in C`$ with $`a \ne c`$ and $`a + c = 2b`$; write $`a = c_i`$, $`c = c_j`$, $`b = c_k`$. From $`a \ne c`$ follows $`i \ne j`$, so $`a + c = c_i + c_j \in K`$, and $`2b = 2c_k \in 2C`$; hence $`2C \cap K \ne \emptyset`$ and $`C`$ is not admissible. &#9632;
 
-**Theorem Z6.4 (Integers with base-3 digits in $`\lbrace 0, 1\rbrace`$ form a Salem-Spencer set).** Let $`S_3 = \lbrace \thinspace \sum_{t \ge 0} a_t 3^t \mid a_t \in \lbrace 0, 1\rbrace ,\thickspace \text{finitely many } a_t \ne 0 \thinspace \rbrace`$. Then $`S_3`$ is 3-AP-free.
+**Theorem Z6.4 (Integers with base-3 digits in $`\{0, 1\}`$ form a Salem-Spencer set).** Let $`S_3 = \{\, \sum_{t \ge 0} a_t 3^t \mid a_t \in \{0, 1\},\; \text{finitely many } a_t \ne 0 \,\}`$. Then $`S_3`$ is 3-AP-free.
 
-*Proof.* Let $`a, b, c \in S_3`$ with $`a + c = 2b`$, and write their base-3 digits as $`a_t, b_t, c_t \in \lbrace 0, 1\rbrace`$. Compute $`a + c`$ digit by digit: at every position $`a_t + c_t \in \lbrace 0, 1, 2\rbrace`$, which is below 3, so no carry is produced at any position, and the base-3 digits of $`a + c`$ are exactly $`a_t + c_t`$. Compute $`2b`$ the same way: at every position $`2 b_t \in \lbrace 0, 2\rbrace`$, again below 3, so no carry is produced and the base-3 digits of $`2b`$ are exactly $`2 b_t`$. Base-3 representation is unique, so $`a + c = 2b`$ forces $`a_t + c_t = 2 b_t`$ at every position $`t`$. If $`b_t = 0`$ then $`a_t + c_t = 0`$ with both terms non-negative, so $`a_t = c_t = 0 = b_t`$. If $`b_t = 1`$ then $`a_t + c_t = 2`$ with both terms at most 1, so $`a_t = c_t = 1 = b_t`$. In both cases $`a_t = b_t = c_t`$, so $`a = b = c`$. Hence every three-term progression in $`S_3`$ is trivial, which is Definition **Definition Z6.2**. &#9632;
+*Proof.* Let $`a, b, c \in S_3`$ with $`a + c = 2b`$, and write their base-3 digits as $`a_t, b_t, c_t \in \{0, 1\}`$. Compute $`a + c`$ digit by digit: at every position $`a_t + c_t \in \{0, 1, 2\}`$, which is below 3, so no carry is produced at any position, and the base-3 digits of $`a + c`$ are exactly $`a_t + c_t`$. Compute $`2b`$ the same way: at every position $`2 b_t \in \{0, 2\}`$, again below 3, so no carry is produced and the base-3 digits of $`2b`$ are exactly $`2 b_t`$. Base-3 representation is unique, so $`a + c = 2b`$ forces $`a_t + c_t = 2 b_t`$ at every position $`t`$. If $`b_t = 0`$ then $`a_t + c_t = 0`$ with both terms non-negative, so $`a_t = c_t = 0 = b_t`$. If $`b_t = 1`$ then $`a_t + c_t = 2`$ with both terms at most 1, so $`a_t = c_t = 1 = b_t`$. In both cases $`a_t = b_t = c_t`$, so $`a = b = c`$. Hence every three-term progression in $`S_3`$ is trivial, which is Definition **Definition Z6.2**. &#9632;
 
-**Definition Z6.5 (The paper's schedule).** For $`N \ge 1`$ and $`i \in [N]`$ let $`i - 1 = \sum_{t=0}^{k-1} \beta_t 2^t`$ with $`\beta_t \in \lbrace 0, 1\rbrace`$ and $`k = \lceil \log_2 N \rceil`$ (for $`N = 1`$ take $`k = 0`$), and set $`c_i = \sum_{t=0}^{k-1} \beta_t 3^t`$: the binary digits of $`i - 1`$ read in base 3. By Theorem **Theorem Z6.4** and Lemma **Lemma Z6.3** the schedule $`C = \lbrace c_1, \dots, c_N\rbrace`$ is admissible; it is a set of $`N`$ distinct integers because the map from binary strings to base-3 values is injective.
+**Definition Z6.5 (The paper's schedule).** For $`N \ge 1`$ and $`i \in [N]`$ let $`i - 1 = \sum_{t=0}^{k-1} \beta_t 2^t`$ with $`\beta_t \in \{0, 1\}`$ and $`k = \lceil \log_2 N \rceil`$ (for $`N = 1`$ take $`k = 0`$), and set $`c_i = \sum_{t=0}^{k-1} \beta_t 3^t`$: the binary digits of $`i - 1`$ read in base 3. By Theorem **Theorem Z6.4** and Lemma **Lemma Z6.3** the schedule $`C = \{c_1, \dots, c_N\}`$ is admissible; it is a set of $`N`$ distinct integers because the map from binary strings to base-3 values is injective.
 
 **Lemma Z6.6 (Size of the cross-term set).** For the schedule of Definition **Definition Z6.5** with $`k = \lceil \log_2 N \rceil`$, $`N - 1 \le |K| \le 3^k - 1 < 3^{\lceil \log_2 N \rceil}`$.
 
-*Proof.* Upper bound. Every $`c_i`$ has at most $`k`$ base-3 digits, each 0 or 1, so $`0 \le c_i \le \sum_{t=0}^{k-1} 3^t = (3^k - 1)/2`$. For $`i \ne j`$ at most one of $`c_i, c_j`$ is 0, so $`c_i + c_j \ge 1`$, and $`c_i + c_j \le 3^k - 1`$. Hence $`K \subseteq \lbrace 1, 2, \dots, 3^k - 1\rbrace`$ and $`|K| \le 3^k - 1`$. Lower bound. The $`N - 1`$ sums $`c_1 + c_j`$ for $`j \ne 1`$ are pairwise distinct because the $`c_j`$ are, and each lies in $`K`$, so $`|K| \ge N - 1`$. &#9632;
+*Proof.* Upper bound. Every $`c_i`$ has at most $`k`$ base-3 digits, each 0 or 1, so $`0 \le c_i \le \sum_{t=0}^{k-1} 3^t = (3^k - 1)/2`$. For $`i \ne j`$ at most one of $`c_i, c_j`$ is 0, so $`c_i + c_j \ge 1`$, and $`c_i + c_j \le 3^k - 1`$. Hence $`K \subseteq \{1, 2, \dots, 3^k - 1\}`$ and $`|K| \le 3^k - 1`$. Lower bound. The $`N - 1`$ sums $`c_1 + c_j`$ for $`j \ne 1`$ are pairwise distinct because the $`c_j`$ are, and each lies in $`K`$, so $`|K| \ge N - 1`$. &#9632;
 
 For $`N = 2^k`$ the upper bound reads $`3^k - 1 = N^{\log_2 3} - 1`$, about $`N^{1.585}`$; the table in the Benchmark shows $`|K|`$ rising from a third of $`3^k`$ at $`k = 1`$ to $`0.995`$ of it at $`k = 13`$ (computed by the script), so the bound is close to the count the schedule produces, and the lower bound $`N - 1`$ is what [Project 9](09-nova-versus-one-shot-folding-on-a-pi.md) compares against Nova.
 
@@ -92,45 +96,47 @@ For $`N = 2^k`$ the upper bound reads $`3^k - 1 = N^{\log_2 3} - 1`$, about $`N^
 
 *Proof.* By induction on $`n`$. Base case $`n = 1`$. A non-zero univariate polynomial of degree $`d`$ has at most $`d`$ roots in $`\mathbb{F}`$: by induction on $`d`$, a polynomial of degree 0 is a non-zero constant with no roots; if $`f`$ has degree $`d \ge 1`$ and a root $`a`$, polynomial division gives $`f(x) = (x - a) q(x)`$ with $`q`$ of degree $`d - 1`$, and any root $`b \ne a`$ of $`f`$ satisfies $`(b - a) q(b) = 0`$ with $`b - a \ne 0`$, so $`q(b) = 0`$; $`q`$ has at most $`d - 1`$ roots by the inner induction, so $`f`$ has at most $`d`$. The probability that a uniform $`r_1 \in S`$ hits one of at most $`d`$ roots is at most $`d / |S|`$. Inductive step. Let $`n \ge 2`$ and write $`f = \sum_{i=0}^{m} x_1^i f_i(x_2, \dots, x_n)`$ with $`m`$ the largest power of $`x_1`$ whose coefficient $`f_m`$ is a non-zero polynomial; $`f_m`$ has total degree at most $`d - m`$. Let $`E`$ be the event $`f_m(r_2, \dots, r_n) = 0`$. By the induction hypothesis applied to $`f_m`$ in $`n - 1`$ variables, $`\Pr[E] \le (d - m) / |S|`$. Conditioned on $`\neg E`$, the univariate polynomial $`g(x_1) = f(x_1, r_2, \dots, r_n)`$ has leading coefficient $`f_m(r_2, \dots, r_n) \ne 0`$, so it is non-zero of degree exactly $`m`$, and by the base case $`\Pr[g(r_1) = 0 \mid \neg E] \le m / |S|`$, since $`r_1`$ is independent of $`r_2, \dots, r_n`$. Therefore
 
-$$
-\Pr[f(r) = 0] \thickspace \le\thickspace  \Pr[E] + \Pr[f(r) = 0 \wedge \neg E]
-  \thickspace \le\thickspace  \frac{d - m}{|S|} + \Pr[g(r_1) = 0 \mid \neg E]
-  \thickspace \le\thickspace  \frac{d - m}{|S|} + \frac{m}{|S|} \thickspace =\thickspace  \frac{d}{|S|} .
-$$ &#9632;
+```math
+\Pr[f(r) = 0] \;\le\; \Pr[E] + \Pr[f(r) = 0 \wedge \neg E]
+  \;\le\; \frac{d - m}{|S|} + \Pr[g(r_1) = 0 \mid \neg E]
+  \;\le\; \frac{d - m}{|S|} + \frac{m}{|S|} \;=\; \frac{d}{|S|} .
+``` &#9632;
 
 **Theorem Z6.8 (Equation 27 of the paper, expanded).** Let $`C`$ be any schedule, $`r \in \mathbb{Z}_p`$, $`A^* = \sum_{i=1}^{N} r^{c_i} A_i`$ and $`\lambda^* = \sum_{j=1}^{N} r^{c_j} \lambda_j`$. Then
 
-$$
-A^* \lambda^* \thickspace =\thickspace  \sum_{i=1}^{N} r^{2 c_i} A_i \lambda_i
-  \thickspace +\thickspace  \sum_{k \in K} r^{k} C^A_k,
-  \qquad C^A_k = \sum_{\substack{i \ne j \cr  c_i + c_j = k}} A_i \lambda_j . \tag{6.3}
-$$
+```math
+A^* \lambda^* \;=\; \sum_{i=1}^{N} r^{2 c_i} A_i \lambda_i
+  \;+\; \sum_{k \in K} r^{k} C^A_k,
+  \qquad C^A_k = \sum_{\substack{i \ne j \\ c_i + c_j = k}} A_i \lambda_j .
+```
+
+*(6.3)*
 
 If moreover $`A_i \lambda_i = \alpha_i`$ for every $`i`$, then $`A^* \lambda^* = \alpha^*`$ with $`\alpha^* = \sum_i r^{2c_i} \alpha_i + \sum_{k \in K} r^k C^A_k`$.
 
 *Proof.* Matrix-vector multiplication is bilinear, so
 
-$$
+```math
 \begin{aligned}
 A^* \lambda^*
   &= \Big( \sum_{i=1}^{N} r^{c_i} A_i \Big) \Big( \sum_{j=1}^{N} r^{c_j} \lambda_j \Big)
    = \sum_{i=1}^{N} \sum_{j=1}^{N} r^{c_i} r^{c_j} A_i \lambda_j
-   = \sum_{i=1}^{N} \sum_{j=1}^{N} r^{c_i + c_j} A_i \lambda_j \cr 
+   = \sum_{i=1}^{N} \sum_{j=1}^{N} r^{c_i + c_j} A_i \lambda_j \\
   &= \sum_{i=1}^{N} r^{c_i + c_i} A_i \lambda_i
-   \thickspace +\thickspace  \sum_{\substack{i, j \in [N] \cr  i \ne j}} r^{c_i + c_j} A_i \lambda_j
+   \;+\; \sum_{\substack{i, j \in [N] \\ i \ne j}} r^{c_i + c_j} A_i \lambda_j
    = \sum_{i=1}^{N} r^{2 c_i} A_i \lambda_i
-   \thickspace +\thickspace  \sum_{k \in K} \thickspace  \sum_{\substack{i \ne j \cr  c_i + c_j = k}} r^{k} A_i \lambda_j ,
+   \;+\; \sum_{k \in K} \; \sum_{\substack{i \ne j \\ c_i + c_j = k}} r^{k} A_i \lambda_j ,
 \end{aligned}
-$$
+```
 
 where the last step groups the ordered pairs $`(i, j)`$ with $`i \ne j`$ by the value $`k = c_i + c_j`$, which by Definition **Definition Z6.1** ranges exactly over $`K`$, and every ordered pair falls into exactly one group. Factoring $`r^k`$ out of each group gives $`r^k C^A_k`$, which is Equation 6.3. Substituting $`\alpha_i`$ for $`A_i \lambda_i`$ in the diagonal sum gives the second claim. &#9632;
 
-**Theorem Z6.9 (Field-layer soundness of the fold).** Let $`C`$ be admissible with $`c_{\max} = \max_i c_i`$, and let the prover commit to $`\lbrace A_i, \lambda_i, \alpha_i\rbrace _{i}`$ and to vectors $`\lbrace D_k\rbrace _{k \in K}`$ of its choosing before $`r`$ is drawn uniformly from $`\mathbb{Z}_p`$. If $`A_i \lambda_i \ne \alpha_i`$ for some $`i`$, then
+**Theorem Z6.9 (Field-layer soundness of the fold).** Let $`C`$ be admissible with $`c_{\max} = \max_i c_i`$, and let the prover commit to $`\{A_i, \lambda_i, \alpha_i\}_{i}`$ and to vectors $`\{D_k\}_{k \in K}`$ of its choosing before $`r`$ is drawn uniformly from $`\mathbb{Z}_p`$. If $`A_i \lambda_i \ne \alpha_i`$ for some $`i`$, then
 
-$$
-\Pr_r\Big[\thinspace  A^* \lambda^* = \sum_{i} r^{2c_i} \alpha_i + \sum_{k \in K} r^k D_k \thinspace \Big]
-  \thickspace \le\thickspace  \frac{2 c_{\max}}{p} .
-$$
+```math
+\Pr_r\Big[\, A^* \lambda^* = \sum_{i} r^{2c_i} \alpha_i + \sum_{k \in K} r^k D_k \,\Big]
+  \;\le\; \frac{2 c_{\max}}{p} .
+```
 
 *Proof.* Subtract the right-hand side from the left and use Theorem **Theorem Z6.8**: the difference is the vector-valued polynomial $`P(X) = \sum_{i} X^{2c_i} (A_i \lambda_i - \alpha_i) + \sum_{k \in K} X^k (C^A_k - D_k)`$, and the event is $`P(r) = 0`$. Pick $`i_0`$ with $`A_{i_0} \lambda_{i_0} \ne \alpha_{i_0}`$ and a coordinate $`t`$ where they differ, and let $`P_t`$ be the $`t`$-th coordinate of $`P`$, a polynomial in $`\mathbb{Z}_p[X]`$. Its monomials are $`X^{2c_i}`$ for $`i \in [N]`$ and $`X^k`$ for $`k \in K`$. The exponents $`2c_i`$ are pairwise distinct because the $`c_i`$ are, and no $`2c_i`$ equals any $`k \in K`$ because $`C`$ is admissible; so the coefficient of $`X^{2c_{i_0}}`$ in $`P_t`$ is exactly $`(A_{i_0} \lambda_{i_0} - \alpha_{i_0})_t \ne 0`$, whatever the $`D_k`$ are. Hence $`P_t`$ is a non-zero polynomial. Its degree is at most $`\max(2 c_{\max}, \max K)`$, and $`\max K = c_{\max} + c' < 2 c_{\max}`$ for the second-largest $`c'`$, so the degree is at most $`2 c_{\max}`$. By Lemma **Lemma Z6.7** with $`n = 1`$, $`S = \mathbb{Z}_p`$ and $`d = 2 c_{\max}`$, $`\Pr[P_t(r) = 0] \le 2 c_{\max} / p`$, and $`P(r) = 0`$ implies $`P_t(r) = 0`$. &#9632;
 

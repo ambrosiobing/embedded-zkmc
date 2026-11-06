@@ -40,25 +40,29 @@ The paper's Remark on page 13 says that the relation of its Equation 25 is SNARK
 
 The three circuit chapters share one statement, written here once and repeated word for word in Sections [Project 12](12-a-plonk-gate-for-the-inductive-step.md) and [Project 13](13-the-obligation-in-noir.md). Let $`n = 2`$ be the number of program variables of the modem machine of Section [Project 3](03-the-modems-backoff-machine.md), $`x = (\mathit{delay}, \mathit{done})`$, and let $`y = (x, x') \in \mathbb{Z}^4`$ be a transition. Every integer in the statement is a signed 16-bit integer, $`I = [-2^{15}, 2^{15} - 1]`$, which is the paper's bounded integer encoding with $`M = 2^{15}`$ \[[1](#references)\]. The witness is the transition and the row of the guarded update it belongs to, the statement is the ranking function's two pieces and the fairness bit, and the relation is
 
-$$
+```math
 \begin{aligned}
-  \mathcal{R}_{\mathrm{step}} = \Big\lbrace \thinspace  \big( (x, x', A_i, b_i) ;\thickspace  (w_j, u_j, w_k, u_k, f) \big)
-    \thickspace :\thickspace \thickspace  & x, x' \in I^2,\thickspace  A_i \in I^{m \times 4},\thickspace  b_i \in I^m,\thickspace  f \in \lbrace 0, 1\rbrace , \cr 
-    & A_i \begin{bmatrix} x \cr  x' \end{bmatrix} \le b_i, \thickspace \thickspace 
-      (w_j \cdot x + u_j) - (w_k \cdot x' + u_k) \ge f \thinspace \Big\rbrace .
-\end{aligned} \tag{8.1}
-$$
+  \mathcal{R}_{\mathrm{step}} = \Big\{\, \big( (x, x', A_i, b_i) ;\; (w_j, u_j, w_k, u_k, f) \big)
+    \;:\;\; & x, x' \in I^2,\; A_i \in I^{m \times 4},\; b_i \in I^m,\; f \in \{0, 1\}, \\
+    & A_i \begin{bmatrix} x \\ x' \end{bmatrix} \le b_i, \;\;
+      (w_j \cdot x + u_j) - (w_k \cdot x' + u_k) \ge f \,\Big\}.
+\end{aligned}
+```
 
-This is the paper's Equation 21 read at one point: the premise $`A_i [x\thickspace x']^\top \le b_i`$ is membership of the transition in the $`i`$-th guarded update of Equation 16, and the conclusion is $`V(x, q) - V(x', q') > \mathbf{1}_F(q, \sigma, q') - 1`$ with $`V`$ the piecewise-linear function of Equation 18, which over integers is $`V(x, q) - V(x', q') \ge f`$ with $`f = \mathbf{1}_F(q, \sigma, q')`$. The case rows $`C_j x \le d_j`$ and $`C_k x' \le d_k`$ of Equation 21 have the same shape as rows of $`A_i`$ and are appended to it in the full build; the printed circuit carries the five rows of the update alone so that it fits on one page.
+*(8.1)*
 
-The concrete instance used in all three chapters is the retry loop of the modem machine: state Wait to state Wait, $`\mathit{delay}' = 2\thinspace \mathit{delay}`$, $`\mathit{done}' = \mathit{done} + 1`$ under the guard $`\mathit{done} \le 2`$, which as rows of $`A_i y \le b_i`$ over $`y = (\mathit{delay}, \mathit{done}, \mathit{delay}', \mathit{done}')`$ reads
+This is the paper's Equation 21 read at one point: the premise $`A_i [x\; x']^\top \le b_i`$ is membership of the transition in the $`i`$-th guarded update of Equation 16, and the conclusion is $`V(x, q) - V(x', q') > \mathbf{1}_F(q, \sigma, q') - 1`$ with $`V`$ the piecewise-linear function of Equation 18, which over integers is $`V(x, q) - V(x', q') \ge f`$ with $`f = \mathbf{1}_F(q, \sigma, q')`$. The case rows $`C_j x \le d_j`$ and $`C_k x' \le d_k`$ of Equation 21 have the same shape as rows of $`A_i`$ and are appended to it in the full build; the printed circuit carries the five rows of the update alone so that it fits on one page.
 
-$$
-A_i = \begin{bmatrix} -2 & 0 & 1 & 0 \cr  2 & 0 & -1 & 0 \cr  0 & -1 & 0 & 1 \cr  0 & 1 & 0 & -1 \cr 
+The concrete instance used in all three chapters is the retry loop of the modem machine: state Wait to state Wait, $`\mathit{delay}' = 2\,\mathit{delay}`$, $`\mathit{done}' = \mathit{done} + 1`$ under the guard $`\mathit{done} \le 2`$, which as rows of $`A_i y \le b_i`$ over $`y = (\mathit{delay}, \mathit{done}, \mathit{delay}', \mathit{done}')`$ reads
+
+```math
+A_i = \begin{bmatrix} -2 & 0 & 1 & 0 \\ 2 & 0 & -1 & 0 \\ 0 & -1 & 0 & 1 \\ 0 & 1 & 0 & -1 \\
   0 & 1 & 0 & 0 \end{bmatrix}, \quad
-  b_i = \begin{bmatrix} 0 \cr  0 \cr  1 \cr  -1 \cr  2 \end{bmatrix}, \quad
-  w_j = w_k = (0, -1), \quad u_j = u_k = 3, \quad f = 1, \tag{8.2}
-$$
+  b_i = \begin{bmatrix} 0 \\ 0 \\ 1 \\ -1 \\ 2 \end{bmatrix}, \quad
+  w_j = w_k = (0, -1), \quad u_j = u_k = 3, \quad f = 1,
+```
+
+*(8.2)*
 
 so that $`V(x, \mathrm{Wait}) = 3 - \mathit{done}`$ and $`V(x, q) - V(x', q') = \mathit{done}' - \mathit{done} = 1 \ge f`$. The example witness is $`x = (1, 0)`$, $`x' = (2, 1)`$.
 
@@ -70,45 +74,53 @@ Let $`\mathbb{F}`$ be the scalar field of BN254, of prime order $`p`$ with $`p >
 
 **Definition Z8.2 (Rank-1 constraint system).** An R1CS over $`\mathbb{F}`$ with $`m`$ constraints and $`n`$ variables is a triple of matrices $`A, B, C \in \mathbb{F}^{m \times (n + 1)}`$. A vector $`z = (1, z_1, \ldots, z_n) \in \mathbb{F}^{n + 1}`$ whose first entry is the constant $`1`$ *satisfies* the system if
 
-$$
-(A z) \circ (B z) = C z, \tag{8.3}
-$$
+```math
+(A z) \circ (B z) = C z,
+```
 
-where $`\circ`$ is the entrywise product, that is, for every row $`q \in \lbrace 1, \ldots, m\rbrace`$, $`\big(\sum_i A_{q,i} z_i\big)\big(\sum_i B_{q,i} z_i\big) = \sum_i C_{q,i} z_i`$. The entries of $`z`$ split into the public statement $`u`$ and the private witness $`w`$; the relation of the system is $`\lbrace (w ; u) : z = (1, u, w) \text{ satisfies } (\text{8.3})\rbrace`$ \[[3](#references)\].
+*(8.3)*
 
-**Definition Z8.3 (Quadratic arithmetic program).** Fix $`m`$ distinct points $`r_1, \ldots, r_m \in \mathbb{F}`$ and the target polynomial $`Z(X) = \prod_{q = 1}^{m} (X - r_q)`$. For each column $`i \in \lbrace 0, \ldots, n\rbrace`$ let $`A_i(X), B_i(X), C_i(X) \in \mathbb{F}[X]`$ be the unique polynomials of degree less than $`m`$ with $`A_i(r_q) = A_{q,i}`$, $`B_i(r_q) = B_{q,i}`$, $`C_i(r_q) = C_{q,i}`$ for all $`q`$. The QAP of the R1CS is the tuple $`(Z, \lbrace A_i\rbrace , \lbrace B_i\rbrace , \lbrace C_i\rbrace )`$ \[[4](#references)\].
+where $`\circ`$ is the entrywise product, that is, for every row $`q \in \{1, \ldots, m\}`$, $`\big(\sum_i A_{q,i} z_i\big)\big(\sum_i B_{q,i} z_i\big) = \sum_i C_{q,i} z_i`$. The entries of $`z`$ split into the public statement $`u`$ and the private witness $`w`$; the relation of the system is $`\{(w ; u) : z = (1, u, w) \text{ satisfies } (\text{8.3})\}`$ \[[3](#references)\].
+
+**Definition Z8.3 (Quadratic arithmetic program).** Fix $`m`$ distinct points $`r_1, \ldots, r_m \in \mathbb{F}`$ and the target polynomial $`Z(X) = \prod_{q = 1}^{m} (X - r_q)`$. For each column $`i \in \{0, \ldots, n\}`$ let $`A_i(X), B_i(X), C_i(X) \in \mathbb{F}[X]`$ be the unique polynomials of degree less than $`m`$ with $`A_i(r_q) = A_{q,i}`$, $`B_i(r_q) = B_{q,i}`$, $`C_i(r_q) = C_{q,i}`$ for all $`q`$. The QAP of the R1CS is the tuple $`(Z, \{A_i\}, \{B_i\}, \{C_i\})`$ \[[4](#references)\].
 
 The polynomials exist and are unique by Lagrange interpolation: with the basis
 
-$$
+```math
 L_q(X) = \prod_{l \ne q} \frac{X - r_l}{r_q - r_l}, \qquad L_q(r_{q'}) =
-  \begin{cases} 1 & q' = q \cr  0 & q' \ne q, \end{cases} \tag{8.4}
-$$
+  \begin{cases} 1 & q' = q \\ 0 & q' \ne q, \end{cases}
+```
+
+*(8.4)*
 
 $`A_i(X) = \sum_q A_{q,i} L_q(X)`$ has degree less than $`m`$ and the required values, and two polynomials of degree less than $`m`$ that agree on $`m`$ points differ by a polynomial of degree less than $`m`$ with $`m`$ roots, which is zero.
 
 **Theorem Z8.4 (Satisfiability is divisibility).** Let $`z \in \mathbb{F}^{n+1}`$ with $`z_0 = 1`$ and define
 
-$$
+```math
 P_z(X) = \Big(\sum_{i=0}^{n} z_i A_i(X)\Big)\Big(\sum_{i=0}^{n} z_i B_i(X)\Big)
-         - \sum_{i=0}^{n} z_i C_i(X). \tag{8.5}
-$$
+         - \sum_{i=0}^{n} z_i C_i(X).
+```
+
+*(8.5)*
 
 Then $`z`$ satisfies the R1CS if and only if $`Z(X)`$ divides $`P_z(X)`$ in $`\mathbb{F}[X]`$, that is, if and only if there is $`H(X) \in \mathbb{F}[X]`$ with $`P_z(X) = H(X) Z(X)`$.
 
 *Proof.* First evaluate $`P_z`$ at a point $`r_q`$. By the interpolation property, $`\sum_i z_i A_i(r_q) = \sum_i z_i A_{q,i} = (Az)_q`$, and likewise $`\sum_i z_i B_i(r_q) = (Bz)_q`$ and $`\sum_i z_i C_i(r_q) = (Cz)_q`$, so
 
-$$
-P_z(r_q) = (Az)_q (Bz)_q - (Cz)_q \qquad \text{for every } q \in \lbrace 1, \ldots, m\rbrace . \tag{8.6}
-$$
+```math
+P_z(r_q) = (Az)_q (Bz)_q - (Cz)_q \qquad \text{for every } q \in \{1, \ldots, m\}.
+```
 
-($`\Rightarrow`$) Suppose $`z`$ satisfies the system. Then by (8.3) the right-hand side of (8.6) is $`0`$ for every $`q`$, so each $`r_q`$ is a root of $`P_z`$. By the factor theorem, $`(X - r_1)`$ divides $`P_z`$: write $`P_z = (X - r_1) P^{(1)}`$. Evaluating at $`r_2 \ne r_1`$ gives $`0 = (r_2 - r_1) P^{(1)}(r_2)`$, and since $`r_2 - r_1 \ne 0`$ in a field, $`P^{(1)}(r_2) = 0`$, so $`(X - r_2)`$ divides $`P^{(1)}`$ and $`P_z = (X - r_1)(X - r_2) P^{(2)}`$. Repeating the step for $`r_3, \ldots, r_m`$, each time using that the remaining points are distinct from the ones already divided out, gives $`P_z = Z(X) \thinspace P^{(m)}`$ with $`H = P^{(m)} \in \mathbb{F}[X]`$.
+*(8.6)*
+
+($`\Rightarrow`$) Suppose $`z`$ satisfies the system. Then by (8.3) the right-hand side of (8.6) is $`0`$ for every $`q`$, so each $`r_q`$ is a root of $`P_z`$. By the factor theorem, $`(X - r_1)`$ divides $`P_z`$: write $`P_z = (X - r_1) P^{(1)}`$. Evaluating at $`r_2 \ne r_1`$ gives $`0 = (r_2 - r_1) P^{(1)}(r_2)`$, and since $`r_2 - r_1 \ne 0`$ in a field, $`P^{(1)}(r_2) = 0`$, so $`(X - r_2)`$ divides $`P^{(1)}`$ and $`P_z = (X - r_1)(X - r_2) P^{(2)}`$. Repeating the step for $`r_3, \ldots, r_m`$, each time using that the remaining points are distinct from the ones already divided out, gives $`P_z = Z(X) \, P^{(m)}`$ with $`H = P^{(m)} \in \mathbb{F}[X]`$.
 
 ($`\Leftarrow`$) Suppose $`P_z = H Z`$ for some $`H`$. Evaluating at $`r_q`$, $`P_z(r_q) = H(r_q) Z(r_q) = H(r_q) \cdot 0 = 0`$ because $`r_q`$ is a root of its own factor $`(X - r_q)`$ of $`Z`$. By (8.6), $`(Az)_q (Bz)_q - (Cz)_q = 0`$ for every $`q`$, which is (8.3).
 
 The degree of $`P_z`$ is at most $`2(m - 1)`$ and that of $`Z`$ is $`m`$, so $`H`$ has degree at most $`m - 2`$; this is the polynomial the prover commits to. &#9632;
 
-**Lemma Z8.5 (Comparison by bit decomposition).** Let $`k \ge 1`$ with $`2^{k+1} < p`$, and let $`a, b \in \mathbb{Z}`$ with $`|b - a| < 2^k`$. Then $`a \le b`$ as integers if and only if the residue $`(b - a) \bmod p`$ lies in $`\lbrace 0, 1, \ldots, 2^k - 1\rbrace`$, that is, if and only if it has a $`k`$-bit binary decomposition $`(b - a) \bmod p = \sum_{t=0}^{k-1} \beta_t 2^t`$ with every $`\beta_t \in \lbrace 0, 1\rbrace`$.
+**Lemma Z8.5 (Comparison by bit decomposition).** Let $`k \ge 1`$ with $`2^{k+1} < p`$, and let $`a, b \in \mathbb{Z}`$ with $`|b - a| < 2^k`$. Then $`a \le b`$ as integers if and only if the residue $`(b - a) \bmod p`$ lies in $`\{0, 1, \ldots, 2^k - 1\}`$, that is, if and only if it has a $`k`$-bit binary decomposition $`(b - a) \bmod p = \sum_{t=0}^{k-1} \beta_t 2^t`$ with every $`\beta_t \in \{0, 1\}`$.
 
 *Proof.* ($`\Rightarrow`$) If $`a \le b`$ then $`0 \le b - a < 2^k < p`$, so $`b - a`$ is its own residue modulo $`p`$ and lies in $`[0, 2^k)`$; its binary digits are the $`\beta_t`$.
 
@@ -120,11 +132,13 @@ The circuit applies the lemma three times with different $`k`$: every entry $`e`
 
 **Remark Z8.6 (The setup and the three elements).** Groth16 \[[2](#references)\] evaluates the QAP at a secret point $`\tau`$ inside the exponent: the setup publishes $`g_1^{\tau^t}`$, $`g_2^{\tau^t}`$ and the circuit-specific terms $`g_1^{(\beta A_i(\tau) + \alpha B_i(\tau) + C_i(\tau))/\delta}`$ for the witness columns and the same with $`\gamma`$ for the public columns, and then $`\tau, \alpha, \beta, \gamma, \delta`$ must be forgotten. The proof is $`\pi = (A, B, C) \in \mathbb{G}_1 \times \mathbb{G}_2 \times \mathbb{G}_1`$ with $`A = g_1^{\alpha + \sum_i z_i A_i(\tau) + r\delta}`$, $`B = g_2^{\beta + \sum_i z_i B_i(\tau) + s\delta}`$, and $`C`$ carrying the witness terms, the quotient $`H(\tau) Z(\tau)/\delta`$ and the blinding $`r, s`$; the verifier checks
 
-$$
+```math
 e(A, B) = e(g_1^{\alpha}, g_2^{\beta}) \cdot
   e\Big(\prod_{i \in \mathrm{pub}} \big(g_1^{(\beta A_i(\tau) + \alpha B_i(\tau) + C_i(\tau))/\gamma}\big)^{z_i},
-  \thinspace  g_2^{\gamma}\Big) \cdot e(C, g_2^{\delta}), \tag{8.7}
-$$
+  \, g_2^{\gamma}\Big) \cdot e(C, g_2^{\delta}),
+```
+
+*(8.7)*
 
 three pairings after the public-input multi-scalar multiplication, because $`e(g_1^{\alpha}, g_2^{\beta})`$ is precomputed in the verification key. Theorem **Theorem Z8.4** is what the equation checks in the exponent: the $`H(\tau)`$ term in $`C`$ exists only if $`Z`$ divides $`P_z`$. On the bench the setup is a one-party ceremony on the build laptop, a software stand-in for the multi-party one a product would need; the chapter draws it dashed and says so. In snarkjs the universal part is the powers-of-tau file (`pot12_final.ptau`, to verify the name for $`2^{12}`$ constraints) and the circuit-specific part the `zkey`.
 

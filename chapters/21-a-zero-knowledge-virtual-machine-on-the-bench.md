@@ -43,34 +43,38 @@ No HAT is seated for this chapter, which is why the console pins and the LED pin
 
 Write $`I`$ for the guest program, $`x`$ for its private input, $`\tau`$ for the machine trace and $`y`$ for the public output. The relation this chapter proves is
 
-$$
-\mathcal{R}_{\mathrm{vm}} = \mathsf{PoK}\Big\lbrace \thinspace  \underbrace{(I, x, \tau, r_I, r_x)}_{w} ;\thickspace 
-  \underbrace{(c_I, c_x, y)}_{u} \thickspace :\thickspace 
-  \mathsf{Com}(\mathsf{sp}, I; r_I) = c_I \thickspace \wedge\thickspace  \mathsf{Com}(\mathsf{sp}, x; r_x) = c_x
-  \thickspace \wedge\thickspace  \tau \in \mathrm{Tr}(I, x) \thickspace \wedge\thickspace  \mathrm{out}(\tau) = y \thinspace \Big\rbrace , \tag{21.1}
-$$
+```math
+\mathcal{R}_{\mathrm{vm}} = \mathsf{PoK}\Big\{\, \underbrace{(I, x, \tau, r_I, r_x)}_{w} ;\;
+  \underbrace{(c_I, c_x, y)}_{u} \;:\;
+  \mathsf{Com}(\mathsf{sp}, I; r_I) = c_I \;\wedge\; \mathsf{Com}(\mathsf{sp}, x; r_x) = c_x
+  \;\wedge\; \tau \in \mathrm{Tr}(I, x) \;\wedge\; \mathrm{out}(\tau) = y \,\Big\},
+```
+
+*(21.1)*
 
 where $`\mathrm{Tr}(I, x)`$ is the set of valid traces defined below. Instanced on this bench, the witness is the replayed log together with its site identifiers, and the statement is
 
-$$
-u = \lbrace \thinspace  c_x,\thickspace  \ell,\thickspace  h,\thickspace  k,\thickspace  c_y \thinspace \rbrace ,
-$$
+```math
+u = \{\, c_x,\; \ell,\; h,\; k,\; c_y \,\},
+```
 
 with $`c_x`$ the digest of the log, $`[\ell, h]`$ the admitted band, $`k`$ the number of records kept and $`c_y`$ the digest of the filtered series. The site identifier appears in $`w`$ and in no component of $`u`$, and the theorem below is what makes that an assurance rather than a hope: it says the published $`y`$ is the output of the committed program, and the committed program is the one whose source says the identifier is read and dropped.
 
 ## The mathematics
 
-**Definition Z21.1 (Register machine).** A register machine is a triple $`(\Sigma, \mathcal{I}, \delta)`$. A machine state is $`\sigma = (\mathit{pc}, R, \mu) \in \Sigma`$ with a program counter $`\mathit{pc} \in \lbrace 0, \ldots, 2^{32} - 1\rbrace`$, a register file $`R : \lbrace 0, \ldots, 31\rbrace \to \lbrace 0, \ldots, 2^{32} - 1\rbrace`$ and a memory $`\mu : \lbrace 0, \ldots, 2^{32} - 1\rbrace \to \lbrace 0, \ldots, 255\rbrace`$. A program is a finite map $`I : \mathcal{A} \to \mathcal{I}`$ from addresses to instructions. The one-step function $`\delta_I : \Sigma \rightharpoonup \Sigma`$ is the partial function the instruction set defines; it is undefined exactly on the halting states.
+**Definition Z21.1 (Register machine).** A register machine is a triple $`(\Sigma, \mathcal{I}, \delta)`$. A machine state is $`\sigma = (\mathit{pc}, R, \mu) \in \Sigma`$ with a program counter $`\mathit{pc} \in \{0, \ldots, 2^{32} - 1\}`$, a register file $`R : \{0, \ldots, 31\} \to \{0, \ldots, 2^{32} - 1\}`$ and a memory $`\mu : \{0, \ldots, 2^{32} - 1\} \to \{0, \ldots, 255\}`$. A program is a finite map $`I : \mathcal{A} \to \mathcal{I}`$ from addresses to instructions. The one-step function $`\delta_I : \Sigma \rightharpoonup \Sigma`$ is the partial function the instruction set defines; it is undefined exactly on the halting states.
 
 The word *partial function* carries the whole of the theorem that follows: for a given $`I`$, a state has at most one successor. Nondeterminism, if the instruction set admits any, is pushed into the input $`x`$ and so into the witness.
 
 **Definition Z21.2 (Execution trace).** Let $`\mathrm{init}(x) \in \Sigma`$ be the initial state the loader builds from an input $`x`$. A sequence $`\tau = (\sigma_0, \sigma_1, \ldots, \sigma_n)`$ is a *valid trace of $`I`$ on $`x`$*, written $`\tau \in \mathrm{Tr}(I, x)`$, when
 
-$$
+```math
 \sigma_0 = \mathrm{init}(x), \qquad
-  \sigma_{i+1} = \delta_I(\sigma_i) \thickspace \thickspace  \text{for every } 0 \le i < n, \qquad
-  \delta_I(\sigma_n) \text{ undefined}. \tag{21.2}
-$$
+  \sigma_{i+1} = \delta_I(\sigma_i) \;\; \text{for every } 0 \le i < n, \qquad
+  \delta_I(\sigma_n) \text{ undefined}.
+```
+
+*(21.2)*
 
 The output $`\mathrm{out}(\tau)`$ is the designated output region of $`\sigma_n`$, and $`\mathrm{out}_I(x)`$ denotes the output of the run of $`I`$ on $`x`$ when that run halts.
 
@@ -92,9 +96,11 @@ For the second claim, suppose a verifier also accepts a proof on $`(c_I, c_x, y'
 
 **Lemma Z21.5 (A trace of $`n`$ instructions needs $`\Theta(n)`$ committed rows).** Let the arithmetisation lay out one row per executed instruction, with $`w`$ committed columns per row, and let the evaluation domain be padded to a power of two. Then the number $`N`$ of committed field elements for a trace of $`n \ge 1`$ instructions satisfies
 
-$$
-w\thinspace n \thickspace \le\thickspace  N \thickspace =\thickspace  w \cdot 2^{\lceil \log_2 n \rceil} \thickspace <\thickspace  2\thinspace w\thinspace n . \tag{21.3}
-$$
+```math
+w\,n \;\le\; N \;=\; w \cdot 2^{\lceil \log_2 n \rceil} \;<\; 2\,w\,n .
+```
+
+*(21.3)*
 
 *Proof.* By the layout each executed instruction contributes exactly one row, so the trace occupies $`n`$ rows before padding, and padding to the next power of two makes the row count $`2^{\lceil \log_2 n \rceil}`$; multiplying by the $`w`$ columns gives the middle expression.
 
@@ -106,9 +112,9 @@ Both bounds are linear in $`n`$ with the constants $`w`$ and $`2w`$, so $`N = \T
 
 **Remark Z21.8.** The constant of Lemma **Lemma Z21.5** is the column count $`w`$ together with the per-row hashing that turns those columns into a commitment, and that product is precisely what the trace-generation accelerator work addresses \[[8](#references)\]; a gate-level accelerator addresses the other half, the proof over the committed rows \[[9](#references)\]. Neither accelerator is on this bench, so every row here is produced by a general-purpose core on the build laptop.
 
-**Corollary Z21.7 (The factor a general machine pays over a tailored protocol).** Let a tailored protocol perform $`m`$ operations in the base field, as the KZG batch verifier of [Project 4](04-two-group-elements.md) does with the counts of Lemma lem:z01\_counts, and let the same check run as a guest program that needs $`q`$ machine instructions per base-field operation. Then by Lemma **Lemma Z21.5** the machine prover commits $`N`$ field elements with $`w\thinspace q\thinspace m \le N < 2\thinspace w\thinspace q\thinspace m`$, against the tailored prover's $`\Theta(m)`$ field operations: a factor of at least $`w\thinspace q`$.
+**Corollary Z21.7 (The factor a general machine pays over a tailored protocol).** Let a tailored protocol perform $`m`$ operations in the base field, as the KZG batch verifier of [Project 4](04-two-group-elements.md) does with the counts of Lemma lem:z01\_counts, and let the same check run as a guest program that needs $`q`$ machine instructions per base-field operation. Then by Lemma **Lemma Z21.5** the machine prover commits $`N`$ field elements with $`w\,q\,m \le N < 2\,w\,q\,m`$, against the tailored prover's $`\Theta(m)`$ field operations: a factor of at least $`w\,q`$.
 
-*Proof.* The guest executes $`n = q\thinspace m`$ instructions by hypothesis, and Lemma **Lemma Z21.5** applied to that $`n`$ gives $`w\thinspace q\thinspace m \le N < 2\thinspace w\thinspace q\thinspace m`$. Dividing the lower bound by the tailored count $`m`$ leaves $`w\thinspace q`$. &#9632;
+*Proof.* The guest executes $`n = q\,m`$ instructions by hypothesis, and Lemma **Lemma Z21.5** applied to that $`n`$ gives $`w\,q\,m \le N < 2\,w\,q\,m`$. Dividing the lower bound by the tailored count $`m`$ leaves $`w\,q`$. &#9632;
 
 Both inputs of the corollary can be put at numbers on this bench, and both are computed, not measured. For $`q`$: the base field of BLS12-381 is 381 bits, and $`\lceil 381 / 32 \rceil = 12`$ limbs on a 32-bit machine, so one schoolbook product is $`12 \times 12 = 144`$ limb multiplications and the Montgomery reduction adds $`12 \times 12 + 12 = 156`$ more, giving $`144 + 156 = 300`$ limb multiplications, hence $`q \ge 300`$ instructions per field multiplication, computed. For $`w`$: the width of the machine's arithmetisation is taken as 60 columns, a figure read from the proof system and marked (to verify). The product is $`60 \times 300 = 18000`$, computed from those two inputs: a general machine pays at least four orders of magnitude on an algebraic check that a tailored protocol does in one group operation. That is the argument for writing a circuit when the statement is fixed, and the argument for a machine when the statement is a program that already exists.
 

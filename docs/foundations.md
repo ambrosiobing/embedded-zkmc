@@ -57,9 +57,9 @@ The design brief draws this diagram with an accelerometer and an 8 by 8 time-of-
 
 ### Traces and languages
 
-**Definition 1 (State transition system).** A **state transition system** is a tuple $`\mathcal{M} = (S, S_0, T, \sigma)`$ where $`S`$ is a set of states, $`S_0 \subseteq S`$ is the set of initial states, $`T \subseteq S \times S`$ is a transition relation that is total, in the sense that every state has at least one successor, and $`\sigma : S \to \Sigma`$ is an observation map into a finite alphabet $`\Sigma = 2^{\Pi}`$ over a set $`\Pi`$ of atomic propositions. The source paper writes the observation of $`s`$ as $`\langle\negthinspace \langle s \rangle\negthinspace \rangle`$; $`\sigma(s)`$ is the same thing, written shorter because it appears in every set below \[[1](#references)\].
+**Definition 1 (State transition system).** A **state transition system** is a tuple $`\mathcal{M} = (S, S_0, T, \sigma)`$ where $`S`$ is a set of states, $`S_0 \subseteq S`$ is the set of initial states, $`T \subseteq S \times S`$ is a transition relation that is total, in the sense that every state has at least one successor, and $`\sigma : S \to \Sigma`$ is an observation map into a finite alphabet $`\Sigma = 2^{\Pi}`$ over a set $`\Pi`$ of atomic propositions. The source paper writes the observation of $`s`$ as $`\langle\!\langle s \rangle\!\rangle`$; $`\sigma(s)`$ is the same thing, written shorter because it appears in every set below \[[1](#references)\].
 
-**Definition 2 (Run, trace, language).** A **run** of $`\mathcal{M}`$ is an infinite sequence $`s_0 s_1 s_2 \ldots`$ with $`s_0 \in S_0`$ and $`(s_i, s_{i+1}) \in T`$ for every $`i`$. Its **trace** is the infinite word $`\sigma(s_0)\thinspace \sigma(s_1)\thinspace \sigma(s_2) \ldots \in \Sigma^{\omega}`$. The **language** of the system, written $`\mathcal{L}_\mathcal{M} \subseteq \Sigma^{\omega}`$, is the set of traces of all its runs.
+**Definition 2 (Run, trace, language).** A **run** of $`\mathcal{M}`$ is an infinite sequence $`s_0 s_1 s_2 \ldots`$ with $`s_0 \in S_0`$ and $`(s_i, s_{i+1}) \in T`$ for every $`i`$. Its **trace** is the infinite word $`\sigma(s_0)\, \sigma(s_1)\, \sigma(s_2) \ldots \in \Sigma^{\omega}`$. The **language** of the system, written $`\mathcal{L}_\mathcal{M} \subseteq \Sigma^{\omega}`$, is the set of traces of all its runs.
 
 Two consequences set up everything that follows. First, the system is secret but its alphabet is public: a verifier knows what can be observed without knowing what is observed. Second, because runs are infinite, a property is a set of infinite words, and the whole question becomes one of language containment rather than of reachability.
 
@@ -69,11 +69,11 @@ Two consequences set up everything that follows. First, the system is secret but
 
 Containment is awkward to prove directly, so the automata-theoretic approach replaces it by emptiness of an intersection \[[16](#references), [17](#references)\]:
 
-$$
+```math
 \mathcal{L}_\mathcal{M} \subseteq \mathcal{L}_\phi
   \iff \mathcal{L}_\mathcal{M} \cap \overline{\mathcal{L}_\phi} = \emptyset
   \iff \mathcal{L}_\mathcal{M} \cap \mathcal{L}_{\mathcal{A}_{\neg\phi}} = \emptyset .
-$$
+```
 
 **Definition 4 (Nondeterministic Buchi automaton).** A **nondeterministic Buchi automaton** is a tuple $`\mathcal{A} = (Q, Q_0, \delta, F)`$ with a finite state set $`Q`$, initial states $`Q_0 \subseteq Q`$, a transition relation $`\delta \subseteq Q \times \Sigma \times Q`$, and a set of accepting transitions $`F \subseteq \delta`$. It accepts an infinite word when some run of the automaton on that word uses a transition of $`F`$ infinitely often. Any formula of linear temporal logic can be translated into such an automaton, and the translation is the subject of Project 17, which uses an established library for it \[[33](#references), [23](#references)\].
 
@@ -89,22 +89,22 @@ The property the observer negates in this picture is that the machine never sett
 
 Emptiness of the intersection is still a statement about infinitely many infinite runs. The step that makes it finite, and therefore provable, is a ranking function: one natural number attached to each pair of a system state and an automaton state, which cannot grow along a run and must shrink whenever the automaton takes an accepting transition.
 
-**Definition 5 (Ranking function).** A **ranking function** for $`\mathcal{M}`$ and $`\mathcal{A}`$ is a map $`V : S \times Q \to \mathbb{N} \cup \lbrace +\infty\rbrace`$.
+**Definition 5 (Ranking function).** A **ranking function** for $`\mathcal{M}`$ and $`\mathcal{A}`$ is a map $`V : S \times Q \to \mathbb{N} \cup \{+\infty\}`$.
 
 **Theorem 6 (The fair-termination rule; Theorem 3.2 of the source paper).** Let $`V`$ be a ranking function for $`\mathcal{M}`$ and $`\mathcal{A}`$ satisfying the three conditions
 
-$$
+```math
 \begin{aligned}
 &\text{(i)} \quad V(s,q) \ne \infty
-     && \text{for all } s \in S_0,\thickspace  q \in Q_0, \cr 
+     && \text{for all } s \in S_0,\; q \in Q_0, \\
   &\text{(ii)} \quad V(s,q) \ge V(s',q')
-     && \text{for all } (s,s') \in T,\thickspace  (q, \sigma(s), q') \in \delta
-        \text{ with } V(s,q) \ne \infty, \cr 
+     && \text{for all } (s,s') \in T,\; (q, \sigma(s), q') \in \delta
+        \text{ with } V(s,q) \ne \infty, \\
   &\text{(iii)} \quad V(s,q) > V(s',q')
-     && \text{for all } (s,s') \in T,\thickspace  (q, \sigma(s), q') \in F
+     && \text{for all } (s,s') \in T,\; (q, \sigma(s), q') \in F
         \text{ with } V(s,q) \ne \infty .
 \end{aligned}
-$$
+```
 
 Then $`\mathcal{L}_\mathcal{M} \cap \mathcal{L}_\mathcal{A} = \emptyset`$, and therefore $`\mathcal{M} \models \phi`$ whenever $`\mathcal{A}`$ is an automaton for $`\neg\phi`$.
 
@@ -116,7 +116,7 @@ The proof is not repeated here. It is an induction on the accepting transitions 
 
 The system has to be fixed before the certificate is checked against it, or a prover could choose a different system for each condition. That is what a commitment is for.
 
-**Definition 8 (Commitment scheme).** A **commitment scheme** over a message space $`M`$ and a randomness space $`R`$ is a pair $`(\mathsf{Setup}, \mathsf{Com})`$ with $`\mathsf{sp} \leftarrow \mathsf{Setup}(1^\lambda)`$ and $`\mathsf{Com} : \lbrace \mathsf{sp}\rbrace \times M \times R \to C`$. It is **hiding** when the distributions $`\lbrace \mathsf{Com}(\mathsf{sp}, m_0; r) : r \leftarrow R\rbrace`$ and $`\lbrace \mathsf{Com}(\mathsf{sp}, m_1; r) : r \leftarrow R\rbrace`$ are indistinguishable for every pair of messages, and **binding** when no efficient adversary produces $`(m, r, m', r')`$ with $`m \ne m'`$ and equal commitments, except with probability $`\mathrm{negl}(\lambda)`$ \[[9](#references), [10](#references)\].
+**Definition 8 (Commitment scheme).** A **commitment scheme** over a message space $`M`$ and a randomness space $`R`$ is a pair $`(\mathsf{Setup}, \mathsf{Com})`$ with $`\mathsf{sp} \leftarrow \mathsf{Setup}(1^\lambda)`$ and $`\mathsf{Com} : \{\mathsf{sp}\} \times M \times R \to C`$. It is **hiding** when the distributions $`\{\mathsf{Com}(\mathsf{sp}, m_0; r) : r \leftarrow R\}`$ and $`\{\mathsf{Com}(\mathsf{sp}, m_1; r) : r \leftarrow R\}`$ are indistinguishable for every pair of messages, and **binding** when no efficient adversary produces $`(m, r, m', r')`$ with $`m \ne m'`$ and equal commitments, except with probability $`\mathrm{negl}(\lambda)`$ \[[9](#references), [10](#references)\].
 
 Both properties come in a perfect form and a computational form, and no scheme has both perfectly. If the commitment hides perfectly then every commitment value is consistent with every message, so for any value and any second message a suitable randomness exists and only the difficulty of finding it can bind; if it binds perfectly then the value determines the message, so an unbounded distinguisher reads the message off and only the difficulty of doing so can hide. The volume uses perfectly hiding, computationally binding commitments throughout, in two shapes.
 
@@ -130,23 +130,23 @@ Project 1 of the volume proves that the Pedersen form is perfectly hiding and co
 
 The first of the two schemes applies when the state space is finite and small enough to embed in a field. The three conditions of Theorem **Theorem 6** are rewritten as three sets of hypothetical states and state pairs that would violate them, and these sets are public, because they are built from $`V`$ and $`\mathcal{A}`$ alone:
 
-$$
+```math
 \begin{aligned}
-E_{\mathrm{init}} &= \lbrace \thinspace  s \in S \mid \exists q \in Q_0 .\thickspace  V(s,q) = \infty \thinspace \rbrace , \cr 
-  E_{\mathrm{step}} &= \lbrace \thinspace  (s,s') \mid \exists q, q' .\thickspace  V(s,q) \ne \infty
-     \thickspace \wedge\thickspace  (q, \sigma(s), q') \in \delta \thickspace \wedge\thickspace  V(s,q) < V(s',q') \thinspace \rbrace , \cr 
-  E_{\mathrm{fair}} &= \lbrace \thinspace  (s,s') \mid \exists q, q' .\thickspace  V(s,q) \ne \infty
-     \thickspace \wedge\thickspace  (q, \sigma(s), q') \in F \thickspace \wedge\thickspace  V(s,q) \le V(s',q') \thinspace \rbrace  .
+E_{\mathrm{init}} &= \{\, s \in S \mid \exists q \in Q_0 .\; V(s,q) = \infty \,\}, \\
+  E_{\mathrm{step}} &= \{\, (s,s') \mid \exists q, q' .\; V(s,q) \ne \infty
+     \;\wedge\; (q, \sigma(s), q') \in \delta \;\wedge\; V(s,q) < V(s',q') \,\}, \\
+  E_{\mathrm{fair}} &= \{\, (s,s') \mid \exists q, q' .\; V(s,q) \ne \infty
+     \;\wedge\; (q, \sigma(s), q') \in F \;\wedge\; V(s,q) \le V(s',q') \,\} .
 \end{aligned}
-$$
+```
 
 The three conditions then say exactly that the secret sets avoid the public ones:
 
-$$
+```math
 S_0 \cap E_{\mathrm{init}} = \emptyset
   \qquad\text{and}\qquad
   T \cap (E_{\mathrm{step}} \cup E_{\mathrm{fair}}) = \emptyset .
-$$
+```
 
 Disjointness of a secret set from a public one is what a polynomial commitment proves cheaply. The states are embedded into a prime field, $`S_0`$ and $`T`$ are encoded as polynomials $`p_{S_0}`$ and $`p_T`$ that vanish exactly off those sets, the prover commits to the two polynomials, and a single batch opening per set shows that each polynomial reads zero on every element of the corresponding public set. The artefact is two group elements regardless of how many states there are, and the verifier's work is a fixed number of pairings. What grows is the prover's: the degree of $`p_T`$ is of the order of $`|S|^2`$, so the commitment is one multi-scalar multiplication of that size. Project 4 builds that verifier in C and Project 11 prices the prover's two expensive pieces.
 
@@ -156,17 +156,17 @@ Disjointness of a secret set from a public one is what a polynomial commitment p
 
 When the state space is countably infinite, as it is for anything parsing a continuous quantity, the system is written instead as linear guarded commands over integer variables and each proof obligation becomes a claim that a system of linear inequalities has no solution, with a secret part contributed by the firmware and a public part contributed by the specification:
 
-$$
-\neg \exists y :\thickspace  A_s\thinspace  y \le b_s \thickspace \wedge\thickspace  C_p\thinspace  y \le d_p \thickspace \wedge\thickspace  E_p\thinspace  y \le f_p .
-$$
+```math
+\neg \exists y :\; A_s\, y \le b_s \;\wedge\; C_p\, y \le d_p \;\wedge\; E_p\, y \le f_p .
+```
 
 Farkas’ lemma turns that negative statement into a positive one \[[11](#references)\]. The system is infeasible over the rationals exactly when non-negative vectors $`\lambda_s`$ and $`\mu_s`$ exist with
 
-$$
+```math
 A_s^{T} \lambda_s + \begin{bmatrix} C_p^{T} & E_p^{T} \end{bmatrix} \mu_s = 0
   \qquad\text{and}\qquad
   b_s^{T} \lambda_s + \begin{bmatrix} d_p^{T} & f_p^{T} \end{bmatrix} \mu_s < 0 .
-$$
+```
 
 The pair $`(\lambda_s, \mu_s)`$ is the **Farkas witness**. It is short, it is checked by arithmetic rather than by search, and the check is a matrix product and two comparisons. The prover therefore commits to the secret matrices with a two-tier Pedersen commitment, proves the matrix products with a committed-matrix argument \[[5](#references)\], proves the equality with a sigma protocol in the style of the wallet-with-observers construction \[[8](#references)\], and proves the sign conditions with range proofs \[[4](#references)\]. Project 5 builds exactly this on a Pi with a joystick as the source of the guarded commands, and the solver that produces the witness is the one named in the prerequisites \[[22](#references)\].
 
@@ -184,11 +184,11 @@ The brief draws this tree with the state-space question alone \[[26](#references
 
 The symbolic route produces one obligation per guarded command and per condition, so a realistic machine produces hundreds or thousands of them. Proving each separately is the cost the scheme cannot pay on a constrained board, so all $`N`$ obligations are folded into one. The fold is a random linear combination with a public exponent schedule $`c_1, \ldots, c_N`$ and a verifier challenge $`r`$:
 
-$$
-A^{*} = \sum_{i=1}^{N} r^{\thinspace c_i} A_i ,
+```math
+A^{*} = \sum_{i=1}^{N} r^{\,c_i} A_i ,
   \qquad
-  \lambda^{*} = \sum_{i=1}^{N} r^{\thinspace c_i} \lambda_i .
-$$
+  \lambda^{*} = \sum_{i=1}^{N} r^{\,c_i} \lambda_i .
+```
 
 The product $`A^{*} \lambda^{*}`$ expands into $`N`$ diagonal terms, carrying exponent $`2 c_i`$, and $`N(N-1)`$ cross terms, carrying exponent $`c_i + c_j`$ with $`i \ne j`$. The prover wants the diagonal terms, which are the quantities the obligations are about, and has to account for the cross terms, which are not. If some diagonal exponent equals some cross exponent, that is if $`2 c_i = c_j + c_k`$ for indices that are not all equal, then the two kinds of term land on the same power of $`r`$ and cannot be separated. A schedule with no such coincidence is exactly a set of integers containing no three-term arithmetic progression, which is a Salem-Spencer set \[[13](#references), [12](#references), [14](#references)\]. The classical construction reads the digits of $`i-1`$ in base 3, and it keeps the largest exponent below $`3^{\lceil \log_2 N \rceil}`$, which is what bounds the number of cross-term commitments the prover must publish. Project 6 computes that schedule exactly for the sizes this bench would use, and Project 9 compares the one-shot fold against a recursive one \[[6](#references)\].
 
@@ -200,16 +200,16 @@ The first edition stopped at the two schemes of the paper. This edition adds two
 
 The practical effect is that any program compiled to the machine's instruction set becomes provable without anyone writing a circuit for it \[[7](#references), [25](#references)\]. The price is that the trace has to be committed row by row: a trace of $`n`$ instructions needs of the order of $`n`$ committed rows, and generating that trace, rather than proving it, is the part the recent accelerator work addresses at the hardware level \[[31](#references), [32](#references)\]. Neither accelerator is on this bench. Project 21 builds the route on the boards that are here, with the two established implementations as the two instruments \[[27](#references), [28](#references)\], and compares the general machine against the tailored protocol of the earlier chapters by counting, not by timing.
 
-**Definition 13 (Ternary linear layer).** A **ternary linear layer** is a map $`x \mapsto W x`$ where $`W \in \lbrace -1, 0, 1\rbrace ^{m \times n}`$ and $`x \in \mathbb{R}^{n}`$. A model whose every weight matrix is of this form is a ternary-weight model; the architecture the volume uses is the one with $`\log_2 3 \approx 1.58`$ bits per weight \[[29](#references)\], run by its own inference framework \[[30](#references)\].
+**Definition 13 (Ternary linear layer).** A **ternary linear layer** is a map $`x \mapsto W x`$ where $`W \in \{-1, 0, 1\}^{m \times n}`$ and $`x \in \mathbb{R}^{n}`$. A model whose every weight matrix is of this form is a ternary-weight model; the architecture the volume uses is the one with $`\log_2 3 \approx 1.58`$ bits per weight \[[29](#references)\], run by its own inference framework \[[30](#references)\].
 
-**Lemma 14 (A ternary product needs no multiplication).** Let $`W \in \lbrace -1,0,1\rbrace ^{m \times n}`$ and $`x \in \mathbb{R}^{n}`$. Then $`W x`$ can be computed with additions and subtractions only, using at most $`n - 1`$ additive operations per output entry and no multiplication at all.
+**Lemma 14 (A ternary product needs no multiplication).** Let $`W \in \{-1,0,1\}^{m \times n}`$ and $`x \in \mathbb{R}^{n}`$. Then $`W x`$ can be computed with additions and subtractions only, using at most $`n - 1`$ additive operations per output entry and no multiplication at all.
 
-*Proof.* Fix a row $`i`$ and split its index set into $`P_i = \lbrace \thinspace j \mid W_{ij} = 1 \thinspace \rbrace`$, $`M_i = \lbrace \thinspace j \mid W_{ij} = -1 \thinspace \rbrace`$ and the rest, on which $`W_{ij} = 0`$. Then
+*Proof.* Fix a row $`i`$ and split its index set into $`P_i = \{\, j \mid W_{ij} = 1 \,\}`$, $`M_i = \{\, j \mid W_{ij} = -1 \,\}`$ and the rest, on which $`W_{ij} = 0`$. Then
 
-$$
+```math
 (W x)_i = \sum_{j=1}^{n} W_{ij} x_j
-          = \sum_{j \in P_i} x_j \thickspace  - \sum_{j \in M_i} x_j ,
-$$
+          = \sum_{j \in P_i} x_j \; - \sum_{j \in M_i} x_j ,
+```
 
 because every omitted index contributes $`0 \cdot x_j = 0`$. The right-hand side names $`|P_i| + |M_i| \le n`$ operands combined by $`|P_i| + |M_i| - 1 \le n - 1`$ additions and subtractions, and no product of two numbers appears anywhere in it. &#9632;
 

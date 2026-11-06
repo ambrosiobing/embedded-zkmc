@@ -39,24 +39,28 @@ The paper says where its explicit-state prover spends its time: committing to th
 
 There is no witness in this chapter; the relations it measures are the two that every prover of the volume evaluates in the open on its own side. Writing $`\mathbb{G}_1`$ additively, as `blst` does, a commitment $`g^v`$ of [Project 1](01-the-price-list.md) is the point $`v P`$, and the multi-scalar relation is
 
-$$
-\mathcal{R}_{\mathrm{msm}} = \Big\lbrace \thinspace  \big((a_1, \ldots, a_n), (P_1, \ldots, P_n), Q\big)
-  \in [0, 2^b)^n \times \mathbb{G}_1^n \times \mathbb{G}_1 \thickspace :\thickspace  Q = \sum_{i=1}^{n} a_i P_i \thinspace \Big\rbrace , \tag{11.1}
-$$
+```math
+\mathcal{R}_{\mathrm{msm}} = \Big\{\, \big((a_1, \ldots, a_n), (P_1, \ldots, P_n), Q\big)
+  \in [0, 2^b)^n \times \mathbb{G}_1^n \times \mathbb{G}_1 \;:\; Q = \sum_{i=1}^{n} a_i P_i \,\Big\},
+```
+
+*(11.1)*
 
 with $`b = 255`$ for the scalar field $`\mathbb{F}_r`$ of BLS12-381. The transform relation is
 
-$$
-\mathcal{R}_{\mathrm{ntt}} = \Big\lbrace \thinspace  (a, \hat a) \in \mathbb{F}_r^{n} \times \mathbb{F}_r^{n} \thickspace :\thickspace 
-  \hat a_k = \sum_{j=0}^{n-1} a_j \omega^{jk} \text{ for } 0 \le k < n \thinspace \Big\rbrace , \tag{11.2}
-$$
+```math
+\mathcal{R}_{\mathrm{ntt}} = \Big\{\, (a, \hat a) \in \mathbb{F}_r^{n} \times \mathbb{F}_r^{n} \;:\;
+  \hat a_k = \sum_{j=0}^{n-1} a_j \omega^{jk} \text{ for } 0 \le k < n \,\Big\},
+```
+
+*(11.2)*
 
 for a fixed primitive $`n`$-th root of unity $`\omega \in \mathbb{F}_r`$. What the chapter publishes is the partial function
 
-$$
-\mathrm{cost} : \lbrace \text{Pi 4B}, \text{Pi 3B+}\rbrace  \times \lbrace \mathsf{msm}, \mathsf{ntt}\rbrace 
-  \times \lbrace 2^8, 2^9, \ldots, 2^{14}\rbrace  \rightharpoonup \mathbb{R}_{\ge 0},
-$$
+```math
+\mathrm{cost} : \{\text{Pi 4B}, \text{Pi 3B+}\} \times \{\mathsf{msm}, \mathsf{ntt}\}
+  \times \{2^8, 2^9, \ldots, 2^{14}\} \rightharpoonup \mathbb{R}_{\ge 0},
+```
 
 undefined exactly on the cells that read **not measured**.
 
@@ -64,33 +68,37 @@ undefined exactly on the cells that read **not measured**.
 
 **Definition Z11.1 (Multi-scalar multiplication and the bucket method).** Let $`\mathbb{G}_1`$ be a group of prime order $`r`$ written additively, let $`P_1, \ldots, P_n \in \mathbb{G}_1`$ and let $`a_1, \ldots, a_n \in [0, 2^b)`$. The multi-scalar multiplication is $`Q = \sum_{i=1}^{n} a_i P_i`$. Fix a window width $`c`$ with $`1 \le c \le b`$ and let $`w = \lceil b / c \rceil`$. Write every scalar in base $`2^c`$,
 
-$$
-a_i = \sum_{j=0}^{w-1} a_{i,j}\thinspace  2^{cj}, \qquad a_{i,j} \in [0, 2^c). \tag{11.3}
-$$
+```math
+a_i = \sum_{j=0}^{w-1} a_{i,j}\, 2^{cj}, \qquad a_{i,j} \in [0, 2^c).
+```
 
-For each window $`j`$ and each digit value $`k \in [1, 2^c)`$ the *bucket* is $`B_{j,k} = \sum_{i : a_{i,j} = k} P_i`$ and the *window sum* is $`S_j = \sum_{k=1}^{2^c - 1} k\thinspace B_{j,k}`$. The bucket method, due to Pippenger, computes the buckets, then the window sums, then $`Q = \sum_{j=0}^{w-1} 2^{cj} S_j`$.
+*(11.3)*
+
+For each window $`j`$ and each digit value $`k \in [1, 2^c)`$ the *bucket* is $`B_{j,k} = \sum_{i : a_{i,j} = k} P_i`$ and the *window sum* is $`S_j = \sum_{k=1}^{2^c - 1} k\, B_{j,k}`$. The bucket method, due to Pippenger, computes the buckets, then the window sums, then $`Q = \sum_{j=0}^{w-1} 2^{cj} S_j`$.
 
 **Theorem Z11.2 (Cost of the bucket method).** Counting one group addition or one doubling as one operation, the bucket method computes $`Q`$ in at most
 
-$$
-\Big\lceil \frac{b}{c} \Big\rceil \big( n + 2^{c+1} + 1 \big) + b + c \tag{11.4}
-$$
+```math
+\Big\lceil \frac{b}{c} \Big\rceil \big( n + 2^{c+1} + 1 \big) + b + c
+```
+
+*(11.4)*
 
 operations. The leading term is $`(b/c)(n + 2^c)`$ up to the factor two on the bucket term.
 
 *Proof.* First the identity. Substituting Equation 11.3 and exchanging the two finite sums,
 
-$$
+```math
 Q = \sum_{i=1}^{n} \Big( \sum_{j=0}^{w-1} a_{i,j} 2^{cj} \Big) P_i
     = \sum_{j=0}^{w-1} 2^{cj} \sum_{i=1}^{n} a_{i,j} P_i .
-$$
+```
 
 Grouping the inner sum by the value $`k`$ of the digit $`a_{i,j}`$, and dropping $`k = 0`$ because it contributes $`0 \cdot P_i`$,
 
-$$
+```math
 \sum_{i=1}^{n} a_{i,j} P_i = \sum_{k=1}^{2^c - 1} k \sum_{i : a_{i,j} = k} P_i
-  = \sum_{k=1}^{2^c - 1} k\thinspace  B_{j,k} = S_j ,
-$$
+  = \sum_{k=1}^{2^c - 1} k\, B_{j,k} = S_j ,
+```
 
 so $`Q = \sum_j 2^{cj} S_j`$ as claimed. Now the count, in three parts per window and one part for the combination.
 
@@ -98,55 +106,57 @@ so $`Q = \sum_j 2^{cj} S_j`$ as claimed. Now the count, in three parts per windo
 
 (ii) Window sum. Let $`K = 2^c - 1`$ and define the suffix sums $`R_K = B_{j,K}`$ and $`R_k = R_{k+1} + B_{j,k}`$ for $`k = K-1`$ down to $`1`$, so that $`R_k = \sum_{l=k}^{K} B_{j,l}`$; and the running totals $`T_K = R_K`$, $`T_k = T_{k+1} + R_k`$, so that $`T_1 = \sum_{k=1}^{K} R_k`$. Exchanging sums once more,
 
-$$
+```math
 T_1 = \sum_{k=1}^{K} \sum_{l=k}^{K} B_{j,l} = \sum_{l=1}^{K} \Big( \sum_{k=1}^{l} 1 \Big)
-  B_{j,l} = \sum_{l=1}^{K} l\thinspace  B_{j,l} = S_j .
-$$
+  B_{j,l} = \sum_{l=1}^{K} l\, B_{j,l} = S_j .
+```
 
 The suffix sums cost $`K - 1`$ additions and the running totals $`K - 1`$ more, together $`2(2^c - 2) < 2^{c+1}`$.
 
 (iii) Combination. Set $`Q \leftarrow S_{w-1}`$ and, for $`j = w-2`$ down to $`0`$, set $`Q \leftarrow 2^c Q + S_j`$ by $`c`$ doublings and one addition; after the last step $`Q = \sum_{j} 2^{cj} S_j`$ by Horner's rule. This costs $`(w - 1)(c + 1)`$ operations.
 
-Adding the parts: $`w\thinspace (n + 2^{c+1}) + (w-1)(c+1) \le w\thinspace (n + 2^{c+1}) + wc + w`$. Since $`w = \lceil b/c \rceil < b/c + 1`$, we have $`wc < b + c`$, so the total is below $`w\thinspace (n + 2^{c+1} + 1) + b + c`$, which is Equation 11.4. &#9632;
+Adding the parts: $`w\,(n + 2^{c+1}) + (w-1)(c+1) \le w\,(n + 2^{c+1}) + wc + w`$. Since $`w = \lceil b/c \rceil < b/c + 1`$, we have $`wc < b + c`$, so the total is below $`w\,(n + 2^{c+1} + 1) + b + c`$, which is Equation 11.4. &#9632;
 
 **Corollary Z11.3 (The window that makes it quasi-linear).** With $`c = \lceil \log_2 n \rceil`$ the bucket method costs at most $`\lceil b / c \rceil (5n + 1) + b + c`$ operations, which is $`O(nb / \log n)`$ as $`n`$ grows; the plain method of $`n`$ separate double-and-add scalar multiplications costs up to $`2nb + n`$.
 
 *Proof.* With $`c = \lceil \log_2 n \rceil`$ we have $`2^c < 2n`$, so $`2^{c+1} < 4n`$ and $`n + 2^{c+1} + 1 < 5n + 1`$; substitute into Equation 11.4. For fixed $`b`$ the term $`\lceil b/c \rceil (5n + 1)`$ is at most $`(b / \log_2 n + 1)(5n + 1)`$, which is $`O(nb / \log n)`$, and $`b + c`$ is $`O(\log n)`$. The plain method performs, per scalar, $`b`$ doublings and at most $`b`$ additions, then $`n - 1`$ additions to combine, at most $`2nb + n`$. &#9632;
 
-**Remark Z11.7.** For $`b = 255`$ and $`n = 2^{14}`$ the bound Equation 11.4 evaluates, computed, to $`479\thinspace 523`$ operations at $`c = 10`$ ($`w = 26`$, $`26 \cdot 18\thinspace 433 + 265`$), against $`8\thinspace 372\thinspace 224`$ for the plain method, a factor of about $`17`$. The harness below uses $`c = k - 4`$ for $`n = 2^k`$, which is $`10`$ at $`2^{14}`$, because the window of the corollary is the asymptotic choice and Equation 11.4 is smaller a little below it; the measured ratio between the two methods is a cell of the table, not this number.
+**Remark Z11.7.** For $`b = 255`$ and $`n = 2^{14}`$ the bound Equation 11.4 evaluates, computed, to $`479\,523`$ operations at $`c = 10`$ ($`w = 26`$, $`26 \cdot 18\,433 + 265`$), against $`8\,372\,224`$ for the plain method, a factor of about $`17`$. The harness below uses $`c = k - 4`$ for $`n = 2^k`$, which is $`10`$ at $`2^{14}`$, because the window of the corollary is the asymptotic choice and Equation 11.4 is smaller a little below it; the measured ratio between the two methods is a cell of the table, not this number.
 
 **Definition Z11.5 (Number-theoretic transform).** Let $`\mathbb{F}`$ be a field and $`n \ge 1`$ an integer such that $`\mathbb{F}`$ holds a primitive $`n`$-th root of unity $`\omega`$, that is $`\omega^n = 1`$ and $`\omega^m \ne 1`$ for $`0 < m < n`$. The transform of $`a = (a_0, \ldots, a_{n-1}) \in \mathbb{F}^n`$ is $`\hat a_k = \sum_{j=0}^{n-1} a_j \omega^{jk}`$ for $`0 \le k < n`$. For $`\mathbb{F} = \mathbb{F}_r`$ with $`r`$ the order of BLS12-381's $`\mathbb{G}_1`$, $`r - 1 = 2^{32} \cdot t`$ with $`t`$ odd, so a primitive $`2^k`$-th root exists for every $`k \le 32`$ as $`g^{(r-1)/2^k}`$ for a generator $`g`$ of $`\mathbb{F}_r^\times`$; the low 32 bits of $`r - 1`$ are zero and the generator $`g = 7`$ is read from the arkworks field definition \[[6](#references)\] (to verify).
 
-**Lemma Z11.6 (Cooley and Tukey's split, and the count).** Let $`n = 2m`$ and let $`\omega`$ be a primitive $`n`$-th root of unity. For $`0 \le k < m`$ put $`E_k = \sum_{j=0}^{m-1} a_{2j}\thinspace (\omega^2)^{jk}`$ and $`O_k = \sum_{j=0}^{m-1} a_{2j+1}\thinspace (\omega^2)^{jk}`$, the transforms of the even and the odd entries under $`\omega^2`$, which is a primitive $`m`$-th root. Then
+**Lemma Z11.6 (Cooley and Tukey's split, and the count).** Let $`n = 2m`$ and let $`\omega`$ be a primitive $`n`$-th root of unity. For $`0 \le k < m`$ put $`E_k = \sum_{j=0}^{m-1} a_{2j}\, (\omega^2)^{jk}`$ and $`O_k = \sum_{j=0}^{m-1} a_{2j+1}\, (\omega^2)^{jk}`$, the transforms of the even and the odd entries under $`\omega^2`$, which is a primitive $`m`$-th root. Then
 
-$$
-\hat a_k = E_k + \omega^k O_k, \qquad \hat a_{k+m} = E_k - \omega^k O_k . \tag{11.5}
-$$
+```math
+\hat a_k = E_k + \omega^k O_k, \qquad \hat a_{k+m} = E_k - \omega^k O_k .
+```
+
+*(11.5)*
 
 Consequently, for $`n = 2^s`$, the transform costs $`M(n) = \tfrac{n}{2} \log_2 n`$ multiplications and $`A(n) = n \log_2 n`$ additions or subtractions in $`\mathbb{F}`$, not counting the powers of $`\omega`$.
 
 *Proof.* Split the defining sum by the parity of $`j`$:
 
-$$
-\hat a_k = \sum_{j=0}^{m-1} a_{2j}\thinspace  \omega^{2jk} + \sum_{j=0}^{m-1} a_{2j+1}\thinspace  \omega^{(2j+1)k}
-  = \sum_{j=0}^{m-1} a_{2j}\thinspace  (\omega^2)^{jk} + \omega^k \sum_{j=0}^{m-1} a_{2j+1}\thinspace  (\omega^2)^{jk}
+```math
+\hat a_k = \sum_{j=0}^{m-1} a_{2j}\, \omega^{2jk} + \sum_{j=0}^{m-1} a_{2j+1}\, \omega^{(2j+1)k}
+  = \sum_{j=0}^{m-1} a_{2j}\, (\omega^2)^{jk} + \omega^k \sum_{j=0}^{m-1} a_{2j+1}\, (\omega^2)^{jk}
   = E_k + \omega^k O_k ,
-$$
+```
 
 which is the first half of Equation 11.5 and holds for every $`k`$, also for $`k \ge m`$. For the second half, $`\omega^m`$ satisfies $`(\omega^m)^2 = \omega^n = 1`$, so $`\omega^m`$ is a root of $`x^2 - 1 = (x - 1)(x + 1)`$ in a field and is $`1`$ or $`-1`$; it is not $`1`$ because $`0 < m < n`$ and $`\omega`$ is primitive; hence $`\omega^m = -1`$ and $`\omega^{k+m} = -\omega^k`$. Also $`(\omega^2)^{j(k+m)} = (\omega^2)^{jk} (\omega^{2m})^{j} = (\omega^2)^{jk}`$, so $`E_{k+m} = E_k`$ and $`O_{k+m} = O_k`$. Substituting $`k + m`$ into the first half gives $`\hat a_{k+m} = E_k - \omega^k O_k`$. That $`\omega^2`$ is a primitive $`m`$-th root follows from $`(\omega^2)^m = 1`$ and, for $`0 < l < m`$, $`(\omega^2)^l = \omega^{2l} \ne 1`$ because $`0 < 2l < n`$.
 
 Counts, by induction on $`s`$ where $`n = 2^s`$. Base $`s = 0`$: $`n = 1`$, $`\hat a_0 = a_0`$, no operations, and $`\tfrac{1}{2} \log_2 1 = 0 = 1 \cdot \log_2 1`$. Step: assume $`M(m) = \tfrac{m}{2} \log_2 m`$ and $`A(m) = m \log_2 m`$ for $`m = 2^{s}`$. Computing $`\hat a`$ for $`n = 2m`$ by Equation 11.5 takes the two half-size transforms, then for each of the $`m`$ values of $`k`$ one multiplication $`\omega^k O_k`$, one addition and one subtraction. So
 
-$$
+```math
 \begin{aligned}
-M(2m) &= 2 M(m) + m = m \log_2 m + m = m (\log_2 m + 1) = m \log_2 (2m) = \tfrac{2m}{2} \log_2 (2m), \cr 
+M(2m) &= 2 M(m) + m = m \log_2 m + m = m (\log_2 m + 1) = m \log_2 (2m) = \tfrac{2m}{2} \log_2 (2m), \\
   A(2m) &= 2 A(m) + 2m = 2m \log_2 m + 2m = 2m (\log_2 m + 1) = 2m \log_2 (2m),
 \end{aligned}
-$$
+```
 
 which are the claimed forms at $`n = 2m`$. &#9632;
 
-The harness evaluates the lemma iteratively: a bit-reversal permutation followed by $`\log_2 n`$ passes of butterflies, which performs exactly the operations the induction counts. For $`n = 2^{14}`$ that is, computed, $`114\thinspace 688`$ multiplications and $`229\thinspace 376`$ additions, against $`2^{28}`$ multiplications for the defining sum.
+The harness evaluates the lemma iteratively: a bit-reversal permutation followed by $`\log_2 n`$ passes of butterflies, which performs exactly the operations the induction counts. For $`n = 2^{14}`$ that is, computed, $`114\,688`$ multiplications and $`229\,376`$ additions, against $`2^{28}`$ multiplications for the defining sum.
 
 ## The protocol
 

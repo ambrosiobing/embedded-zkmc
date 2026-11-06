@@ -44,17 +44,21 @@ The three BCM numbers are the ones measured with these LEDs on Saturday 3 Octobe
 
 The verifier holds no witness. It decides membership in two relations. The single opening relation is that of [Project 2](02-a-sensor-reading-committed-on-the-microcontroller.md),
 
-$$
-\mathcal{R}_{\mathrm{open}} = \big\lbrace \thinspace  ((v, r), c) \in (\mathbb{Z}_p \times \mathbb{Z}_p) \times \mathbb{G}
-    \thickspace :\thickspace  c = g^v h^r \thinspace \big\rbrace , \tag{15.1}
-$$
+```math
+\mathcal{R}_{\mathrm{open}} = \big\{\, ((v, r), c) \in (\mathbb{Z}_p \times \mathbb{Z}_p) \times \mathbb{G}
+    \;:\; c = g^v h^r \,\big\},
+```
+
+*(15.1)*
 
 with the parse condition $`v < 2^{16}`$ checked beside it, a condition on the format and not on the cryptography, since $`v`$ is disclosed. The batch relation for $`n`$ openings is the product
 
-$$
-\mathcal{R}_{\mathrm{open}}^{n} = \big\lbrace \thinspace  \big((v_i, r_i)_{i=1}^{n}, (c_i)_{i=1}^{n}\big)
-    \thickspace :\thickspace  \forall i \in \lbrace 1, \dots, n\rbrace  .\thickspace  c_i = g^{v_i} h^{r_i} \thinspace \big\rbrace , \tag{15.2}
-$$
+```math
+\mathcal{R}_{\mathrm{open}}^{n} = \big\{\, \big((v_i, r_i)_{i=1}^{n}, (c_i)_{i=1}^{n}\big)
+    \;:\; \forall i \in \{1, \dots, n\} .\; c_i = g^{v_i} h^{r_i} \,\big\},
+```
+
+*(15.2)*
 
 and the question is whether $`n`$ group equations can be decided by one. In the paper's Figure 4 the verifier of `zkeq` checks products of commitments raised to challenge powers in exactly this way, with challenges from the Fiat-Shamir hash \[[1](#references)\]; here the challenges are the verifier's own random draws, which is the interactive form, and the lemma below is the reason the paper's verifier can afford a batch of obligations at all.
 
@@ -62,24 +66,26 @@ and the question is whether $`n`$ group equations can be decided by one. In the 
 
 **Definition Z15.1 (The batched opening check).** Given $`(c_i, v_i, r_i)_{i=1}^{n}`$, the verifier draws $`\rho_1, \dots, \rho_n`$ independent and uniform in $`\mathbb{Z}_p`$ after all $`n`$ openings have arrived, and accepts if and only if
 
-$$
-\prod_{i=1}^{n} c_i^{\rho_i} \thickspace =\thickspace  g^{\sum_{i=1}^{n} \rho_i v_i} \thickspace  h^{\sum_{i=1}^{n} \rho_i r_i}, \tag{15.3}
-$$
+```math
+\prod_{i=1}^{n} c_i^{\rho_i} \;=\; g^{\sum_{i=1}^{n} \rho_i v_i} \; h^{\sum_{i=1}^{n} \rho_i r_i},
+```
+
+*(15.3)*
 
 the exponents on the right reduced modulo $`p`$.
 
 **Lemma Z15.2 (A random linear combination catches a wrong opening).** If every $`(v_i, r_i)`$ opens $`c_i`$, the check of Equation 15.3 accepts. If some $`(v_j, r_j)`$ does not open $`c_j`$, the check accepts with probability exactly $`1/p`$ over the choice of $`\rho_1, \dots, \rho_n`$.
 
-*Proof.* For each $`i`$ let $`e_i = c_i \thinspace g^{-v_i} h^{-r_i} \in \mathbb{G}`$. By Lemma lem:z02\_prime the group is cyclic of prime order $`p`$ with generator $`g`$, so every element is a power of $`g`$; write $`e_i = g^{d_i}`$ with $`d_i \in \mathbb{Z}_p`$ (the verifier cannot compute $`d_i`$, but it exists). Then $`(v_i, r_i)`$ opens $`c_i`$ if and only if $`e_i = 1`$, that is, $`d_i = 0`$. Dividing the left side of Equation 15.3 by the right side and using that $`\mathbb{G}`$ is abelian,
+*Proof.* For each $`i`$ let $`e_i = c_i \, g^{-v_i} h^{-r_i} \in \mathbb{G}`$. By Lemma lem:z02\_prime the group is cyclic of prime order $`p`$ with generator $`g`$, so every element is a power of $`g`$; write $`e_i = g^{d_i}`$ with $`d_i \in \mathbb{Z}_p`$ (the verifier cannot compute $`d_i`$, but it exists). Then $`(v_i, r_i)`$ opens $`c_i`$ if and only if $`e_i = 1`$, that is, $`d_i = 0`$. Dividing the left side of Equation 15.3 by the right side and using that $`\mathbb{G}`$ is abelian,
 
-$$
+```math
 \begin{aligned}
 \prod_{i=1}^{n} c_i^{\rho_i} \cdot g^{-\sum_i \rho_i v_i} h^{-\sum_i \rho_i r_i}
   &= \prod_{i=1}^{n} \big( c_i^{\rho_i} g^{-\rho_i v_i} h^{-\rho_i r_i} \big)
-   = \prod_{i=1}^{n} \big( c_i g^{-v_i} h^{-r_i} \big)^{\rho_i} \cr 
+   = \prod_{i=1}^{n} \big( c_i g^{-v_i} h^{-r_i} \big)^{\rho_i} \\
   &= \prod_{i=1}^{n} e_i^{\rho_i} = \prod_{i=1}^{n} g^{\rho_i d_i} = g^{\sum_{i=1}^{n} \rho_i d_i},
 \end{aligned}
-$$
+```
 
 so the check accepts if and only if $`\sum_{i=1}^{n} \rho_i d_i = 0`$ in $`\mathbb{Z}_p`$, because $`g`$ has order $`p`$. If every $`d_i = 0`$ the sum is 0 for every choice of $`\rho`$: the check accepts. Now suppose $`d_j \ne 0`$ for some $`j`$. Fix the values of $`\rho_i`$ for all $`i \ne j`$ and let $`S = \sum_{i \ne j} \rho_i d_i`$. The condition becomes $`\rho_j d_j = -S`$, and since $`d_j`$ is invertible in the field $`\mathbb{Z}_p`$ it has exactly one solution, $`\rho_j = -S d_j^{-1}`$. The variable $`\rho_j`$ is uniform in $`\mathbb{Z}_p`$ and independent of the other $`\rho_i`$, so for every fixing of the others the condition holds with probability exactly $`1/p`$, and averaging over the fixings gives exactly $`1/p`$. &#9632;
 
@@ -89,10 +95,10 @@ so the check accepts if and only if $`\sum_{i=1}^{n} \rho_i d_i = 0`$ in $`\math
 
 *Proof.* Let $`(v_1, r_1)`$ and $`(v_2, r_2)`$ be the true openings of $`c_1`$ and $`c_2`$, and let $`\delta \in \mathbb{Z}_p`$, $`\delta \ne 0`$. The prover sends $`(v_1 + \delta, r_1)`$ for $`c_1`$ and $`(v_2 - \rho_1 \delta \rho_2^{-1}, r_2)`$ for $`c_2`$, with $`\rho_2 \ne 0`$ (if $`\rho_2 = 0`$ the second opening is unconstrained and any value passes). In the notation of the proof of Lemma **Lemma Z15.2**, $`e_1 = c_1 g^{-v_1 - \delta} h^{-r_1} = g^{-\delta}`$, so $`d_1 = -\delta`$, and $`e_2 = c_2 g^{-v_2 + \rho_1 \delta \rho_2^{-1}} h^{-r_2} = g^{\rho_1 \delta \rho_2^{-1}}`$, so $`d_2 = \rho_1 \delta \rho_2^{-1}`$. Then
 
-$$
+```math
 \rho_1 d_1 + \rho_2 d_2 = -\rho_1 \delta + \rho_2 \rho_1 \delta \rho_2^{-1}
   = -\rho_1 \delta + \rho_1 \delta = 0,
-$$
+```
 
 and the check accepts although the first opening is wrong by $`\delta`$ and the second by $`-\rho_1 \delta \rho_2^{-1}`$. This is why the weights are drawn after the last opening of the batch has been received and are never written to the CDC port. &#9632;
 

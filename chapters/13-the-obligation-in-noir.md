@@ -38,30 +38,36 @@ The paper's Equation 22 writes every obligation in one uniform shape, a universa
 
 The statement is the one of Section [Project 8](08-a-ranking-function-as-a-circuit.md), repeated word for word so that the three circuit chapters prove the same thing. Let $`n = 2`$ be the number of program variables of the modem machine of Section [Project 3](03-the-modems-backoff-machine.md), $`x = (\mathit{delay}, \mathit{done})`$, and let $`y = (x, x') \in \mathbb{Z}^4`$ be a transition. Every integer in the statement is a signed 16-bit integer, $`I = [-2^{15}, 2^{15} - 1]`$, which is the paper's bounded integer encoding with $`M = 2^{15}`$ \[[1](#references)\]. The witness is the transition and the row of the guarded update it belongs to, the statement is the ranking function's two pieces and the fairness bit, and the relation is
 
-$$
+```math
 \begin{aligned}
-  \mathcal{R}_{\mathrm{step}} = \Big\lbrace \thinspace  \big( (x, x', A_i, b_i) ;\thickspace  (w_j, u_j, w_k, u_k, f) \big)
-    \thickspace :\thickspace \thickspace  & x, x' \in I^2,\thickspace  A_i \in I^{m \times 4},\thickspace  b_i \in I^m,\thickspace  f \in \lbrace 0, 1\rbrace , \cr 
-    & A_i \begin{bmatrix} x \cr  x' \end{bmatrix} \le b_i, \thickspace \thickspace 
-      (w_j \cdot x + u_j) - (w_k \cdot x' + u_k) \ge f \thinspace \Big\rbrace .
-\end{aligned} \tag{13.1}
-$$
+  \mathcal{R}_{\mathrm{step}} = \Big\{\, \big( (x, x', A_i, b_i) ;\; (w_j, u_j, w_k, u_k, f) \big)
+    \;:\;\; & x, x' \in I^2,\; A_i \in I^{m \times 4},\; b_i \in I^m,\; f \in \{0, 1\}, \\
+    & A_i \begin{bmatrix} x \\ x' \end{bmatrix} \le b_i, \;\;
+      (w_j \cdot x + u_j) - (w_k \cdot x' + u_k) \ge f \,\Big\}.
+\end{aligned}
+```
 
-This is the paper's Equation 21 read at one point: the premise $`A_i [x\thickspace x']^\top \le b_i`$ is membership of the transition in the $`i`$-th guarded update of Equation 16, and the conclusion is $`V(x, q) - V(x', q') > \mathbf{1}_F(q, \sigma, q') - 1`$ with $`V`$ the piecewise-linear function of Equation 18, which over integers is $`V(x, q) - V(x', q') \ge f`$ with $`f = \mathbf{1}_F(q, \sigma, q')`$. In the paper's uniform form, Equation 22, the premise is $`A_s y \le b_s`$ with $`A_s, b_s`$ secret and the conclusion is a public row that must not hold; the program below asserts the premise and the negation of that row, which is the conclusion. The concrete instance is the retry loop of Section [Project 8](08-a-ranking-function-as-a-circuit.md), whose instance equation it repeats: $`A_i`$ with five rows over $`y = (\mathit{delay}, \mathit{done}, \mathit{delay}', \mathit{done}')`$, $`b_i = (0, 0, 1, -1, 2)`$, $`w_j = w_k = (0, -1)`$, $`u_j = u_k = 3`$, $`f = 1`$, witness $`x = (1, 0)`$, $`x' = (2, 1)`$. Remark rem:z08\_step on one step against the universal obligation applies here unchanged.
+*(13.1)*
+
+This is the paper's Equation 21 read at one point: the premise $`A_i [x\; x']^\top \le b_i`$ is membership of the transition in the $`i`$-th guarded update of Equation 16, and the conclusion is $`V(x, q) - V(x', q') > \mathbf{1}_F(q, \sigma, q') - 1`$ with $`V`$ the piecewise-linear function of Equation 18, which over integers is $`V(x, q) - V(x', q') \ge f`$ with $`f = \mathbf{1}_F(q, \sigma, q')`$. In the paper's uniform form, Equation 22, the premise is $`A_s y \le b_s`$ with $`A_s, b_s`$ secret and the conclusion is a public row that must not hold; the program below asserts the premise and the negation of that row, which is the conclusion. The concrete instance is the retry loop of Section [Project 8](08-a-ranking-function-as-a-circuit.md), whose instance equation it repeats: $`A_i`$ with five rows over $`y = (\mathit{delay}, \mathit{done}, \mathit{delay}', \mathit{done}')`$, $`b_i = (0, 0, 1, -1, 2)`$, $`w_j = w_k = (0, -1)`$, $`u_j = u_k = 3`$, $`f = 1`$, witness $`x = (1, 0)`$, $`x' = (2, 1)`$. Remark rem:z08\_step on one step against the universal obligation applies here unchanged.
 
 ## The mathematics
 
 **Definition Z13.1 (The sumcheck protocol).** Let $`g \in \mathbb{F}[X_1, \ldots, X_v]`$ have degree at most $`d`$ in each variable, and let the prover claim
 
-$$
-H = \sum_{b_1 \in \lbrace 0,1\rbrace } \sum_{b_2 \in \lbrace 0,1\rbrace } \cdots \sum_{b_v \in \lbrace 0,1\rbrace } g(b_1, b_2, \ldots, b_v). \tag{13.2}
-$$
+```math
+H = \sum_{b_1 \in \{0,1\}} \sum_{b_2 \in \{0,1\}} \cdots \sum_{b_v \in \{0,1\}} g(b_1, b_2, \ldots, b_v).
+```
 
-The verifier has oracle access to $`g`$ at one point of its choice. The protocol has $`v`$ rounds. In round $`i \in \lbrace 1, \ldots, v\rbrace`$ the prover sends a univariate polynomial $`g_i(X)`$ of degree at most $`d`$, claimed to equal
+*(13.2)*
 
-$$
-s_i(X) = \sum_{b_{i+1}, \ldots, b_v \in \lbrace 0,1\rbrace } g(r_1, \ldots, r_{i-1}, X, b_{i+1}, \ldots, b_v), \tag{13.3}
-$$
+The verifier has oracle access to $`g`$ at one point of its choice. The protocol has $`v`$ rounds. In round $`i \in \{1, \ldots, v\}`$ the prover sends a univariate polynomial $`g_i(X)`$ of degree at most $`d`$, claimed to equal
+
+```math
+s_i(X) = \sum_{b_{i+1}, \ldots, b_v \in \{0,1\}} g(r_1, \ldots, r_{i-1}, X, b_{i+1}, \ldots, b_v),
+```
+
+*(13.3)*
 
 where $`r_1, \ldots, r_{i-1}`$ are the challenges of the earlier rounds. The verifier checks $`g_1(0) + g_1(1) = H`$ in round 1 and $`g_i(0) + g_i(1) = g_{i-1}(r_{i-1})`$ in round $`i > 1`$, rejecting on failure, then draws $`r_i \leftarrow \mathbb{F}`$ uniformly and sends it. After round $`v`$ the verifier queries the oracle once for $`g(r_1, \ldots, r_v)`$ and accepts if and only if it equals $`g_v(r_v)`$ \[[3](#references), [2](#references)\].
 
@@ -75,29 +81,29 @@ where $`r_1, \ldots, r_{i-1}`$ are the challenges of the earlier rounds. The ver
 
 *Inductive step.* Let $`v \ge 2`$ and assume the claim for $`v - 1`$. Let $`H`$ differ from the sum. The prover sends $`g_1`$. If $`g_1(0) + g_1(1) \ne H`$ the verifier rejects. Otherwise, since the honest round polynomial $`s_1`$ of (13.3) satisfies $`s_1(0) + s_1(1) = \sum_{b} g(b) \ne H = g_1(0) + g_1(1)`$, we have $`g_1 \ne s_1`$ as polynomials, both of degree at most $`d`$. Let $`E`$ be the event $`g_1(r_1) = s_1(r_1)`$. As in the base case, $`r_1`$ must be a root of the nonzero polynomial $`g_1 - s_1`$ of degree at most $`d`$, so $`\operatorname{Pr}[E] \le d / |\mathbb{F}|`$.
 
-Condition on the complement of $`E`$, that is, on $`g_1(r_1) \ne s_1(r_1)`$. From round 2 on, the protocol is exactly the sumcheck protocol for the $`(v-1)`$-variate polynomial $`g'(X_2, \ldots, X_v) = g(r_1, X_2, \ldots, X_v)`$, which has degree at most $`d`$ in each variable, with the claimed sum $`H' = g_1(r_1)`$: round 2 checks $`g_2(0) + g_2(1) = g_1(r_1)`$, the later rounds check the same recurrence, and the final oracle query is $`g(r_1, \ldots, r_v) = g'(r_2, \ldots, r_v)`$. The true sum of $`g'`$ over $`\lbrace 0,1\rbrace ^{v-1}`$ is $`s_1(r_1)`$ by (13.3), and $`s_1(r_1) \ne g_1(r_1) = H'`$ on the complement of $`E`$. By the induction hypothesis the verifier accepts this residual protocol with probability at most $`d(v - 1) / |\mathbb{F}|`$, whatever the prover does from round 2 on; the prover's freedom to choose $`g_1`$ after seeing nothing, and $`g_2, \ldots`$ after seeing $`r_1`$, is exactly the freedom the hypothesis quantifies over.
+Condition on the complement of $`E`$, that is, on $`g_1(r_1) \ne s_1(r_1)`$. From round 2 on, the protocol is exactly the sumcheck protocol for the $`(v-1)`$-variate polynomial $`g'(X_2, \ldots, X_v) = g(r_1, X_2, \ldots, X_v)`$, which has degree at most $`d`$ in each variable, with the claimed sum $`H' = g_1(r_1)`$: round 2 checks $`g_2(0) + g_2(1) = g_1(r_1)`$, the later rounds check the same recurrence, and the final oracle query is $`g(r_1, \ldots, r_v) = g'(r_2, \ldots, r_v)`$. The true sum of $`g'`$ over $`\{0,1\}^{v-1}`$ is $`s_1(r_1)`$ by (13.3), and $`s_1(r_1) \ne g_1(r_1) = H'`$ on the complement of $`E`$. By the induction hypothesis the verifier accepts this residual protocol with probability at most $`d(v - 1) / |\mathbb{F}|`$, whatever the prover does from round 2 on; the prover's freedom to choose $`g_1`$ after seeing nothing, and $`g_2, \ldots`$ after seeing $`r_1`$, is exactly the freedom the hypothesis quantifies over.
 
 Putting the two together with the union bound,
 
-$$
-\operatorname{Pr}[\text{accept}] \thickspace \le\thickspace  \operatorname{Pr}[E] + \operatorname{Pr}[\text{accept} \mid \neg E]
-  \thickspace \le\thickspace  \frac{d}{|\mathbb{F}|} + \frac{d(v-1)}{|\mathbb{F}|} \thickspace =\thickspace  \frac{dv}{|\mathbb{F}|},
-$$
+```math
+\operatorname{Pr}[\text{accept}] \;\le\; \operatorname{Pr}[E] + \operatorname{Pr}[\text{accept} \mid \neg E]
+  \;\le\; \frac{d}{|\mathbb{F}|} + \frac{d(v-1)}{|\mathbb{F}|} \;=\; \frac{dv}{|\mathbb{F}|},
+```
 
 which is the claim for $`v`$. &#9632;
 
-**Lemma Z13.3 (Prover cost for a multilinear polynomial).** Let $`g`$ be multilinear ($`d = 1`$) and given by the table of its $`2^v`$ values on $`\lbrace 0,1\rbrace ^v`$. Then the honest prover computes every round polynomial $`g_i = s_i`$ with fewer than $`4 \cdot 2^v`$ field additions and multiplications in total, that is, $`O(2^v)`$.
+**Lemma Z13.3 (Prover cost for a multilinear polynomial).** Let $`g`$ be multilinear ($`d = 1`$) and given by the table of its $`2^v`$ values on $`\{0,1\}^v`$. Then the honest prover computes every round polynomial $`g_i = s_i`$ with fewer than $`4 \cdot 2^v`$ field additions and multiplications in total, that is, $`O(2^v)`$.
 
-*Proof.* Keep a table $`T_{i-1}`$ holding $`g(r_1, \ldots, r_{i-1}, b)`$ for $`b \in \lbrace 0,1\rbrace ^{v-i+1}`$; $`T_0`$ is the given table of $`2^v`$ values. Because $`s_i`$ has degree at most one, it is determined by $`s_i(0)`$ and $`s_i(1)`$, and by (13.3) each is a sum of $`2^{v-i}`$ entries of $`T_{i-1}`$: those with $`b_i = 0`$ and those with $`b_i = 1`$. That is $`2 \cdot 2^{v-i}`$ additions. After $`r_i`$ arrives, the next table is $`T_i(b) = (1 - r_i)\thinspace T_{i-1}(0, b) + r_i\thinspace T_{i-1}(1, b)`$ for $`b \in \lbrace 0,1\rbrace ^{v-i}`$, which is correct because $`g`$ is affine in $`X_i`$ when the other variables are fixed, and costs two multiplications and one addition per entry, $`3 \cdot 2^{v-i}`$ operations. The total over the $`v`$ rounds is
+*Proof.* Keep a table $`T_{i-1}`$ holding $`g(r_1, \ldots, r_{i-1}, b)`$ for $`b \in \{0,1\}^{v-i+1}`$; $`T_0`$ is the given table of $`2^v`$ values. Because $`s_i`$ has degree at most one, it is determined by $`s_i(0)`$ and $`s_i(1)`$, and by (13.3) each is a sum of $`2^{v-i}`$ entries of $`T_{i-1}`$: those with $`b_i = 0`$ and those with $`b_i = 1`$. That is $`2 \cdot 2^{v-i}`$ additions. After $`r_i`$ arrives, the next table is $`T_i(b) = (1 - r_i)\, T_{i-1}(0, b) + r_i\, T_{i-1}(1, b)`$ for $`b \in \{0,1\}^{v-i}`$, which is correct because $`g`$ is affine in $`X_i`$ when the other variables are fixed, and costs two multiplications and one addition per entry, $`3 \cdot 2^{v-i}`$ operations. The total over the $`v`$ rounds is
 
-$$
+```math
 \sum_{i=1}^{v} \big(2 \cdot 2^{v-i} + 3 \cdot 2^{v-i}\big)
-  = 5 \sum_{i=1}^{v} 2^{v-i} = 5\thinspace (2^{v} - 1) < 5 \cdot 2^{v}.
-$$
+  = 5 \sum_{i=1}^{v} 2^{v-i} = 5\,(2^{v} - 1) < 5 \cdot 2^{v}.
+```
 
 Counting the $`3 \cdot 2^{v-i}`$ fold of the last round as unnecessary, since no table is needed after round $`v`$, leaves fewer than $`4 \cdot 2^v`$ operations; either count is $`O(2^v)`$, linear in the size of the table and with no transform in sight. &#9632;
 
-**Remark Z13.4 (Honk and the program).** UltraHonk keeps PLONK's gate relation of Definition def:z12\_gate but indexes the $`n = 2^v`$ gates by the Boolean hypercube rather than by roots of unity: each wire vector becomes a multilinear polynomial on $`\lbrace 0,1\rbrace ^v`$, the gate relation becomes a polynomial $`g`$ of small degree $`d`$ in each variable (a product of a few multilinears), and the prover shows that $`g`$ sums to zero over the hypercube with Theorem **Theorem Z13.2**, randomised by a Lagrange-like weighting so that a zero sum means every gate is satisfied. The final oracle query is answered by opening the committed multilinear wire polynomials at the random point with a polynomial commitment scheme (the names of the opening protocol in the `bb` version on the bench are to verify). Lemma **Lemma Z13.3** is the reason this prover has no NTT: its cost is linear in $`2^v`$, where the quotient of Section [Project 12](12-a-plonk-gate-for-the-inductive-step.md) needs transforms of size a small multiple of $`n`$ \[[4](#references)\]. The Noir program never sees any of this; it sees a `main` with assertions, and the soundness bound $`dv / |\mathbb{F}|`$ with $`|\mathbb{F}| > 2^{253}`$ and $`dv`$ in the hundreds is a probability below $`2^{-240}`$, which the chapter states as computed.
+**Remark Z13.4 (Honk and the program).** UltraHonk keeps PLONK's gate relation of Definition def:z12\_gate but indexes the $`n = 2^v`$ gates by the Boolean hypercube rather than by roots of unity: each wire vector becomes a multilinear polynomial on $`\{0,1\}^v`$, the gate relation becomes a polynomial $`g`$ of small degree $`d`$ in each variable (a product of a few multilinears), and the prover shows that $`g`$ sums to zero over the hypercube with Theorem **Theorem Z13.2**, randomised by a Lagrange-like weighting so that a zero sum means every gate is satisfied. The final oracle query is answered by opening the committed multilinear wire polynomials at the random point with a polynomial commitment scheme (the names of the opening protocol in the `bb` version on the bench are to verify). Lemma **Lemma Z13.3** is the reason this prover has no NTT: its cost is linear in $`2^v`$, where the quotient of Section [Project 12](12-a-plonk-gate-for-the-inductive-step.md) needs transforms of size a small multiple of $`n`$ \[[4](#references)\]. The Noir program never sees any of this; it sees a `main` with assertions, and the soundness bound $`dv / |\mathbb{F}|`$ with $`|\mathbb{F}| > 2^{253}`$ and $`dv`$ in the hundreds is a probability below $`2^{-240}`$, which the chapter states as computed.
 
 ## The protocol
 

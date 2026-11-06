@@ -42,31 +42,37 @@ The design brief puts this node on a Raspberry Pi 3 Model B Plus and sends its p
 
 The cryptographic relation is the one [Project 4](04-two-group-elements.md) verifies, the proof of knowledge of a committed polynomial that vanishes on a public set \[[1](#references)\]:
 
-$$
-\mathcal{R}_{\mathrm{eval}} = \mathsf{PoK}\Big\lbrace \thinspace  \underbrace{(p, b)}_{w} ;\thickspace  \underbrace{(c_p, E)}_{u} \thickspace :\thickspace 
-    c_p = \mathsf{Com}(p; b) \thickspace \wedge\thickspace  \forall e \in E .\thickspace  p(e) = 0 \thinspace \Big\rbrace , \tag{23.1}
-$$
+```math
+\mathcal{R}_{\mathrm{eval}} = \mathsf{PoK}\Big\{\, \underbrace{(p, b)}_{w} ;\; \underbrace{(c_p, E)}_{u} \;:\;
+    c_p = \mathsf{Com}(p; b) \;\wedge\; \forall e \in E .\; p(e) = 0 \,\Big\},
+```
+
+*(23.1)*
 
 instantiated at $`u = (c_T, E_{\mathrm{step}} \cup E_{\mathrm{fair}})`$ with $`|E_{\mathrm{step}} \cup E_{\mathrm{fair}}| = 8088`$, the count [Project 4](04-two-group-elements.md) recomputes and refuses to take on trust. This chapter adds a second relation that no earlier chapter needs, because no earlier chapter has a runtime that may restart the sender. Let $`\mathbb{N}`$ be the sequence numbers and let $`A \subseteq \mathbb{N}`$ be the set a receiver has already accepted. The freshness relation and the transport relation are
 
-$$
+```math
 \begin{gathered}
-\mathcal{R}_{\mathrm{fresh}} = \lbrace \thinspace  (s, A) \in \mathbb{N} \times 2^{\mathbb{N}} \mid s > \max(A \cup \lbrace 0\rbrace ) \thinspace \rbrace ,
-   \cr 
-  \mathrm{seg}_s(x) = \big((\mathrm{0x320},\thinspace  s_4 \thinspace \Vert \thinspace  \mathrm{crc}_{32}(x)_4),\thinspace 
-    (\mathrm{0x321}, x_{0..7}),\thinspace  \dots,\thinspace  (\mathrm{0x338}, x_{184..191})\big), \tag{23.2}
+\mathcal{R}_{\mathrm{fresh}} = \{\, (s, A) \in \mathbb{N} \times 2^{\mathbb{N}} \mid s > \max(A \cup \{0\}) \,\},
+   \\
+  \mathrm{seg}_s(x) = \big((\mathrm{0x320},\, s_4 \,\|\, \mathrm{crc}_{32}(x)_4),\,
+    (\mathrm{0x321}, x_{0..7}),\, \dots,\, (\mathrm{0x338}, x_{184..191})\big),
 \end{gathered}
-$$
+```
 
-where $`x \in \lbrace 0,1\rbrace ^{8 \cdot 192}`$ is the proof, the subscripts are byte counts, and $`\mathrm{seg}_s`$ differs from the segmentation of [Project 18](18-a-proof-over-the-wire.md) in one place only: the four bytes that there carried a length and a fixed tag here carry $`s`$. The length is fixed at 192 by the identifier range instead, so the replay guard costs no additional frame and no additional bus time (computed: $`8 - 4 - 4 = 0`$ spare header bytes, and 25 frames either way). The verdict the second node writes is $`\mathsf{Verify}(c_T, E_{\mathrm{step}} \cup E_{\mathrm{fair}}, \pi_T) \wedge [\thinspace (s, A) \in \mathcal{R}_{\mathrm{fresh}}\thinspace ]`$, and the chapter's mathematics is about the right conjunct.
+*(23.2)*
+
+where $`x \in \{0,1\}^{8 \cdot 192}`$ is the proof, the subscripts are byte counts, and $`\mathrm{seg}_s`$ differs from the segmentation of [Project 18](18-a-proof-over-the-wire.md) in one place only: the four bytes that there carried a length and a fixed tag here carry $`s`$. The length is fixed at 192 by the identifier range instead, so the replay guard costs no additional frame and no additional bus time (computed: $`8 - 4 - 4 = 0`$ spare header bytes, and 25 frames either way). The verdict the second node writes is $`\mathsf{Verify}(c_T, E_{\mathrm{step}} \cup E_{\mathrm{fair}}, \pi_T) \wedge [\,(s, A) \in \mathcal{R}_{\mathrm{fresh}}\,]`$, and the chapter's mathematics is about the right conjunct.
 
 ## The mathematics
 
-**Definition Z23.1 (Supervision tree and its restart function).** A *supervision tree* is a triple $`(P, \mathrm{par}, \mathrm{str})`$ in which $`P`$ is a finite set of processes, $`\mathrm{par} : P \setminus \lbrace \rho\rbrace \to P`$ is a parent function with a single root $`\rho`$ whose graph is acyclic, and $`\mathrm{str}`$ assigns a strategy to every process that has children. Write $`\mathrm{sub}(p) = \lbrace \thinspace q \in P \mid p = q \text{ or } p \text{ is an ancestor of } q \thinspace \rbrace`$ for the subtree at $`p`$. Let $`\mathcal{E}`$ be a set of faults. The *restart function* is the partial function
+**Definition Z23.1 (Supervision tree and its restart function).** A *supervision tree* is a triple $`(P, \mathrm{par}, \mathrm{str})`$ in which $`P`$ is a finite set of processes, $`\mathrm{par} : P \setminus \{\rho\} \to P`$ is a parent function with a single root $`\rho`$ whose graph is acyclic, and $`\mathrm{str}`$ assigns a strategy to every process that has children. Write $`\mathrm{sub}(p) = \{\, q \in P \mid p = q \text{ or } p \text{ is an ancestor of } q \,\}`$ for the subtree at $`p`$. Let $`\mathcal{E}`$ be a set of faults. The *restart function* is the partial function
 
-$$
-\mathrm{res} : P \times \mathcal{E} \rightharpoonup 2^{P}, \tag{23.3}
-$$
+```math
+\mathrm{res} : P \times \mathcal{E} \rightharpoonup 2^{P},
+```
+
+*(23.3)*
 
 which sends a failure $`(p, \epsilon)`$ to the set of processes that are terminated and started afresh in response to it, and is undefined where the failure is not caught, in which case the whole node restarts. Under the one-for-one strategy at $`\mathrm{par}(p)`$, $`\mathrm{res}(p, \epsilon) = \mathrm{sub}(p)`$: the failed process and its own descendants, and nothing else \[[3](#references)\].
 
@@ -88,7 +94,7 @@ For the uncaught case, $`\kappa`$ is terminated with every other process and is 
 
 (ii) Let the $`k`$-th call precede the restart and the $`k'`$-th follow it, $`k < k'`$. Suppose first that the restart is one the supervisor caught. By Lemma **Lemma Z23.3** the value $`\kappa`$ holds is unchanged, so the enumeration of (i) continues without interruption and $`v_{k'} = n_0 + k' > n_0 + k = v_k`$. Suppose instead that the whole node restarted. By Lemma **Lemma Z23.3** the value after the restart, call it $`n'_0`$, satisfies $`n'_0 \ge n_k = v_k`$. Applying (i) to the calls after the restart gives $`v_{k'} = n'_0 + j`$ for some $`j \ge 1`$, hence $`v_{k'} \ge v_k + 1 > v_k`$. In both cases the second value is strictly greater.
 
-(iii) Let $`m`$ be a message that the receiver accepted, with number $`s(m)`$, and suppose a message $`m'`$ with the same 192 bytes is offered afterwards. At that moment $`s(m) \in A`$, so $`\max(A \cup \lbrace 0\rbrace ) \ge s(m)`$, and by (23.2) the receiver accepts $`m'`$ only if $`s(m') > s(m)`$. Two cases. If $`m'`$ is a re-queue of $`m`$ by the restarted bus process, it carries the number already reserved for $`m`$, that is $`s(m') = s(m)`$, and the receiver refuses it. If instead the restarted process called $`\mathsf{next}`$ again, then by (i) and (ii) its number is a value no earlier call returned and is strictly greater than every number issued before the restart; the frames it sends are then a fresh message with a fresh number, which is a new transmission and not a second acceptance of $`m`$. Hence no message is accepted twice. Finally, partial transmissions are covered by the same argument: a message missing one of the 24 data identifiers is refused before its number is examined, exactly as in [Project 18](18-a-proof-over-the-wire.md), so an incomplete first attempt adds nothing to $`A`$ and the retry is judged against the state $`A`$ had before it. &#9632;
+(iii) Let $`m`$ be a message that the receiver accepted, with number $`s(m)`$, and suppose a message $`m'`$ with the same 192 bytes is offered afterwards. At that moment $`s(m) \in A`$, so $`\max(A \cup \{0\}) \ge s(m)`$, and by (23.2) the receiver accepts $`m'`$ only if $`s(m') > s(m)`$. Two cases. If $`m'`$ is a re-queue of $`m`$ by the restarted bus process, it carries the number already reserved for $`m`$, that is $`s(m') = s(m)`$, and the receiver refuses it. If instead the restarted process called $`\mathsf{next}`$ again, then by (i) and (ii) its number is a value no earlier call returned and is strictly greater than every number issued before the restart; the frames it sends are then a fresh message with a fresh number, which is a new transmission and not a second acceptance of $`m`$. Hence no message is accepted twice. Finally, partial transmissions are covered by the same argument: a message missing one of the 24 data identifiers is refused before its number is examined, exactly as in [Project 18](18-a-proof-over-the-wire.md), so an incomplete first attempt adds nothing to $`A`$ and the retry is judged against the state $`A`$ had before it. &#9632;
 
 **Remark Z23.5 (What the theorem does not say).** The theorem is about this node's own restarts. It says nothing about a third node that records the 25 frames and sends them again later, because such a node can pick any sequence number it likes; the bus has no notion of sender, as [Project 18](18-a-proof-over-the-wire.md) states, and only a signature over the payload and the number would change that. Nor does it say that the message was sent by a node whose system is the committed one: that is the binding property of the commitment, thm:z01\_binding, and it is about the bytes, not about the wire. The theorem's whole content is that the sender cannot be made to repeat itself by a fault in its own supervision tree, which is the one new obligation the runtime creates.
 
