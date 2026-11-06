@@ -121,6 +121,32 @@ those chapters carries the theorem saying a wrong proposal cannot cost soundness
 chapter uses a trusted setup it says so and marks the ceremony as something this bench
 cannot run.
 
+## Where a proof assistant is used
+
+Lean 4 appears wherever the volume states something a machine could check rather than
+something a board could measure. **None of it has been checked.** Lean is not installed on
+either machine on this bench, so what follows is a proof written in a language a machine
+can check, and not a proof a machine has checked. The chapter says so in its own key facts,
+and this section says so because a reader scanning a contents list will not read them.
+
+| Where | What Lean carries there |
+| --- | --- |
+| [Project 14](chapters/14-theorem-3-2-in-lean-4.md) | The whole chapter. The paper's Theorem 3.2, the fair-termination rule, written as four structures, a descent lemma and the rule itself. This is the only chapter whose language is Lean. |
+| [Project 13](chapters/13-the-obligation-in-noir.md) | Named among the languages not chosen, as the route that would prove the program implies the obligation rather than proving one instance of it. |
+| [Project 16](chapters/16-the-model-proposes-a-ranking-function-the-certifier.md) | Cites Project 14 for the rule the certifier relies on, and names a checked proof of the certifier's own soundness as the step after this one. |
+| [Project 17](chapters/17-from-a-sentence-to-a-b-uchi-automaton.md) | Cites Project 14 for the machine-readable statement of the conclusion its automaton feeds. |
+| [Foundations](docs/foundations.md) | Explains that the volume carries the fair-termination proof twice, once as prose and once for a proof assistant, and why the second form has to name its induction. |
+| [Prerequisites](docs/prerequisites.md) | Lists Lean 4 among the tools, with what a reader needs to know before Project 14. |
+| [Tutorial](docs/tutorial.md) | Names the kernel verdict as the thing Project 14 is to reproduce. |
+| [Guide](docs/guide.md) | The one-page summary of Project 14. |
+
+**What would change this section.** A Lean development for the volume exists outside this
+repository, in the author's working tree. It closes the step Project 14 leaves open and
+formalises two counterexamples found in review, so that a relation failing to imply its
+conclusion becomes a fact a kernel confirms rather than a claim a reader is asked to
+accept. It is published here only if and when it compiles, and this section is rewritten
+in the past tense on the same day and not before.
+
 ## Checks
 
 The workflow reads the published tree, which is all a clone contains: the authoring sources

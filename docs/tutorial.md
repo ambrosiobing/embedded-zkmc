@@ -384,7 +384,7 @@ The tutorial is deliberately the smallest instance that is still complete, and e
 | a system too large to enumerate | [Project 5](../chapters/05-farkas-witnesses-for-a-joystick-program.md) | guarded commands, Farkas witnesses and range proofs instead of an indicator polynomial |
 | the proof crossing a wire | [Project 18](../chapters/18-a-proof-over-the-wire.md) | the same 192 bytes in 25 CAN frames, with the reassembly checked byte for byte |
 | the ranking function written by something else | [Project 16](../chapters/16-the-model-proposes-a-ranking-function-the-certifier.md) | a model proposes $`V`$, a solver certifies it, and the theorem that a wrong proposal costs completeness and never soundness |
-| the certificate's own soundness | [Project 14](../chapters/14-theorem-3-2-in-lean-4.md) | Theorem 3.2 as a Lean 4 statement whose kernel verdict is reproduced on the Pi 4B |
+| the certificate's own soundness | [Project 14](../chapters/14-theorem-3-2-in-lean-4.md) | Theorem 3.2 as a Lean 4 statement whose kernel verdict is to be reproduced on the Pi 4B, once a toolchain is installed |
 
 The one habit to keep from this tutorial is the order of the steps. The sets were computed and compared before a single group element was formed, and the prover's remainder was checked before a single pairing was evaluated. Both checks are cheap, both catch the errors that are easy to make, and an expensive run that begins before them is an expensive run that may prove the wrong thing.
 
