@@ -555,9 +555,9 @@
  </g>
 <g fill='#0b0d12'>
 <g fill='#0b0d12'>
-<path d='m150.793-175.095h108.134v8.757h-108.134z' stroke='none'/>
+<path d='m178.779-175.095h52.162v8.757h-52.162z' stroke='none'/>
 </g>
-<g transform='matrix(1.004 0 0 -1.004 161.202 -205.526)' stroke='none' fill='#f2f4f8'>
+<g transform='matrix(1.004 0 0 -1.004 189.188 -205.526)' stroke='none' fill='#f2f4f8'>
 <use x='-8.876' y='-32.704' xlink:href='#g0-98'/>
 <use x='-4.845' y='-32.704' xlink:href='#g0-101'/>
 <use x='-1.551' y='-32.704' xlink:href='#g0-110'/>
@@ -566,24 +566,10 @@
 <use x='11.864' y='-32.704' xlink:href='#g0-76'/>
 <use x='15.896' y='-32.704' xlink:href='#g0-65'/>
 <use x='20.836' y='-32.704' xlink:href='#g0-78'/>
-<use x='28.536' y='-32.704' xlink:href='#g0-116'/>
-<use x='31.212' y='-32.704' xlink:href='#g0-104'/>
-<use x='35.038' y='-32.704' xlink:href='#g0-101'/>
-<use x='40.802' y='-32.704' xlink:href='#g0-98'/>
-<use x='44.833' y='-32.704' xlink:href='#g0-101'/>
-<use x='48.127' y='-32.704' xlink:href='#g0-110'/>
-<use x='51.953' y='-32.704' xlink:href='#g0-99'/>
-<use x='55.246' y='-32.704' xlink:href='#g0-104'/>
-<use x='61.542' y='-32.704' xlink:href='#g0-115'/>
-<use x='64.383' y='-32.704' xlink:href='#g0-117'/>
-<use x='68.209' y='-32.704' xlink:href='#g0-98'/>
-<use x='72.035' y='-32.704' xlink:href='#g0-110'/>
-<use x='75.861' y='-32.704' xlink:href='#g0-101'/>
-<use x='79.154' y='-32.704' xlink:href='#g0-116'/>
-<use x='81.83' y='-32.704' xlink:href='#g0-44'/>
-<use x='86.358' y='-32.704' xlink:href='#g0-115'/>
-<use x='89.199' y='-32.704' xlink:href='#g0-115'/>
-<use x='92.039' y='-32.704' xlink:href='#g0-104'/>
+<use x='26.066' y='-32.704' xlink:href='#g0-44'/>
+<use x='30.595' y='-32.704' xlink:href='#g0-115'/>
+<use x='33.435' y='-32.704' xlink:href='#g0-115'/>
+<use x='36.276' y='-32.704' xlink:href='#g0-104'/>
 </g>
 </g>
 </g>

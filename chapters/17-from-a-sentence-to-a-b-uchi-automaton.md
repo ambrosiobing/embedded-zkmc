@@ -12,7 +12,7 @@
 >
 > - **Board:** Raspberry Pi 4 Model B Rev 1.4 (8 GB, Raspberry Pi OS trixie, address \<pi4b\>)
 > - **Parts:** the Pi 4B, build laptop (\<build-laptop\>) serving the model with `llama-server` on port 8080 through a portproxy, or the model on the Pi itself, the Renkforce USB/TTL cable on the Pi 4B's header pins 6, 8 and 10
-> - **Interface:** ssh over the bench LAN the bench subnet; HTTP to the model on port 8080; the serial console at 115200
+> - **Interface:** ssh over the bench LAN; HTTP to the model on port 8080; the serial console at 115200
 > - **Language and library:** C++17 against `libspot` \[[7](#references), [5](#references)\], whose release on Tuesday 3 November 2026 is 2.16.2, from the Debian packages `spot` and `libspot-dev` (the version trixie carries, to verify, and it is older than the upstream release); the model through `llama.cpp` \[[10](#references)\] with a GBNF grammar
 > - **Primitive:** LTL to a nondeterministic Buchi automaton, the first half of the paper's certificate $v_\phi = (\mathcal{A}_{\neg\phi}, V)$ \[[1](#references)\]
 > - **Secret:** none; $\phi$ and $\mathcal{A}_{\neg\phi}$ are public by the paper's design
@@ -231,7 +231,7 @@ Read the figure as two paths that meet at one diamond-shaped decision drawn as a
 
 ![Figure 17.2. The Pi 4B and the build laptop over the bench LAN.](../figures/z17_wiring.svg)
 
-*Figure 17.2. The Pi 4B and the build laptop over the bench LAN. On the left the Pi 4 Model B as a solid hardware block with its three console pins called out, pin 6 GND, pin 8 GPIO14 TXD and pin 10 GPIO15 RXD, and its Ethernet jack; in the middle the Renkforce USB/TTL cable with its three leads on three horizontal runs; on the right the build laptop as a solid grey block holding the cable's USB end, the ssh session and llama-server on port 8080 behind the portproxy. Below, a double-headed bus line for the bench LAN the bench subnet, and a dashed arrow along it for the HTTP route to port 8080 that is a software stand-in when the model runs on the Pi itself.*
+*Figure 17.2. The Pi 4B and the build laptop over the bench LAN. On the left the Pi 4 Model B as a solid hardware block with its three console pins called out, pin 6 GND, pin 8 GPIO14 TXD and pin 10 GPIO15 RXD, and its Ethernet jack; in the middle the Renkforce USB/TTL cable with its three leads on three horizontal runs; on the right the build laptop as a solid grey block holding the cable's USB end, the ssh session and llama-server on port 8080 behind the portproxy. Below, a double-headed bus line for the bench LAN, and a dashed arrow along it for the HTTP route to port 8080 that is a software stand-in when the model runs on the Pi itself.*
 
 | **Signal** | **From** | **To** | **Note** |
 | --- | --- | --- | --- |

@@ -57,6 +57,12 @@ ALLOWED = re.compile(
     r"|^\.git(ignore|attributes)$"
     r"|^\.editorconfig$"
     r"|^\.githooks/(pre-commit|commit-msg)$"
+    # One text file, admitted by name rather than by type. tools/no_trace_words.txt is the
+    # vocabulary the attribution scan and the commit-message hook both read, and it exists
+    # so that neither of them has to spell those words itself. Admitting ".txt" wholesale
+    # would open the tree to transcripts and captures, which belong with the bench record
+    # and not here, so the exception is this one path.
+    r"|^tools/no_trace_words\.txt$"
     r"|(^|/)Makefile$"
     r"|(^|/)CMakeLists\.txt$)"
 )

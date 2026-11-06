@@ -11,7 +11,7 @@
 > **Key facts**
 >
 > - **Board:** Raspberry Pi 4 Model B Rev 1.4 (8 GB) as the certifier and, by default, as the model host; the build laptop (WSL, \<build-laptop\>) as the alternative model host over the bench LAN
-> - **Parts:** the Pi 4B with no HAT on its header, the Renkforce USB/TTL cable on header pins 6, 8 and 10 for the console, the bench Wi-Fi the bench subnet
+> - **Parts:** the Pi 4B with no HAT on its header, the Renkforce USB/TTL cable on header pins 6, 8 and 10 for the console, the bench Wi-Fi
 > - **Interface:** HTTP to `llama-server` on port 8080 (local, or through the Windows portproxy of the build laptop); SSH to the Pi; the console cable at 115200
 > - **Language and library:** Python for the harness, with `z3-solver` (version to verify) \[[2](#references)\] and the standard library's `urllib`; C17 for the acceptance check on the enumerated instance; `llama.cpp` at the sibling volume's pin \[[8](#references)\]
 > - **Primitive:** certification of a proposed piecewise-linear ranking function, the paper's Equations 18 to 23 \[[1](#references)\]
@@ -289,7 +289,7 @@ Read the figure as a judge with two witnesses: the certifier is the judge, and t
 
 ![Figure 16.2. No HAT sits on the header in this chapter.](../figures/z16_wiring.svg)
 
-*Figure 16.2. No HAT sits on the header in this chapter. On the left the Pi 4B as a solid hardware block with its three console pins called out: GND on pin 6, TXD (BCM14) on pin 8, RXD (BCM15) on pin 10. Below it the Renkforce USB/TTL cable as a solid hardware block, joined by three vertical lines: pin 6 to the cable's GND, pin 8 to the cable's RXD, pin 10 to the cable's TXD, the crossing named on the lines. On the right the build laptop as a solid grey block; a double-headed bus arrow between the Pi and the build laptop carries the bench LAN the bench subnet over Wi-Fi with llama-server on port 8080 behind the Windows portproxy, and a solid arrow from the cable's USB end reaches the build laptop as the console.*
+*Figure 16.2. No HAT sits on the header in this chapter. On the left the Pi 4B as a solid hardware block with its three console pins called out: GND on pin 6, TXD (BCM14) on pin 8, RXD (BCM15) on pin 10. Below it the Renkforce USB/TTL cable as a solid hardware block, joined by three vertical lines: pin 6 to the cable's GND, pin 8 to the cable's RXD, pin 10 to the cable's TXD, the crossing named on the lines. On the right the build laptop as a solid grey block; a double-headed bus arrow between the Pi and the build laptop carries the bench LAN the bench LAN over Wi-Fi with llama-server on port 8080 behind the Windows portproxy, and a solid arrow from the cable's USB end reaches the build laptop as the console.*
 
 | **Signal** | **From** | **To** | **Note** |
 | --- | --- | --- | --- |

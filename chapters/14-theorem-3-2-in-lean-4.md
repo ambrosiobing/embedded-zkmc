@@ -12,7 +12,7 @@
 >
 > - **Board:** Raspberry Pi 4 Model B Rev 1.4 (8 GB, Raspberry Pi OS trixie, kernel 6.18.50+rpt-rpi-v8, address \<pi4b\>)
 > - **Parts:** the Pi 4B, the Renkforce USB/TTL cable on its header pins 6, 8 and 10, the build laptop (\<build-laptop\>) as the build host that elaborates and holds the Mathlib cache
-> - **Interface:** ssh over the bench LAN the bench subnet; the serial console at 115200
+> - **Interface:** ssh over the bench LAN; the serial console at 115200
 > - **Language and library:** Lean 4 (version pinned by the project's `lean-toolchain`, to verify on the day) \[[5](#references)\] with Mathlib (the revision of the same day, to verify); the lemma itself needs only core Lean's `omega` and `induction`
 > - **Primitive:** the certifier's soundness: the paper's Theorem 3.2 \[[1](#references)\], whose proof is written in [Project 3](03-the-modems-backoff-machine.md) and stated here for a machine; zkPi \[[6](#references)\] is the next step, proving a Lean theorem in zero knowledge
 > - **Secret:** none; a formal proof is public, and that is the point of this chapter
@@ -220,7 +220,7 @@ Read the figure as one proof object crossing one wire. Elaboration is the expens
 
 ![Figure 14.2. The Pi 4B alone.](../figures/z14_wiring.svg)
 
-*Figure 14.2. The Pi 4B alone. On the left the Pi 4 Model B as a solid hardware block with its three console pins called out, pin 6 GND, pin 8 GPIO14 TXD and pin 10 GPIO15 RXD; in the middle the Renkforce USB/TTL cable as a solid hardware block with its three leads on three horizontal runs; on the right the build laptop as a solid grey block holding the cable's USB end and the ssh session that copies the olean tree. Below, a double-headed bus line for the bench LAN the bench subnet between the Pi's Ethernet jack and the build laptop, with the note that no other wire is needed for this chapter.*
+*Figure 14.2. The Pi 4B alone. On the left the Pi 4 Model B as a solid hardware block with its three console pins called out, pin 6 GND, pin 8 GPIO14 TXD and pin 10 GPIO15 RXD; in the middle the Renkforce USB/TTL cable as a solid hardware block with its three leads on three horizontal runs; on the right the build laptop as a solid grey block holding the cable's USB end and the ssh session that copies the olean tree. Below, a double-headed bus line for the bench LAN between the Pi's Ethernet jack and the build laptop, with the note that no other wire is needed for this chapter.*
 
 | **Signal** | **From** | **To** | **Note** |
 | --- | --- | --- | --- |

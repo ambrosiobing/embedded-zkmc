@@ -12,7 +12,7 @@
 >
 > - **Board:** Raspberry Pi 4 Model B Rev 1.4 (8 GB, address \<pi4b\>) and Raspberry Pi 3 Model B Plus Rev 1.3 (905 MB, 1.4 GHz, soft limit 60 C, no fan, address \<pi3bplus\>)
 > - **Parts:** the two Pis, the Renkforce USB/TTL cable on the Pi 4B's header pins 6, 8 and 10, build laptop (\<build-laptop\>) as the build host and the cable's USB end
-> - **Interface:** ssh over the bench LAN the bench subnet to both boards; the Pi 4B's serial console at 115200 through the cable; the Pi 3B+ has no working serial console
+> - **Interface:** ssh over the bench LAN to both boards; the Pi 4B's serial console at 115200 through the cable; the Pi 3B+ has no working serial console
 > - **Language and library:** C++17 against `blst` v0.3.17 \[[7](#references)\] through its C++ header `blst.hpp` for $\mathbb{G}_1$ and its C functions `blst_fr_*` for the scalar field; the transform is written by hand in this chapter
 > - **Primitive:** the two costs that dominate every prover of the paper \[[1](#references)\]: a multi-scalar multiplication of size $n$ in $\mathbb{G}_1$ and a transform of size $n$ over $\mathbb{F}_r$, the pair that \[[5](#references)\] compares against sumcheck
 > - **Secret:** none; this chapter is a cost instrument
@@ -286,7 +286,7 @@ Read the figure as one harness, one witness and one contrast. The harness is the
 
 ![Figure 11.2. The two boards and their two paths to the build laptop.](../figures/z11_wiring.svg)
 
-*Figure 11.2. The two boards and their two paths to the build laptop. On the left the Pi 4 Model B as a solid hardware block with three header pins called out, pin 6 GND, pin 8 GPIO14 TXD and pin 10 GPIO15 RXD; in the middle the Renkforce USB/TTL cable as a solid hardware block with its three leads, GND to pin 6, RX to pin 8 and TX to pin 10; on the right the build laptop as a solid grey block holding the cable's USB end and the ssh sessions. Below, the Pi 3 Model B Plus as a solid hardware block with no console wire, only its LAN address, and the note that its serial console is dead. A double-headed bus line at the bottom is the bench LAN the bench subnet joining the three addresses \<pi4b\>, \<pi3bplus\> and \<build-laptop\>.*
+*Figure 11.2. The two boards and their two paths to the build laptop. On the left the Pi 4 Model B as a solid hardware block with three header pins called out, pin 6 GND, pin 8 GPIO14 TXD and pin 10 GPIO15 RXD; in the middle the Renkforce USB/TTL cable as a solid hardware block with its three leads, GND to pin 6, RX to pin 8 and TX to pin 10; on the right the build laptop as a solid grey block holding the cable's USB end and the ssh sessions. Below, the Pi 3 Model B Plus as a solid hardware block with no console wire, only its LAN address, and the note that its serial console is dead. A double-headed bus line at the bottom is the bench LAN joining the three addresses \<pi4b\>, \<pi3bplus\> and \<build-laptop\>.*
 
 | **Signal** | **From** | **To** | **Note** |
 | --- | --- | --- | --- |
