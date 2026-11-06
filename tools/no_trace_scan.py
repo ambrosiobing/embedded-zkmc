@@ -7,6 +7,10 @@ and not ignored) is read as text; binary files and the word list itself are skip
 Then every commit message, author and committer line of `git log --all` is checked.
 Exit 1 with one line per hit, 0 when clean.
 
+The summary line says how many commits were read, and a shallow clone is called out
+rather than passed over, because there the history is whatever that clone happens to hold
+and a clean result says nothing about the commits it does not have.
+
     python tools/no_trace_scan.py            # the repository this file sits in
     python tools/no_trace_scan.py <root>     # another checkout
 """
@@ -15,6 +19,10 @@ import subprocess
 import sys
 
 SKIP_DIRS = {".git", "build", "third_party", ".venv", "target", "__pycache__"}
+
+
+def plural(n, noun):
+    return "%d %s%s" % (n, noun, "" if n == 1 else "s")
 
 
 def load_words(root):
@@ -80,17 +88,38 @@ def main():
             continue
         scan_text(rel, data.decode("utf-8", "replace"), words, hits)
 
+    # How much history was read is printed, not assumed. A shallow clone answers
+    # `git log --all` with whatever commits it happens to hold and exits 0, so a scan of
+    # one commit out of four reports the same clean zero as a scan of all four. That is
+    # how this ran in CI from the first push until Friday 6 November 2026:
+    # actions/checkout defaults to fetch-depth 1, and the step was named for the history
+    # it was not reading. The workflow now asks for the whole history, and the count and
+    # the shallow flag below are what would have shown the gap.
+    commits = 0
     try:
         log = subprocess.run(
             ["git", "-C", root, "log", "--all", "--format=%H%n%an <%ae>%n%cn <%ce>%n%B"],
             capture_output=True, check=True)
-        scan_text("git log", log.stdout.decode("utf-8", "replace"), words, hits)
+        text = log.stdout.decode("utf-8", "replace")
+        scan_text("git log", text, words, hits)
+        count = subprocess.run(["git", "-C", root, "rev-list", "--all", "--count"],
+                               capture_output=True, check=True)
+        commits = int(count.stdout.decode().strip() or 0)
+        shallow = subprocess.run(["git", "-C", root, "rev-parse",
+                                  "--is-shallow-repository"], capture_output=True)
+        if shallow.stdout.decode().strip() == "true":
+            print("no_trace_scan: THIS CLONE IS SHALLOW, so the %s it holds is not the"
+                  % plural(commits, "commit"))
+            print("no_trace_scan: whole history. Fetch it before trusting a clean")
+            print("no_trace_scan: result: actions/checkout needs fetch-depth: 0.")
     except (subprocess.CalledProcessError, FileNotFoundError):
         print("no_trace_scan: no history to scan (not a repository or no commit yet)")
 
     for hit in hits:
         print(hit)
-    print("no_trace_scan: %d files, %d hits" % (len(files), len(hits)))
+    print("no_trace_scan: %s, %s, %s"
+          % (plural(len(files), "file"), plural(commits, "commit"),
+             plural(len(hits), "hit")))
     return 1 if hits else 0
 
 

@@ -24,6 +24,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The whole history, not the default single commit. The attribution scan below
+          # reads `git log --all`, and a shallow clone answers that with the one commit
+          # it holds and exits 0: a scan of one commit out of four reports the same clean
+          # zero as a scan of all four, with nothing in the log to say which it was. The
+          # first four pushes ran that way. The scanner now prints the commit count and
+          # refuses to be quiet about a shallow clone, and this is the other half.
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
