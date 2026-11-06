@@ -6,7 +6,7 @@
 > [!IMPORTANT]
 > **The question, instanced**
 >
-> What can a verifier learn from a device without the device revealing itself, and what does it cost on this board? Every zero-knowledge proof in this volume rests on one sentence of the paper: if a ranking function exists, the system satisfies its specification. This chapter turns that sentence into a Lean 4 statement, proves the lemma it rests on with tactics that a kernel checks, and asks what it costs to replay that check on the Pi 4B, so that the next step, hiding the proof itself, has a checked object to hide.
+> What can a verifier learn from a device without the device revealing itself, and what does it cost on this board? Every zero-knowledge proof in this volume rests on one sentence of the paper: if a ranking function exists, the system satisfies its specification. This chapter turns that sentence into a Lean 4 statement, writes the proof of the lemma it rests on in tactics a kernel can check, and asks what it would cost to run that check on the Pi 4B, so that the next step, hiding the proof itself, has a checkable object to hide. No kernel has yet run it on this bench.
 
 > **Key facts**
 >

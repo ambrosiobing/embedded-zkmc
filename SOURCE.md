@@ -63,3 +63,40 @@ fingerprint reader, no fan and no motor. Each chapter that would want one says s
 as an absent block, and states what the absence costs its acceptance test. A figure drawn
 dashed is a software stand-in; a figure drawn dotted and grey is a part that is not here.
 Neither is ever presented as a measurement.
+
+## Where this volume came from
+
+This volume did not start from a blank page. It is the fourth bench volume in a family,
+and it is built on what the earlier ones settled.
+
+**The bench is the author's, and every part in it was already there.** Three Raspberry Pis,
+a NanoPi NEO Air, a NUCLEO-H7A3ZI-Q, an ESP32 and an ESP8266, three cellular HATs, a CAN
+and RS485 HAT, an MCC 118 DAQ HAT, two ST sensor shields, an STWIN.box, a time-of-flight
+sensor, a display and four LEDs. Nothing was bought for this volume, and the front matter
+says so. The inventory is kept as a dated bench record, and a part that is not in it is
+drawn dotted and grey wherever a chapter would want it.
+
+**The measurement method descends from the firmware volume.** Project 6 of
+[`firmware-nucleo-h7`](https://github.com/ambrosiobing/firmware-nucleo-h7), sampling on a
+timer at exactly 1 kHz, established the method this volume uses in nine chapters: the
+Nucleo's cycle counter is never trusted alone, and an MCC 118 on a Raspberry Pi watches a
+marker pin as an external witness. That HAT has been stacked on the Pi 4B since Friday 9
+October 2026, and the powering order, the wiring and the library versions are that
+project's. Chapter 10 builds against the firmware volume's toolchain and HAL tree.
+
+**The sensor and the model descend from the Edge LLM volume.** The VL53L4CD time-of-flight
+sensor, its I2C address and its known behaviour at close range come from
+[`edge-llm-pi`](https://github.com/ambrosiobing/edge-llm-pi), as does the ternary model that
+chapter 24 is built on and the thermal record of the Pi 3B+ that the front matter cites.
+Six chapters here lean on that work.
+
+**The mathematics is written for a proof assistant and has not yet been checked by one.**
+Chapter 14 carries the paper's Theorem 3.2 as a Lean 4 development. A kernel can check it;
+no kernel has run on this bench. The README says the same in its own section.
+
+**The hardware testing is the author's, and it is still to come.** Every chapter ends with
+an acceptance test written so that it can fail, naming the board, the instrument, the
+repeat count and the conditions a measurement must carry. Those tests are run on the bench
+described above, by its owner, and until one has been, its cells read "not measured" with
+the reason.
+
