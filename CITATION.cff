@@ -1,0 +1,54 @@
+cff-version: 1.2.0
+title: "Zero Knowledge on the Bench: twenty-four embedded projects that prove without revealing"
+message: "If you refer to this work, please cite it as below."
+type: software
+authors:
+  - family-names: Pagaran
+    given-names: Joseph Ambrose
+    orcid: "https://orcid.org/0000-0001-7595-9070"
+abstract: >-
+  Twenty-four embedded hardware and firmware projects that take one paper on
+  zero-knowledge model checking apart into the primitives it is built from and
+  put each one on hardware already present on a single bench: three Raspberry
+  Pis, a NanoPi NEO Air, an STM32H7A3 development board, an ESP32 and an
+  ESP8266, three cellular modules, a CAN and RS485 expansion board, a data
+  acquisition board, two sensor shields, an industrial sensor node, a
+  time-of-flight sensor, a display and four indicator modules.
+
+  Each chapter names a secret, a public statement and the relation between them
+  in set notation, proves the property of the primitive it uses with every step
+  written out, gives the protocol as a sequence, shows the code in the language
+  that chapter chose, and prices the work on the board with an instrument that
+  is named. Fourteen languages appear across the chapters. The primitives
+  covered include Pedersen and KZG commitments, batch vanishing proofs, Farkas
+  witnesses and linear programming duality, Bulletproofs range proofs, one-shot
+  folding under a progression-free exponent schedule, sigma protocols,
+  Groth16, PLONK and sumcheck-based circuits, recursive composition, and
+  zero-knowledge virtual machines.
+
+  Nothing in the volume has been run on the bench it describes. Every timing and
+  every agreement rate reads as not measured and names the instrument that would
+  fill it; the only measured figures are the source paper's own and are
+  attributed to the paper's own machine. A figure the volume derives is marked
+  as computed and shows its arithmetic. Where a language model appears it
+  proposes and never decides, and the chapter carries the theorem that says a
+  wrong proposal cannot cost soundness.
+keywords:
+  - zero-knowledge proofs
+  - model checking
+  - formal verification
+  - embedded systems
+  - polynomial commitments
+  - Farkas lemma
+  - folding schemes
+  - zero-knowledge virtual machines
+  - linear temporal logic
+  - Buechi automata
+  - Raspberry Pi
+  - STM32
+  - controller area network
+  - technical writing
+license: MIT
+repository-code: "https://github.com/ambrosiobing/embedded-zkmc"
+version: "1.0.0"
+date-released: "2026-11-06"

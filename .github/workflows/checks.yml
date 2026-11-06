@@ -1,0 +1,107 @@
+name: checks
+
+# What this job can and cannot see.
+#
+# The authoring sources are not published. There is no sections/ and no figures/*.tex in
+# a clone, so the checks that compare the Markdown against the LaTeX it came from cannot
+# run here: they run in prepublish.py on the authoring machine, which is also the only
+# machine with a TeX installation. What this job can do is read the published tree, and
+# the three guards below are the ones that matter, because each of them has been needed.
+#
+# Nothing here compiles. This repository carries a book and its figures.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: No authoring source is published
+        run: |
+          set -e
+          if git ls-files | grep -E '\.tex$'; then
+            echo "A .tex file is committed, and the authoring sources are never"
+            echo "published. Only the Markdown edition and its SVG figures are."
+            echo "The sources stay in the catalogue; see publish.py there."
+            exit 1
+          fi
+          echo "no authoring source in the published tree, as intended"
+
+      - name: No assembled volume and no PDF is published
+        run: |
+          set -e
+          if git ls-files | grep -E '\.(pdf|html|aux|log|toc|out)$'; then
+            echo "A PDF or an HTML file is committed, and neither is ever published."
+            echo "What this repository offers is one Markdown chapter at a time. There"
+            echo "is deliberately no assembled volume to download. The PDF and the HTML"
+            echo "are for the author's own proofreading and stay on the authoring machine."
+            exit 1
+          fi
+          echo "no PDF, no HTML, no assembled volume. Markdown chapters only, as intended"
+
+      - name: No journal and no correspondence is published
+        run: |
+          set -e
+          if git ls-files | grep -iE '(^|/)(private_journal|correspondence)/|(^|/)DIARY[^/]*\.md$'; then
+            echo "A journal or a correspondence file is committed."
+            echo "The working record of this volume is kept in the catalogue, which is"
+            echo "local only. A published repository carries the work, never the running"
+            echo "record of doing it."
+            exit 1
+          fi
+          echo "no journal, no correspondence, as intended"
+
+      - name: Twenty-four chapters, the front matter, the appendix, four figures each
+        # The structural shape of the published edition, asserted rather than assumed.
+        # A chapter that fails to render leaves no error behind in a Markdown build: it
+        # simply is not there, and the index that lists it still links to it. This is
+        # what notices.
+        run: |
+          set -e
+          fail=0
+          for n in $(seq -w 1 24); do
+            count=$(ls chapters/${n}-*.md 2>/dev/null | wc -l)
+            test "$count" = 1 || { echo "chapters/${n}-*.md matches $count files, want 1"; fail=1; }
+            for f in arch wiring tree data; do
+              test -f "figures/z${n}_${f}.svg" \
+                || { echo "missing figures/z${n}_${f}.svg"; fail=1; }
+            done
+          done
+          test -f chapters/00-about-this-volume.md || { echo "missing chapter 00"; fail=1; }
+          test -f chapters/25-appendix.md          || { echo "missing the appendix"; fail=1; }
+          for d in prerequisites foundations tutorial guide; do
+            test -f "docs/${d}.md" || { echo "missing docs/${d}.md"; fail=1; }
+          done
+          for f in supp_node supp_pipeline supp_kripke; do
+            test -f "figures/${f}.svg" || { echo "missing figures/${f}.svg"; fail=1; }
+          done
+          test -f CONTENTS.md || { echo "missing CONTENTS.md"; fail=1; }
+          exit $fail
+
+      - name: Every relative link resolves
+        run: python tools/check_links.py
+
+      - name: Only the file types this repository publishes, and nothing over four megabytes
+        run: python tools/check_tree.py
+
+      - name: No authoring file would be committed, tracked or not
+        run: python tools/no_authoring_files.py
+
+      - name: Attribution scan over the tree and the history
+        # The word list is tools/no_trace_words.txt, so neither the scanner nor the
+        # commit-message hook has to spell what it looks for, and a search of this tree
+        # for any of those words finds exactly one file, the list itself.
+        run: python tools/no_trace_scan.py
