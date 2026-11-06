@@ -9,7 +9,7 @@ two ST sensor shields, an STWIN.box, a time-of-flight sensor, a display and four
 paper is Berrang, Giacobbe, Swales and Yang, *Zero-Knowledge Model Checking*,
 arXiv:2605.00487v2. Nothing here needs to be bought.
 
-**24 chapters, 99 figures, 362 numbered statements, 65 proofs.** Each chapter stands on its
+**24 chapters, 99 figures, 156 numbered statements, 67 proofs.** The statements are the theorems, lemmas, corollaries, propositions, definitions, examples and remarks, counted across the chapter sources on Friday 6 November 2026; the figures are four per chapter plus three in the companion. Each chapter stands on its
 own: it names a secret, a public statement and the relation between them as a set, proves
 the property of the primitive it uses with every step written, gives the protocol, shows the
 code, and prices it on the board with an instrument that is named.
@@ -65,20 +65,20 @@ time.
 | 4 | [Two group elements: the KZG batch verifier in C](chapters/04-two-group-elements.md) | C | Pi 4B, Pi 3B |
 | 5 | [Farkas witnesses for a joystick program](chapters/05-farkas-witnesses-for-a-joystick-program.md) | Rust | Pi 4B, Explorer700 |
 | 6 | [Folding and the Salem-Spencer schedule, computed exactly](chapters/06-folding-and-the-salem-spencer-schedule.md) | Julia | Pi 4B, STWIN.box |
-| 7 | [The ESP32 proves two commitments open to one calibration constant](chapters/07-the-esp32-proves-two-commitments-open-to-one.md) | C# and C | Pi 4B, ESP32 |
+| 7 | [The ESP32 proves one secret behind two public points: Chaum-Pedersen on P-256](chapters/07-the-esp32-proves-one-secret-behind-two-public.md) | C# and C | Pi 4B, ESP32 |
 | 8 | [A ranking function as a circuit, verified in a kiosk browser](chapters/08-a-ranking-function-as-a-circuit.md) | JavaScript, Circom | Pi 4B, touchscreen |
 | 9 | [Nova versus one-shot folding on a Pi](chapters/09-nova-versus-one-shot-folding-on-a-pi.md) | Rust | Pi 4B |
 | 10 | [The hardware hash unit commits to a transition log](chapters/10-the-hardware-hash-unit-commits-to-a-transition.md) | C | Nucleo, IKS5A1 |
 | 11 | [The prover's cost: multi-scalar multiplication and FFT on two Pis](chapters/11-the-provers-cost.md) | C++ | Pi 4B, Pi 3B+ |
 | 12 | [A PLONK gate for the inductive step, verified on the NanoPi](chapters/12-a-plonk-gate-for-the-inductive-step.md) | Go | NanoPi, Pi 4B |
 | 13 | [The obligation in Noir, proved with UltraHonk](chapters/13-the-obligation-in-noir.md) | Noir | Pi 4B |
-| 14 | [Theorem 3.2 in Lean 4: the ranking-function rule, machine checked](chapters/14-theorem-3-2-in-lean-4.md) | Lean 4 | Pi 4B |
+| 14 | [Theorem 3.2 in Lean 4: the descent lemma machine checked, the rule stated](chapters/14-theorem-3-2-in-lean-4.md) | Lean 4 | Pi 4B |
 | 15 | [A Zig verifier of Pedersen openings for the Pi 3B+](chapters/15-a-zig-verifier-of-pedersen-openings.md) | Zig | Pi 3B+, Nucleo |
 | 16 | [The model proposes a ranking function; the certifier decides](chapters/16-the-model-proposes-a-ranking-function-the-certifier.md) | Python and C | Pi 4B |
 | 17 | [From a sentence to a Büchi automaton with Spot](chapters/17-from-a-sentence-to-a-b-uchi-automaton.md) | C++ | Pi 4B |
 | 18 | [A proof over the wire: KZG elements in CAN frames](chapters/18-a-proof-over-the-wire.md) | C | Pi 4B, WS-28164, Nucleo |
 | 19 | [A commitment over NB-IoT and the energy per proof byte](chapters/19-a-commitment-over-nb-iot-and-the-energy.md) | C | Pi 4B, SIM7070G, PPK2 |
-| 20 | [The occupancy counter that proves it stayed under the limit](chapters/20-the-occupancy-counter-that-proves-it-stayed-under.md) | Rust | Pi 4B, VL53L4CD, LCD |
+| 20 | [The occupancy counter that proves its committed count is under the limit](chapters/20-the-occupancy-counter-that-proves-its-committed-count.md) | Rust | Pi 4B, VL53L4CD, LCD |
 | 21 | [A zero-knowledge virtual machine on the bench](chapters/21-a-zero-knowledge-virtual-machine-on-the-bench.md) | Rust | Pi 4B |
 | 22 | [Embedded Swift on the microcontroller](chapters/22-embedded-swift-on-the-microcontroller.md) | Embedded Swift | Nucleo, IKS4A1, LCD |
 | 23 | [Elixir and Nerves: the CAN node on the Erlang virtual machine](chapters/23-elixir-and-nerves.md) | Elixir and Rust | Pi 4B, WS-28164 |
@@ -166,6 +166,10 @@ no package outside the standard library.
 ## Licence
 
 MIT, see [`LICENSE`](LICENSE). The volume leans on a great deal of other people's work:
-every chapter ends with its own numbered reference list, and the appendix carries all 144
-entries with each one's verification date, because a reader who builds on a chapter needs to
-know what that commits them to before writing code around a dependency.
+every chapter ends with its own numbered reference list, and the appendix carries all 145
+entries. Of those, 38 carry a date on which the page was fetched and the figure read from
+it, 106 read "to verify" and are recorded from a citation rather than from the source, and
+one carries neither and should. Fourteen entries record the licence of the implementation
+they name; the rest say that the licence has not been read, because a reader who builds on
+a chapter needs to know what that commits them to, and a guessed identifier is worse than
+an admitted gap.

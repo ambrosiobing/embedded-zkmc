@@ -51,7 +51,7 @@ This chapter proves nothing in zero knowledge, so there is no witness to hide. I
 
 *(16.1)*
 
-with the remaining cases of $`V_{a,b,c}`$ fixed as in the paper's Example 3.4: $`3 \cdot 2^8`$ on $`\mathsf{Closed}`$ in $`q_1`$ and everywhere in $`q_0`$, $`0`$ on $`\mathsf{Established}`$ and $`\mathsf{Exhausted}`$, and $`+\infty`$ on $`\mathsf{Wait} \wedge \mathsf{done} = 3`$ in both automaton states. The set the certifier decides is
+with the remaining cases of $`V_{a,b,c}`$ fixed as in the paper's Example 3.4: $`3 \cdot 2^8`$ on $`\mathsf{Closed}`$ in $`q_1`$ and everywhere in $`q_0`$, $`0`$ on $`\mathsf{Registered}`$ and $`\mathsf{Exhausted}`$, and $`+\infty`$ on $`\mathsf{Wait} \wedge \mathsf{done} = 3`$ in both automaton states. The set the certifier decides is
 
 ```math
 \mathrm{Acc}(\mathcal{M}, \mathcal{A}) = \{\, V \in \mathcal{V} \mid \mathsf{Cert}(\mathcal{M}, (\mathcal{A}, V)) = 1 \,\},
@@ -120,7 +120,7 @@ with $`n_{11} + n_{10} + n_{01} + n_{00} = n`$. The model's acceptance rate is $
 
 *Proof.* (a) By Definition **Definition Z16.4**, $`k_{\mathrm{llm}} - k_{\mathrm{grid}} = (n_{11} + n_{10}) - (n_{11} + n_{01}) = n_{10} - n_{01}`$, so $`k_{\mathrm{llm}} > k_{\mathrm{grid}}`$ if and only if $`n_{10} > n_{01}`$, and dividing both sides by $`n > 0`$ preserves the inequality. (b) A round is certified by the fallback procedure when $`m_t = 1`$ or $`g_t = 1`$; the three cells $`n_{11}, n_{10}, n_{01}`$ are exactly those rounds and are disjoint, so the count is their sum. Since $`n_{01} \ge 0`$ the sum is at least $`n_{11} + n_{10} = k_{\mathrm{llm}}`$, and since $`n_{10} \ge 0`$ it is at least $`n_{11} + n_{01} = k_{\mathrm{grid}}`$. &#9632;
 
-**Lemma Z16.6 (Enumeration decides the obligations on a finite box).** Let the state variables range over the finite box $`B = \{\mathsf{Closed}, \mathsf{Wait}, \mathsf{Established}, \mathsf{Exhausted}\} \times [0, 3] \times [0, 255]`$, so $`|B| = 4 \cdot 4 \cdot 256 = 4096`$. Then $`\mathsf{Cert}(\mathcal{M}, (\mathcal{A}, V)) = 1`$ if and only if the three conditions (4), (5), (6) of Theorem 3.2 hold at every $`s \in S_0`$, every $`(s, s') \in T \cap B^2`$ and every automaton transition, and this is decided by at most $`|T \cap B^2| \cdot |\delta|`$ evaluations of $`V`$.
+**Lemma Z16.6 (Enumeration decides the obligations on a finite box).** Let the state variables range over the finite box $`B = \{\mathsf{Closed}, \mathsf{Wait}, \mathsf{Registered}, \mathsf{Exhausted}\} \times [0, 3] \times [0, 255]`$, so $`|B| = 4 \cdot 4 \cdot 256 = 4096`$ (computed), and let the guarded commands of $`\mathcal{M}`$ be such that $`S \subseteq B`$, hence $`S_0 \subseteq B`$ and $`T \subseteq B^2`$; for the retry command this is the over-approximation $`0 \le \mathsf{delay}' \le 255`$ recorded below. Assume conditions (i), (ii) and (iii) of Definition **Definition Z16.1** hold, so that $`V`$ is a total, non-negative, case-disjoint function on $`B \times Q`$; these three are decided on public data alone by inspecting the finitely many cases of $`V`$. Then $`\mathsf{Cert}(\mathcal{M}, (\mathcal{A}, V)) = 1`$ if and only if the three conditions (4), (5), (6) of Theorem 3.2 hold at every $`s \in S_0`$, every $`(s, s') \in T`$ and every automaton transition, and this is decided by at most $`2 \, |T| \, |\delta|`$ evaluations of $`V`$.
 
 *Proof.* Each obligation (16.3) to (16.3) is a universally quantified implication over $`y = (x, x')`$ with $`x, x' \in B`$. Over a finite domain a universal statement is the conjunction of its instances, so it holds if and only if every instance holds, and an instance is checked by evaluating finitely many linear inequalities. The proof of Theorem **Theorem Z16.2** shows the instances of (16.3) to (16.3) at $`(s, s', q, q')`$ are equivalent to (4), (5), (6) at the same point; conversely, (5) and (6) at a point where $`V(s, q)`$ is finite give, by the uniqueness of the case $`k`$ satisfied by $`s'`$ under (i) and (ii), the finiteness of $`V(s', q')`$ and the linear inequality of (16.3). The bound counts one evaluation of $`V`$ at $`(s, q)`$ and one at $`(s', q')`$ per transition pair, the initial condition being one evaluation per element of $`S_0 \times Q_0`$, which is dominated. &#9632;
 
@@ -149,7 +149,7 @@ from z3 import Ints, Solver, And, Or, Not, Implies, unsat
 
 URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8080/completion"
 GRAMMAR = open("z16_rank.gbnf").read()
-PROMPT = ("Program: states Closed, Wait, Established, Exhausted. In Wait the counter "
+PROMPT = ("Program: states Closed, Wait, Registered, Exhausted. In Wait the counter "
           "delay counts down to 0; then done rises by one and delay is resampled "
           "below 256; after done reaches 2 the next timeout goes to Exhausted. "
           "Propose a ranking function V(q1) on Wait that decreases on every step.\n")
@@ -183,7 +183,7 @@ def certify(a, b, c):
         Implies(And(box, tick), v > v2),           # fair self-loop on q1, Eq 21
         Implies(And(box, retry), And(v > v2, v2 >= 0)),
         Implies(And(box, exhaust), v > 0),         # retry from done = 2
-        Implies(box, v > 0),                       # synack to Established, V = 0
+        Implies(box, v > 0),                       # synack to Registered, V = 0
     ]
     s = Solver()
     s.add(Or([Not(o) for o in obligations]))
@@ -209,7 +209,7 @@ static long V(int q, int st, int done, int delay) {
     if (st == WAIT && done == 3) return INF;        /* the template's infinite case */
     if (q == 0 || st == CLOSED) return 3 * 256;
     if (st == WAIT) return a - b * done + c * delay;
-    return 0;                                      /* Established, Exhausted */
+    return 0;                                      /* Registered, Exhausted */
 }
 static int wait_obs(int st) { return st == WAIT; }
 

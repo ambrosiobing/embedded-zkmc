@@ -39,19 +39,26 @@ The paper's running example is a 3-way handshake with exponential backoff \[[1](
 
 ## The secret, the statement and the relation
 
-The witness is the pair of polynomials that encode the secret initial states and the secret transition relation, with their blinding scalars; the statement is the pair of commitments and the three public batches. The paper writes the relation as $`\mathcal{R}_e`$ after its Equation 14 \[[1](#references)\]; with this chapter's sets it reads
+The witness is the pair of polynomials that encode the secret initial states and the secret transition relation, together with the two mask coefficients each of them carries; the statement is the pair of commitments and the three public batches. The paper writes the relation as $`\mathcal{R}_e`$ after its Equation 14 \[[1](#references)\]; with this chapter's sets, and with the commitment written with the arity Definition def:z04\_kzg gives it, it reads
 
 ```math
-\mathcal{R}_e = \mathsf{PoK}\Big\{\, \underbrace{(p_{S_0}, p_T, b_{S_0}, b_T)}_{w} ;\;
+\mathcal{R}_e = \mathsf{PoK}\Big\{\,
+    \underbrace{(p_{S_0}, p_T, b_{S_0,0}, b_{S_0,1}, b_{T,0}, b_{T,1})}_{w} ;\;
     \underbrace{(c_{S_0}, c_T, E_{\mathrm{init}}, E_{\mathrm{step}}, E_{\mathrm{fair}})}_{u} \;:\;
     \begin{array}{l}
-      \forall e \in E_{\mathrm{init}} .\; p_{S_0}(e) = 0 \;\wedge\;
+      \deg p_{S_0} < 256 \;\wedge\; \deg p_T < 2^{16} \\
+      \wedge\; \forall e \in E_{\mathrm{init}} .\; p_{S_0}(e) = 0 \;\wedge\;
       \forall e \in E_{\mathrm{step}} \cup E_{\mathrm{fair}} .\; p_T(e) = 0 \\
-      \wedge\; \mathsf{Com}(p_{S_0}; b_{S_0}) = c_{S_0} \;\wedge\; \mathsf{Com}(p_T; b_T) = c_T
+      \wedge\; \mathsf{Com}\big(p_{S_0} + (b_{S_0,0} + b_{S_0,1} X)(X^{256} - 1)\big) = c_{S_0} \\
+      \wedge\; \mathsf{Com}\big(p_T + (b_{T,0} + b_{T,1} X)(X^{2^{16}} - 1)\big) = c_T
     \end{array} \Big\}.
 ```
 
 *(3.1)*
+
+Two features of the written form are deliberate. The commitment is called with one argument, because $`\mathsf{Com}`$ of Definition def:z04\_kzg is a deterministic function of the polynomial handed to it: all the randomness of this relation lives inside the committed polynomial, as the mask of Remark **Remark Z3.10**, so the witness carries the two mask coefficients of each polynomial and not one opening scalar per polynomial. And the degree bounds belong in the relation because no verifier reads a degree off a single group element, while the soundness argument of [Project 4](04-two-group-elements.md)'s Remark rem:z04\_setup needs them.
+
+**What the relation does not oblige.** Neither conjunct constrains $`p_{S_0}`$ or $`p_T`$ at any point outside the batches, so Equation 3.1 is satisfied by a prover who commits $`p_{S_0} = p_T = 0`$: the zero polynomial vanishes on every set, and the vanishing polynomial of every set divides it. The hypothesis of Lemma **Lemma Z3.9**, that $`p_T`$ satisfies the second half of Equation 3.6, is therefore a property of the honest prover's construction below and not an obligation the relation places on a prover. Equation 3.1 is the paper's relation \[[1](#references)\], and what the paper's relation leaves to the encoder is said here rather than left to a reader to notice: the well-formedness of the encoding, that $`p_{S_0}`$ and $`p_T`$ take values in $`\{0, 1\}`$ on the whole interpolation domain, is assumed of the honest prover and is proved nowhere in this volume. Read an accepted proof as a statement about whichever polynomials $`c_{S_0}`$ and $`c_T`$ commit to, and see [Project 4](04-two-group-elements.md) for the same point on the verifier's side.
 
 The specific sets of this project are
 
@@ -193,7 +200,14 @@ With $`n = 256`$, $`\omega = \omega_1`$ and $`J = \mathrm{idx}[S_0]`$ the lemma 
 
 If. Suppose $`T \cap B = \emptyset`$ and let $`e \in E`$. By definition of the image there is $`(s, s') \in B`$ with $`e = e_2(s, s')`$, and by injectivity it is the only pair in $`S \times S`$ with that image, so (3.6) speaks about this pair and no other: $`p_T(e) = p_T(e_2(s, s')) = \mathbf{1}_T(s, s')`$. Since $`(s, s') \in B`$ and $`T \cap B = \emptyset`$, $`(s, s') \notin T`$ and $`\mathbf{1}_T(s, s') = 0`$. So $`p_T(e) = 0`$ for every $`e \in E`$. Injectivity is also what makes a $`p_T`$ with (3.6) exist at all: Lemma **Lemma Z3.8** interpolates one value per distinct point, and two pairs with the same image but different indicator values would admit no polynomial. &#9632;
 
-**Remark Z3.10 (Blinding, and what this chapter does not prove).** A KZG commitment $`g_1^{p(\tau)}`$ to the plain indicator polynomial is binding \[[3](#references)\] but not hiding: with $`|S| = 256`$ a verifier could guess a transition relation, recompute its polynomial and compare commitments. The code adds to each polynomial the mask $`(b_0 + b_1 X)(X^n - 1)`$ with $`b_0, b_1`$ uniform in $`\mathbb{F}_r`$, the technique PLONK uses to blind its wire polynomials \[[4](#references)\]. The mask vanishes on every $`n`$-th root of unity, so (3.6) is unchanged, $`E \subset`$ the domain is still a set of roots, and the batch division of [Project 4](04-two-group-elements.md) stays exact. The hiding argument for this mask under one batch opening is standard and is not proved in this volume; the paper's own scheme uses a Pedersen-style randomisation of KZG for the same purpose \[[1](#references)\].
+**Remark Z3.10 (Blinding, and what this chapter does not prove).** A KZG commitment $`g_1^{p(\tau)}`$ to the plain indicator polynomial is binding \[[3](#references)\] but not hiding: with $`|S| = 256`$ a verifier could guess a transition relation, recompute its polynomial and compare commitments. The code adds to each polynomial the mask $`(b_0 + b_1 X)(X^n - 1)`$ with $`b_0, b_1`$ uniform in $`\mathbb{F}_r`$, the technique PLONK uses to blind its wire polynomials \[[4](#references)\]. The mask vanishes on every $`n`$-th root of unity, so (3.6) is unchanged, $`E \subset`$ the domain is still a set of roots, and the batch division of [Project 4](04-two-group-elements.md) stays exact. The hiding argument is short enough to write out. Write $`W = (X^{n} - 1) / Z_E`$, which is a polynomial because $`E`$ is a subset of the $`n`$-th roots of unity, and let $`q_0 = p_0 / Z_E`$ for the unmasked indicator $`p_0`$. The masked polynomial is $`p = p_0 + (b_0 + b_1 X)(X^{n} - 1)`$ and its quotient is $`q = q_0 + (b_0 + b_1 X) W`$, so the verifier's whole view of this polynomial is the pair
+
+```math
+\big(c, \pi\big) = \Big( g_1^{\,p_0(\tau) + (b_0 + b_1\tau) (\tau^{n} - 1)},\;
+  g_1^{\,q_0(\tau) + (b_0 + b_1\tau) W(\tau)} \Big).
+```
+
+Both exponents are affine in the single scalar $`\beta = b_0 + b_1 \tau`$, and the second is the first divided by $`Z_E(\tau)`$, so $`\pi`$ is a deterministic function of $`c`$ and of public data: the view is the one group element $`c`$. If $`\tau^{n} \ne 1`$, which holds except with probability $`n / r`$ over an honest setup, the map $`b_0 \mapsto \beta (\tau^{n} - 1)`$ is a bijection of $`\mathbb{F}_r`$, so $`c`$ is uniform on $`\mathbb{G}_1`$ whatever $`p_0`$ is, and the view is perfectly hiding. The second mask coefficient $`b_1`$ is therefore not needed for one batch opening; $`b_0 (X^{n} - 1)`$ alone suffices and costs one setup power fewer. This volume keeps $`b_1`$ all the same, because dropping it moves the blinded degree from $`65537`$ to $`65536`$, and that changes the setup size, the $`65538`$ $`\mathbb{G}_1`$ powers in [Project 4](04-two-group-elements.md)'s parts table and the pitfall below that turns on the two mask terms: four places, not one line. The paper's own scheme uses a Pedersen-style randomisation of KZG instead, which does not need $`E`$ to lie in the interpolation domain \[[1](#references)\].
 
 ## The protocol
 
@@ -461,8 +475,8 @@ The chapter passes when (i) the enumeration on the Pi 4B prints 16, 7976, 5016 a
 5. Moshe Y. Vardi and Pierre Wolper. An automata-theoretic approach to automatic program verification (preliminary report). In LICS 1986, pages 332 to 344. IEEE Computer Society, 1986. (to verify)
 6. Moshe Y. Vardi. Verification of concurrent programs: the automata-theoretic framework. Annals of Pure and Applied Logic, 51(1 to 2), pages 79 to 98, 1991. [doi:10.1016/0168-0072(91)90066-U](https://doi.org/10.1016/0168-0072(91)90066-U) (to verify).
 7. Christel Baier and Joost-Pieter Katoen. Principles of Model Checking. MIT Press, 2008. (to verify)
-8. arkworks contributors. arkworks: a Rust ecosystem for zkSNARK programming. The ark-bls12-381 crate is at version 0.6.0, updated Sunday 26 April 2026, 25.3 million downloads. [crates.io, ark-bls12-381](https://crates.io/api/v1/crates/ark-bls12-381) (verified Friday 6 November 2026).
-9. Supranational. blst: a BLS12-381 signature and pairing library in C and assembly. Release v0.3.17, Friday 24 July 2026. [github.com/supranational/blst, latest release](https://api.github.com/repos/supranational/blst/releases/latest) (verified Friday 6 November 2026).
+8. arkworks contributors. arkworks: a Rust ecosystem for zkSNARK programming. The ark-bls12-381 crate is at version 0.6.0, updated Sunday 26 April 2026, 25.3 million downloads. The licence is not recorded here because it has not been read; read it from the crate's own licence field and from the repository's LICENSE file (to verify). [crates.io, ark-bls12-381](https://crates.io/api/v1/crates/ark-bls12-381) (verified Friday 6 November 2026).
+9. Supranational. blst: a BLS12-381 signature and pairing library in C and assembly. Release v0.3.17, Friday 24 July 2026. The licence is not recorded here because it has not been read; read it from the repository's LICENSE file (to verify). [github.com/supranational/blst, latest release](https://api.github.com/repos/supranational/blst/releases/latest) (verified Friday 6 November 2026).
 10. Advanced hardware-software architectures for edge artificial intelligence and zero-knowledge model checking. A design brief of twenty project sketches, read on Friday 6 November 2026 and held locally at `a local design brief`. It is the input to this second edition and is not a published source; where its hardware claims disagree with the bench, the bench is followed and the disagreement is stated.
 11. .NET nanoFramework contributors. nanoFramework: a managed runtime for constrained microcontrollers, including the ESP32 and ESP8266 families. [nanoframework.net](https://www.nanoframework.net/) (to verify).
 12. Jon Postel. Transmission Control Protocol. RFC 793, September of 1981. [rfc-editor.org/info/rfc793](https://www.rfc-editor.org/info/rfc793) (to verify).

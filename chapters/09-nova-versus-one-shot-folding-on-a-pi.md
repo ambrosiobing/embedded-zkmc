@@ -46,7 +46,9 @@ Fix the step circuit $`\mathsf{F}`$ that checks one obligation of [Project 5](05
 
 *(9.1)*
 
-which with $`z_0 = 0`$ and $`z_N = N`$ says that $`N`$ obligations were checked in sequence. The witness never leaves the device: the verifier receives the folded instance $`(\bar W, \bar E, u, x)`$ and, in Nova's design, a succinct proof of its satisfiability. The secret rows of the program enter only as entries of $`W_i`$ under the step's commitment $`\bar W_i`$ (Theorem thm:z01\_hiding for hiding, with the blinding the crate adds in its zero-knowledge mode, to verify). What is public and what is secret is the same as in [Project 5](05-farkas-witnesses-for-a-joystick-program.md): the public rows $`G_p, h_p`$ are carried in the clear by a hash chain in $`z`$ in the full build, a counter in the listing below.
+which with $`z_0 = 0`$ and $`z_N = N`$ says only that $`N`$ instances of the step circuit were satisfied in sequence, and not which obligations they were. The listing below carries $`a`$, $`\lambda`$ and $`\alpha`$ as private allocated values with no public binding, so the all-zero assignment $`a = \lambda = 0`$, $`\alpha = 0`$ satisfies every step and reaches $`z_N = N`$: the run is a proof about nothing. Making the statement the intended one requires the hash chain this chapter omits, which carries into $`z`$ a digest of the public block $`G_p, h_p`$ and of a commitment to the secret row of each obligation, so that $`z_N`$ binds the sequence of obligations as well as its length. Until that chain is in the listing, the chapter's claim is the weaker one stated in this paragraph, and the acceptance test's mutated run detects a careless prover and not a dishonest one.
+
+What leaves the device depends on which of the crate's two objects is handed over, and the run below hands over the one that carries the witness. `RecursiveSNARK::verify` is called on the `RecursiveSNARK` itself, which holds the folded witness vectors as well as the folded commitments, so on this bench prover and verifier are one process and nothing is transported at all. Only `CompressedSNARK` reduces the hand-over to the folded instance $`(\bar W, \bar E, u, x)`$ with a succinct proof of its satisfiability, and only its zero-knowledge variant makes that hand-over hiding. Step 5 of the protocol below marks the compression optional, so this chapter as run makes no zero-knowledge claim: it is a cost comparison between two folds, and the sentence "the witness never leaves the device" is true here only because the device is also the verifier. The secret rows of the program enter only as entries of $`W_i`$ under the step's commitment $`\bar W_i`$, and no theorem in this volume makes that vector commitment hiding: Theorem thm:z01\_hiding is about the single-value Pedersen form $`g^v h^r`$ and not about $`\bar W`$, and the blinding of the crate's zero-knowledge mode is a property of the compressing argument and not of the folding. What is public and what is secret is the same as in [Project 5](05-farkas-witnesses-for-a-joystick-program.md): the public rows $`G_p, h_p`$ are carried in the clear by a hash chain in $`z`$ in the full build, a counter in the listing below.
 
 ## The mathematics
 
@@ -147,7 +149,7 @@ where the bracket is exactly Equation 9.3. Hence $`(A z) \circ (B z) = u (C z) +
 
 *Proof.* (i) Lemma lem:z06\_Kbound gives $`|K| \ge N - 1`$, so $`4|K| \ge 4(N - 1) > N - 1`$ for $`N \ge 2`$. (ii) Each Nova cross term is committed with one multi-scalar multiplication of length $`m`$ and there are $`N - 1`$ of them; each of the $`4|K|`$ cross terms of the one-shot fold is committed with one of length $`d`$. Dividing $`(N - 1) m < 4|K| d`$ by $`(N - 1) d > 0`$ gives $`m / d < \rho(N)`$, and the steps reverse. (iii) Nova's step $`i`$ hashes the folded instance of step $`i - 1`$ to derive $`r_i`$, so the steps form a chain of length $`N - 1`$; the one-shot fold derives one $`r`$ from all commitments at once. (iv) Equation 9.3 costs the prover, per constraint, the products that form the four matrix-vector terms and their Hadamard products, a constant $`c_T`$ per constraint once $`A z_i`$, $`B z_i`$, $`C z_i`$ are formed, so $`(N - 1) c_T m`$ in all; the one-shot fold forms every $`A_i \lambda_j`$ with $`i \ne j`$ by Theorem thm:z06\_eq27, $`N (N - 1)`$ products of a $`d \times n`$ matrix by a vector, $`d n`$ multiplications each. Dividing $`(N - 1) c_T m < N (N - 1) d n`$ by $`(N - 1) d n > 0`$ gives $`N > c_T m / (d n)`$. &#9632;
 
-For [Project 5](05-farkas-witnesses-for-a-joystick-program.md)'s instance $`d = 4`$, $`n \le 7`$, and the step has the obligation's own constraints, at most $`4 + 33 \times 17 = 565`$ for the two equalities and seventeen 64-bit ranges (computed), plus the recursion overhead of about $`10^4`$ (to verify), so $`m \approx 10565`$ and $`m / d \approx 2641`$ (computed from those two figures). The table in the Benchmark lists $`\rho(N)`$ for $`N = 2^k`$: it reaches $`774.57`$ at $`N = 8192`$ (computed), below $`2641`$, so by (ii) the one-shot fold commits fewer field elements in total for every $`N`$ in the table while Nova commits fewer vectors by (i); by (iv) with $`c_T = 1`$ Nova's field work is the smaller once $`N > 10565 / 28 \approx 377`$ (computed), that is from $`N = 512`$ in the table. An obligation with $`d = 64`$ columns would put $`m / d`$ near $`165`$ and cross (ii) at $`N = 1024`$, where $`\rho = 226.88`$; every one of these figures moves with the constraint count the crate prints, which is why the acceptance test records it.
+For [Project 5](05-farkas-witnesses-for-a-joystick-program.md)'s instance $`d = 4`$, $`n \le 7`$, and the step has the obligation's own constraints, at most $`4 + 65 \times 17 = 1109`$ for the two equalities and seventeen 64-bit ranges (computed: `range64` in the listing below allocates one `AllocatedBit` per bit, which is one booleanity constraint each, and then one `enforce` for the linear recomposition, so $`64 + 1 = 65`$ constraints per range), plus the recursion overhead of about $`10^4`$ (to verify), so $`m \approx 11109`$ and $`m / d \approx 2777`$ (computed from those two figures). The table in the Benchmark lists $`\rho(N)`$ for $`N = 2^k`$: it reaches $`774.57`$ at $`N = 8192`$ (computed), below $`2777`$, so by (ii) the one-shot fold commits fewer field elements in total for every $`N`$ in the table while Nova commits fewer vectors by (i); by (iv) with $`c_T = 1`$ Nova's field work is the smaller once $`N > 11109 / 28 \approx 397`$ (computed), that is from $`N = 512`$ in the table. An obligation with $`d = 64`$ columns would put $`m / d`$ near $`174`$ and cross (ii) at $`N = 1024`$, where $`\rho = 226.88`$; every one of these figures moves with the constraint count the crate prints, which is why the acceptance test records it.
 
 ## The protocol
 
@@ -240,7 +242,12 @@ fn main() {
     let t0 = std::time::Instant::now();
     for step in &steps { rs.prove_step(&pp, step, &c2).unwrap(); }
     let ms = t0.elapsed().as_secs_f64() * 1e3;
-    let ok = rs.verify(&pp, steps.len(), &z0_1, &z0_2).is_ok();
+    // verify returns the final z; a check of is_ok() alone accepts a run of the right
+    // shape and the wrong length, which is this chapter's fifth pitfall.
+    let ok = match rs.verify(&pp, steps.len(), &z0_1, &z0_2) {
+        Ok((z1, _z2)) => z1.first() == Some(&F1::from(steps.len() as u64)),  // shape to verify
+        Err(_) => false,
+    };
     println!("zk09 steps={} ok={} ms_total={:.1} ms_per_step={:.2}", steps.len(), ok, ms,
              ms / steps.len() as f64);
 }
@@ -302,7 +309,7 @@ sequenceDiagram
     P->>P: compute T, commit, derive r_i, fold (Theorem)
     P->>P: prove the previous fold inside this step
   end
-  P->>V: the running instance: W bar, E bar, u, x, N
+  P->>V: the RecursiveSNARK object, on this board the same process
   V->>V: verify with num_steps = 77, read z_N
   V-->>S: zk09 line: steps, ok, ms_per_step
 ```
@@ -334,14 +341,14 @@ stateDiagram-v2
 
 | $`N`$ | $`N - 1`$ | $`4\vert K\vert `$ | $`\rho(N)`$ | $`c_T m/(dn)`$ | **Instrument** |
 | --- | --- | --- | --- | --- | --- |
-| 2 | 1 | 4 | 4.00 | 377 | computed: $`\vert K\vert `$ from Z6's script, $`\rho`$ by division |
-| 8 | 7 | 76 | 10.86 | 377 | computed, the same |
-| 32 | 31 | 844 | 27.23 | 377 | computed, the same |
-| 77 | 76 | 4076 | 53.63 | 377 | computed, the same, for Z5's $`N`$ |
-| 128 | 127 | 8236 | 64.85 | 377 | computed, the same |
-| 512 | 511 | 76684 | 150.07 | 377 | computed, the same; Nova's field work smaller from here, with $`c_T = 1`$ and $`m = 10565`$ to verify |
-| 2048 | 2047 | 700396 | 342.16 | 377 | computed, the same |
-| 8192 | 8191 | 6344524 | 774.57 | 377 | computed, the same |
+| 2 | 1 | 4 | 4.00 | 397 | computed: $`\vert K\vert `$ from Z6's script, $`\rho`$ by division |
+| 8 | 7 | 76 | 10.86 | 397 | computed, the same |
+| 32 | 31 | 844 | 27.23 | 397 | computed, the same |
+| 77 | 76 | 4076 | 53.63 | 397 | computed, the same, for Z5's $`N`$ |
+| 128 | 127 | 8236 | 64.85 | 397 | computed, the same |
+| 512 | 511 | 76684 | 150.07 | 397 | computed, the same; Nova's field work smaller from here, with $`c_T = 1`$ and $`m = 11109`$ to verify |
+| 2048 | 2047 | 700396 | 342.16 | 397 | computed, the same |
+| 8192 | 8191 | 6344524 | 774.57 | 397 | computed, the same |
 
 | **Quantity** | **Value** | **Where** | **Instrument** |
 | --- | --- | --- | --- |
@@ -361,7 +368,7 @@ stateDiagram-v2
 
 **Step 3.** On the Pi 4B over ssh, read `vcgencmd get_throttled`, run `./zk09` under `/usr/bin/time -v`, read the register again, and keep the two `zk09` lines and the maximum resident set size.
 
-**Step 4.** On the Pi 4B, write the printed primary constraint count into Proposition **Proposition Z9.7**'s instance in place of $`10565`$, recompute $`m / d`$ and $`c_T m / (d n)`$, and say whether the crossover row of the table moved.
+**Step 4.** On the Pi 4B, write the printed primary constraint count into Proposition **Proposition Z9.7**'s instance in place of $`11109`$, recompute $`m / d`$ and $`c_T m / (d n)`$, and say whether the crossover row of the table moved.
 
 **Step 5.** On the Pi 4B, raise one $`\lambda`$ entry of one obligation by 1 in the JSON and run again: `prove_step` or `verify` must fail; a run that prints `ok=true` is a defect in the circuit, not a pass.
 
@@ -408,9 +415,9 @@ The chapter passes when the honest run prints `steps=77 ok=true` with the thrott
 5. Liam Eagen and Ariel Gabizon. ProtoGalaxy: efficient ProtoStar-style folding of multiple instances. IACR Cryptology ePrint Archive, report 2023/1106. [eprint.iacr.org/2023/1106](https://eprint.iacr.org/2023/1106) (to verify).
 6. Eli Ben-Sasson, Iddo Bentov, Yinon Horesh and Michael Riabzev. Scalable, transparent, and post-quantum secure computational integrity. IACR Cryptology ePrint Archive, report 2018/046. [eprint.iacr.org/2018/046](https://eprint.iacr.org/2018/046) (to verify).
 7. Srinath Setty. Spartan: efficient and general-purpose zkSNARKs without trusted setup. In CRYPTO 2020, LNCS 12172, pages 704 to 737. Springer, 2020. [doi:10.1007/978-3-030-56877-1\_25](https://doi.org/10.1007/978-3-030-56877-1_25) (to verify).
-8. Microsoft Research. nova-snark: high-speed recursive arguments from folding schemes. Version 0.76.0, updated Thursday 3 September 2026. [crates.io, nova-snark](https://crates.io/api/v1/crates/nova-snark) (verified Friday 6 November 2026).
+8. Microsoft Research. nova-snark: high-speed recursive arguments from folding schemes. Version 0.76.0, updated Thursday 3 September 2026. The licence is not recorded here because it has not been read; read it from the crate's own licence field and from the repository's LICENSE file (to verify). [crates.io, nova-snark](https://crates.io/api/v1/crates/nova-snark) (verified Friday 6 November 2026).
 9. Advanced hardware-software architectures for edge artificial intelligence and zero-knowledge model checking. A design brief of twenty project sketches, read on Friday 6 November 2026 and held locally at `a local design brief`. It is the input to this second edition and is not a published source; where its hardware claims disagree with the bench, the bench is followed and the disagreement is stated.
-10. Plonky3 contributors. Plonky3: a toolkit for polynomial commitment based proof systems, the backend of several zero-knowledge virtual machines. [github.com/Plonky3/Plonky3](https://github.com/Plonky3/Plonky3) (to verify).
+10. Plonky3 contributors. Plonky3: a toolkit for polynomial commitment based proof systems, the backend of several zero-knowledge virtual machines. The licence is not recorded here because it has not been read; read it from the repository's LICENSE file (to verify). [github.com/Plonky3/Plonky3](https://github.com/Plonky3/Plonky3) (to verify).
 
 ---
 

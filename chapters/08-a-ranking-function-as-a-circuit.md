@@ -16,9 +16,9 @@
 > - **Language and library:** JavaScript on Node 22 (to verify) with `snarkjs` v0.7.6 \[[6](#references)\] for setup, proving and the browser verifier; `circom` 2.x (to verify the installed minor version) \[[8](#references)\] and `circomlib`'s `Num2Bits` for the circuit
 > - **Primitive:** Groth16 over BN254 \[[2](#references)\] of the ranking condition of the paper's Equation 21 for one guarded update and one automaton transition, with range checks \[[1](#references)\]
 > - **Secret:** the transition $`x, x'`$ of the modem machine and the row $`A_i, b_i`$ of the guarded update it belongs to
-> - **Public:** the ranking pieces $`w_j, u_j, w_k, u_k`$ and the fairness bit $`\mathbf{1}_F`$
+> - **Public:** the ranking pieces $`w_j, u_j, w_k, u_k`$, the fairness bit $`\mathbf{1}_F`$, and the digest $`h`$ of the guard row of the published program
 > - **Model:** none
-> - **Acceptance:** the honest proof shows accept on the touchscreen; the same proof with one public signal changed shows reject; a witness whose transition does not decrease the ranking function fails at witness generation; the verifier's median time over 64 repeats has a spread under 5 percent with the throttle register at 0x0 before and after
+> - **Acceptance:** the honest proof shows accept on the touchscreen; the same proof with one public signal changed shows reject; a freshly proved different statement shows reject, because the page holds the public signals it expects; a witness whose transition does not satisfy the premise fails at witness generation; the honest witness under an increasing public ranking function fails on the ranking constraint alone, which is the only case that reaches the conclusion; the verifier's median time over 64 repeats has a spread under 5 percent with the throttle register at 0x0 before and after
 > - **Difficulty:** 3 of 5
 > - **Effort:** one evening for the circuit and the ceremony on the build laptop, one evening for the kiosk page and the display, a third session for the repeat
 
@@ -38,33 +38,39 @@ The paper's Remark on page 13 says that the relation of its Equation 25 is SNARK
 
 ## The secret, the statement and the relation
 
-The three circuit chapters share one statement, written here once and repeated word for word in Sections [Project 12](12-a-plonk-gate-for-the-inductive-step.md) and [Project 13](13-the-obligation-in-noir.md). Let $`n = 2`$ be the number of program variables of the modem machine of Section [Project 3](03-the-modems-backoff-machine.md), $`x = (\mathit{delay}, \mathit{done})`$, and let $`y = (x, x') \in \mathbb{Z}^4`$ be a transition. Every integer in the statement is a signed 16-bit integer, $`I = [-2^{15}, 2^{15} - 1]`$, which is the paper's bounded integer encoding with $`M = 2^{15}`$ \[[1](#references)\]. The witness is the transition and the row of the guarded update it belongs to, the statement is the ranking function's two pieces and the fairness bit, and the relation is
+The three circuit chapters share one statement, written here once and repeated word for word in Sections [Project 12](12-a-plonk-gate-for-the-inductive-step.md) and [Project 13](13-the-obligation-in-noir.md). Let $`n = 2`$ be the number of program variables of the modem machine of Section [Project 3](03-the-modems-backoff-machine.md), $`x = (\mathit{delay}, \mathit{done})`$, and let $`y = (x, x') \in \mathbb{Z}^4`$ be a transition. Every integer in the statement is a signed 16-bit integer, $`I = [-2^{15}, 2^{15} - 1]`$, which is the paper's bounded integer encoding with $`M = 2^{15}`$ \[[1](#references)\]. The witness is the transition and the row of the guarded update it belongs to, the statement is the ranking function's two pieces, the fairness bit and the digest of the guard row, and the relation is
 
 ```math
 \begin{aligned}
-  \mathcal{R}_{\mathrm{step}} = \Big\{\, \big( (x, x', A_i, b_i) ;\; (w_j, u_j, w_k, u_k, f) \big)
+  \mathcal{R}_{\mathrm{step}} = \Big\{\, \big( (x, x', A_i, b_i) ;\;
+      (w_j, u_j, w_k, u_k, f, h) \big)
     \;:\;\; & x, x' \in I^2,\; A_i \in I^{m \times 4},\; b_i \in I^m,\; f \in \{0, 1\}, \\
-    & A_i \begin{bmatrix} x \\ x' \end{bmatrix} \le b_i, \;\;
+    & h = H(A_i, b_i), \;\;
+      A_i \begin{bmatrix} x \\ x' \end{bmatrix} \le b_i, \;\;
       (w_j \cdot x + u_j) - (w_k \cdot x' + u_k) \ge f \,\Big\}.
 \end{aligned}
 ```
 
 *(8.1)*
 
+The public digest $`h`$ binds the secret guard row to the published program, and the relation is unsound without it. $`H`$ is a collision-resistant hash over $`\mathbb{F}`$, and $`h = H(A_i, b_i)`$ is published once with the circuit as the digest of the guarded update of the program of Section [Project 3](03-the-modems-backoff-machine.md) that the transition belongs to. If $`h`$ is left out, $`A_i`$ and $`b_i`$ are free witness values: a prover takes $`A_i = 0`$ and $`b_i = 0`$, every row of the premise reads $`0 \le 0`$, the entry range checks pass, and the only obligation left is the ranking inequality, which the prover then satisfies by choosing $`x`$ and $`x'`$ freely, so an accepted proof says nothing about the modem machine. With $`h`$ on the statement side the premise is a claim about the published program and not about inequalities the prover liked. The three chapters instantiate $`H`$ with the hash their own toolchain ships, named in each listing and marked to verify, so a digest made for one chapter is not a digest for another.
+
 This is the paper's Equation 21 read at one point: the premise $`A_i [x\; x']^\top \le b_i`$ is membership of the transition in the $`i`$-th guarded update of Equation 16, and the conclusion is $`V(x, q) - V(x', q') > \mathbf{1}_F(q, \sigma, q') - 1`$ with $`V`$ the piecewise-linear function of Equation 18, which over integers is $`V(x, q) - V(x', q') \ge f`$ with $`f = \mathbf{1}_F(q, \sigma, q')`$. The case rows $`C_j x \le d_j`$ and $`C_k x' \le d_k`$ of Equation 21 have the same shape as rows of $`A_i`$ and are appended to it in the full build; the printed circuit carries the five rows of the update alone so that it fits on one page.
 
-The concrete instance used in all three chapters is the retry loop of the modem machine: state Wait to state Wait, $`\mathit{delay}' = 2\,\mathit{delay}`$, $`\mathit{done}' = \mathit{done} + 1`$ under the guard $`\mathit{done} \le 2`$, which as rows of $`A_i y \le b_i`$ over $`y = (\mathit{delay}, \mathit{done}, \mathit{delay}', \mathit{done}')`$ reads
+The concrete instance used in all three chapters is the retry command of the modem machine of Section [Project 3](03-the-modems-backoff-machine.md): state Wait to state Wait with $`\mathit{delay} = 0`$, a fresh delay drawn below the doubled backoff range, $`0 \le \mathit{delay}' < D_{\mathit{done}+1}`$, and $`\mathit{done}' = \mathit{done} + 1`$ under the guard $`\mathit{done} \le 1`$. The doubling in that machine is of the backoff range from which the delay is drawn and not of the delay variable, so the command is nondeterministic in $`\mathit{delay}'`$. Its five rows over $`y = (\mathit{delay}, \mathit{done}, \mathit{delay}', \mathit{done}')`$ are $`\mathit{delay} \le 0`$, $`-\mathit{delay} \le 0`$, $`\mathit{done}' - \mathit{done} \le 1`$, $`\mathit{done} - \mathit{done}' \le -1`$ and $`\mathit{done} \le 1`$, which as $`A_i y \le b_i`$ reads
 
 ```math
-A_i = \begin{bmatrix} -2 & 0 & 1 & 0 \\ 2 & 0 & -1 & 0 \\ 0 & -1 & 0 & 1 \\ 0 & 1 & 0 & -1 \\
+A_i = \begin{bmatrix} 1 & 0 & 0 & 0 \\ -1 & 0 & 0 & 0 \\ 0 & -1 & 0 & 1 \\ 0 & 1 & 0 & -1 \\
   0 & 1 & 0 & 0 \end{bmatrix}, \quad
-  b_i = \begin{bmatrix} 0 \\ 0 \\ 1 \\ -1 \\ 2 \end{bmatrix}, \quad
+  b_i = \begin{bmatrix} 0 \\ 0 \\ 1 \\ -1 \\ 1 \end{bmatrix}, \quad
   w_j = w_k = (0, -1), \quad u_j = u_k = 3, \quad f = 1,
 ```
 
 *(8.2)*
 
-so that $`V(x, \mathrm{Wait}) = 3 - \mathit{done}`$ and $`V(x, q) - V(x', q') = \mathit{done}' - \mathit{done} = 1 \ge f`$. The example witness is $`x = (1, 0)`$, $`x' = (2, 1)`$.
+so that $`V(x, \mathrm{Wait}) = 3 - \mathit{done}`$ and $`V(x, q) - V(x', q') = \mathit{done}' - \mathit{done} = 1 \ge f`$. The two rows that bound the fresh delay, $`\mathit{delay}' \le D_{\mathit{done}+1} - 1`$ and $`-\mathit{delay}' \le 0`$, are appended in the full build beside the case rows, by the same convention, so that the printed circuit stays at five rows and the computed constraint count below is the count of those five. The example witness is $`x = (0, 0)`$, $`x' = (3, 1)`$, which is a transition of the machine of Section [Project 3](03-the-modems-backoff-machine.md) because $`3 < D_1 = 8`$. A circuit for a deterministic doubling $`\mathit{delay}' = 2\,\mathit{delay}`$ would be a different machine and is not printed here.
+
+Rows 3 and 4 pin $`\mathit{done}' = \mathit{done} + 1`$, so $`(w_j \cdot x + u_j) - (w_k \cdot x' + u_k) = \mathit{done}' - \mathit{done} = 1`$ for every witness that satisfies the premise, and with $`f \in \{0, 1\}`$ the conclusion then holds by construction on this instance whatever the witness is. Two consequences follow for the negative tests. A case that changes the witness cannot reach the ranking constraint, because the premise refuses it first; and the public $`f = 2`$ cannot reach it either, because the boolean constraint on $`f`$ refuses that before the comparison. The case that does reach it keeps the honest witness and $`f = 1`$ and makes the public ranking function increase across the transition, $`w_j = w_k = (0, 1)`$ with $`u_j = u_k = 3`$, which satisfies every premise row and the boolean constraint and then fails the ranking inequality alone, since $`(0 + 3) - (1 + 3) = -1 < 1`$. All three chapters run that case, and the $`f = 2`$ case beside it as the test of the boolean constraint. Without the first of the two the conclusion, which is the thing all three chapters exist to prove, is exercised by no test.
 
 **Remark Z8.1 (One step is not the obligation).** The paper's obligation is universal: for all $`y`$, the premise implies the conclusion, and the paper discharges it with a Farkas witness, Section [Project 5](05-farkas-witnesses-for-a-joystick-program.md). Relation (8.1) is one point of that universal statement, the natural object for a device that commits to its transitions one at a time; a circuit for the Farkas form is the same arithmetic, a linear combination that must vanish plus range checks, with the multipliers $`\lambda, \mu`$ as the witness, and the three chapters name it as the next step rather than printing a second circuit.
 
@@ -128,7 +134,9 @@ The degree of $`P_z`$ is at most $`2(m - 1)`$ and that of $`Z`$ is $`m`$, so $`H
 
 The decomposition is what `Num2Bits`$`(k)`$ constrains: $`k`$ signals $`\beta_t`$ with $`\beta_t(\beta_t - 1) = 0`$ and one linear equation $`\mathit{in} = \sum_t \beta_t 2^t`$, that is, $`k + 1`$ constraints of the form (8.3). &#9632;
 
-The circuit applies the lemma three times with different $`k`$: every entry $`e`$ of the witness is checked as $`e + 2^{15} \in [0, 2^{16})`$, which is exactly $`e \in I`$ ($`k = 16`$); each row $`A_{i,r} \cdot y \le b_{i,r}`$ is checked with $`k = 34`$, since $`|b_{i,r} - A_{i,r} \cdot y| \le 2^{15} + 4 \cdot 2^{15} \cdot 2^{15} < 2^{34}`$; and the ranking inequality with $`k = 34`$, since $`|(w_j \cdot x + u_j) - (w_k \cdot x' + u_k) - f| \le 2 \cdot 2^{31} + 2 \cdot 2^{15} + 1 < 2^{34}`$. In every case $`2^{35} < p`$ holds with room to spare.
+The circuit applies the lemma three times with different $`k`$: every entry $`e`$ of the witness is checked as $`e + 2^{15} \in [0, 2^{16})`$, which is exactly $`e \in I`$ ($`k = 16`$); each row $`A_{i,r} \cdot y \le b_{i,r}`$ is checked with $`k = 34`$, since $`|b_{i,r} - A_{i,r} \cdot y| \le 2^{15} + 4 \cdot 2^{15} \cdot 2^{15} < 2^{34}`$; and the ranking inequality with $`k = 34`$, since $`|(w_j \cdot x + u_j) - (w_k \cdot x' + u_k) - f| \le 2 \cdot 2^{31} + 2 \cdot 2^{15} + 1 < 2^{34}`$, a bound that holds only while $`w_j, w_k \in I^2`$, $`u_j, u_k \in I`$ and $`f \in \{0, 1\}`$. In every case $`2^{35} < p`$ holds with room to spare.
+
+Those five are public signals, and the circuit constrains one of them: $`f \in \{0, 1\}`$ is a boolean constraint in the template below, which is part of the relation. The four ranking coefficients $`w_j, u_j, w_k, u_k`$ are not range-checked in the circuit, so for them the hypothesis of Lemma **Lemma Z8.5** is enforced by the verifier and not by the proof: a public $`w`$ of large magnitude makes the field value handed to `Num2Bits`$`(34)`$ a small residue of a difference that is negative over the integers, and the comparison then holds in the circuit and fails in $`\mathbb{Z}`$. This chapter takes the second of the two routes open to it. The kiosk page holds the ranking function of the published program beside the verification key and refuses a proof whose public signals are not the ones it holds, so the party that pins the four coefficients inside $`I`$ is the verifier. A deployment that cannot pin them must put the four $`k = 16`$ checks into the circuit instead, and pay their constraints.
 
 **Remark Z8.6 (The setup and the three elements).** Groth16 \[[2](#references)\] evaluates the QAP at a secret point $`\tau`$ inside the exponent: the setup publishes $`g_1^{\tau^t}`$, $`g_2^{\tau^t}`$ and the circuit-specific terms $`g_1^{(\beta A_i(\tau) + \alpha B_i(\tau) + C_i(\tau))/\delta}`$ for the witness columns and the same with $`\gamma`$ for the public columns, and then $`\tau, \alpha, \beta, \gamma, \delta`$ must be forgotten. The proof is $`\pi = (A, B, C) \in \mathbb{G}_1 \times \mathbb{G}_2 \times \mathbb{G}_1`$ with $`A = g_1^{\alpha + \sum_i z_i A_i(\tau) + r\delta}`$, $`B = g_2^{\beta + \sum_i z_i B_i(\tau) + s\delta}`$, and $`C`$ carrying the witness terms, the quotient $`H(\tau) Z(\tau)/\delta`$ and the blinding $`r, s`$; the verifier checks
 
@@ -147,7 +155,7 @@ three pairings after the public-input multi-scalar multiplication, because $`e(g
 | **Prover, build laptop (Node 22, snarkjs)** | **Verifier, Pi 4B (Chromium, snarkjs WebAssembly)** |
 | --- | --- |
 | Once: compile `step.circom` to `step.r1cs` and `step.wasm`; run the powers-of-tau phase for $`2^{12}`$ and the Groth16 phase 2; export `verification_key.json`. | Once: copy `verification_key.json`, `snarkjs.min.js` and the kiosk page to `~/zk08`; start Chromium in kiosk mode on the page. |
-| Per proof: write the input (the witness and the public signals, negative entries reduced modulo $`p`$); `groth16.fullProve` computes the witness in WebAssembly and the proof. | Per proof: fetch `proof.json` and `public.json`; call `groth16.verify` with the key; time it with `performance.now()`. |
+| Per proof: write the input (the witness and the public signals, negative entries reduced modulo $`p`$); `groth16.fullProve` computes the witness in WebAssembly and the proof. | Per proof: fetch `proof.json` and `public.json`; compare the signals with the statement the page holds; call `groth16.verify` with the key; time it with `performance.now()`. |
 | Copy `proof.json` and `public.json` to the Pi. | Show accept or reject on the touchscreen in a colour and a word; a touch repeats the check 64 times and shows the median. |
 
 ## The code
@@ -157,6 +165,7 @@ The circuit. Every product of two signals gets its own intermediate signal, beca
 ```javascript
 pragma circom 2.1.6;
 include "circomlib/circuits/bitify.circom";   // Num2Bits; the include path is to verify
+include "circomlib/circuits/poseidon.circom"; // Poseidon; the include path is to verify
 
 // a <= b for integers with |b - a| < 2^k: (b - a) mod p must have k bits, Lemma Z8 cmp
 template Leq(k) {
@@ -177,6 +186,7 @@ template Step(m) {
     signal input wk[2];
     signal input uk;
     signal input f;
+    signal input rowHash;                       // public: h = H(A, b) of the relation
     signal y[4];
     y[0] <== x[0]; y[1] <== x[1]; y[2] <== xp[0]; y[3] <== xp[1];
     // every secret entry is a signed 16-bit integer: e + 2^15 in [0, 2^16)
@@ -188,6 +198,19 @@ template Step(m) {
         rb[r] = Num2Bits(16); rb[r].in <== b[r] + 32768;
         for (var c = 0; c < 4; c++) { rA[r][c] = Num2Bits(16); rA[r][c].in <== A[r][c] + 32768; }
     }
+    // the row of the guarded update is secret but must not be free: without a public
+    // binding a prover may take A = 0 and b = 0, satisfy every row of the premise
+    // trivially, and the proof then says nothing about the modem machine. rowHash is the
+    // public digest h = H(A, b) of the program's chosen row, published with the circuit.
+    component rowH[m];
+    component allH = Poseidon(m);
+    for (var r = 0; r < m; r++) {
+        rowH[r] = Poseidon(5);
+        for (var c = 0; c < 4; c++) { rowH[r].inputs[c] <== A[r][c]; }
+        rowH[r].inputs[4] <== b[r];
+        allH.inputs[r] <== rowH[r].out;
+    }
+    allH.out === rowHash;
     // the rows: one product signal per entry, then the comparison with k = 34
     signal prod[m][4];
     component row[m];
@@ -202,11 +225,16 @@ template Step(m) {
     signal pk[2];
     pj[0] <== wj[0] * x[0];  pj[1] <== wj[1] * x[1];
     pk[0] <== wk[0] * xp[0]; pk[1] <== wk[1] * xp[1];
+    // f in {0, 1}: the relation asks for it and nothing else in this circuit does.
+    // Z12 enforces it with api.AssertIsLessOrEqual(c.F, 1) and Z13 with
+    // assert((f == 0) | (f == 1)); without the line here the three chapters constrain
+    // three different relations.
+    f * (f - 1) === 0;
     component rank = Leq(34);
     rank.a <== pk[0] + pk[1] + uk + f;
     rank.b <== pj[0] + pj[1] + uj;
 }
-component main {public [wj, uj, wk, uk, f]} = Step(5);
+component main {public [wj, uj, wk, uk, f, rowHash]} = Step(5);
 ```
 
 The prover script on the build laptop and the verifier page on the Pi share one module; `fe` reduces a signed integer into the field, which is how a negative entry of $`A_i`$ or $`b_i`$ is handed to the witness calculator.
@@ -214,17 +242,29 @@ The prover script on the build laptop and the verifier page on the Pi share one 
 ```javascript
 // zk08.mjs: prove on the build laptop (node), verify in the kiosk page (snarkjs.min.js, wasm)
 import * as snarkjs from "snarkjs";                      // v0.7.6
+import { buildPoseidon } from "circomlibjs";             // package name to verify
 import { readFileSync, writeFileSync } from "node:fs";
 
 const P = 21888242871839275222246405745257275088548364400416034343698204186575808495617n;
 const fe = (v) => (((BigInt(v) % P) + P) % P).toString();
 const mapDeep = (a) => Array.isArray(a) ? a.map(mapDeep) : fe(a);
 
+// h = H(A, b): the same digest the template constrains, over the same rows in the same
+// order. The circuit hashes each row of five entries and then the m row digests.
+export async function rowHash(A, b) {
+  const poseidon = await buildPoseidon();
+  const rows = A.map((row, r) => poseidon([...row.map(fe), fe(b[r])]));
+  return poseidon.F.toObject(poseidon(rows)).toString();
+}
+
+const A5 = [[1, 0, 0, 0], [-1, 0, 0, 0], [0, -1, 0, 1], [0, 1, 0, -1], [0, 1, 0, 0]];
+const b5 = [0, 0, 1, -1, 1];
+
 export const instance = {
-  x: [1, 0], xp: [2, 1],
-  A: [[-2, 0, 1, 0], [2, 0, -1, 0], [0, -1, 0, 1], [0, 1, 0, -1], [0, 1, 0, 0]],
-  b: [0, 0, 1, -1, 2],
+  x: [0, 0], xp: [3, 1],
+  A: A5, b: b5,
   wj: [0, -1], uj: 3, wk: [0, -1], uk: 3, f: 1,
+  rowHash: await rowHash(A5, b5),
 };
 
 export async function prove(input) {
@@ -236,11 +276,26 @@ export async function prove(input) {
   return { proof, publicSignals };
 }
 
+// The eight public signals are the statement. A verifier that fetches them beside the proof
+// checks only that some statement was proved; the ranking function, the fairness bit and the
+// row digest must be the ones the page itself holds. EXPECTED is the statement of the
+// published program, written into the page beside the verification key. ROW_HASH is the
+// digest rowHash(A, b) prints on the build laptop and is copied in here (to verify).
+const MINUS_ONE = "21888242871839275222246405745257275088548364400416034343698204186575808495616";
+const ROW_HASH = "<the value rowHash printed on the build laptop>";   // to verify
+const EXPECTED = ["0", MINUS_ONE, "3", "0", MINUS_ONE, "3", "1", ROW_HASH];
+// wj[0], wj[1], uj, wk[0], wk[1], uk, f, rowHash, in the circuit's own order (to verify)
+
 // in the kiosk page: window.snarkjs is the browser build, fetch replaces readFileSync
 export async function verifyInBrowser(repeats) {
   const vkey = await (await fetch("verification_key.json")).json();
   const proof = await (await fetch("proof.json")).json();
   const pub = await (await fetch("public.json")).json();
+  if (pub.length !== EXPECTED.length || pub.some((v, i) => String(v) !== EXPECTED[i])) {
+    document.getElementById("verdict").textContent = "reject: wrong statement";
+    document.getElementById("verdict").className = "no";
+    return false;
+  }
   const times = [];
   let ok = false;
   for (let i = 0; i < repeats; i++) {
@@ -280,7 +335,7 @@ None. The circuit is fixed by the relation and the witness is a transition the m
 ## Real, modelled, absent
 
 - **have:** real: the Pi 4B, the 7 inch DSI touchscreen and its display board, snarkjs v0.7.6 read on Friday 6 November 2026 \[[6](#references)\], circom and circomlib, Chromium on Raspberry Pi OS trixie
-- **learn:** modelled: the one-party powers-of-tau and phase-2 ceremony on the build laptop is a software stand-in for the multi-party ceremony a product needs, and is drawn dashed; every bar in the benchmark figure is an expected order of magnitude; the constraint count 727 is computed from the template and is to be confirmed by circom's own report
+- **learn:** modelled: the one-party powers-of-tau and phase-2 ceremony on the build laptop is a software stand-in for the multi-party ceremony a product needs, and is drawn dashed; every bar in the benchmark figure is an expected order of magnitude; the constraint count 727 is computed from the template's arithmetic rows and is to be confirmed by circom's own report, and the Poseidon row digest adds a count that has not been read
 - **absent:** absent: a second party for the ceremony; a hardware timer in the browser finer than `performance.now()`, whose resolution Chromium coarsens, which is why the verifier is timed over 64 repeats; a stacking header, which this chapter does not need since the header stays empty
 
 ## System architecture
@@ -341,7 +396,7 @@ stateDiagram-v2
 
 ![Figure 8.3. Which proof system for the step relation.](../figures/z08_tree.svg)
 
-*Figure 8.3. Which proof system for the step relation. The root diamond asks whether the statement is one of the paper's tailored sub-protocols (a range, an equality, a matrix product); yes leads to the leaf that says no SNARK, use the paper's own protocols of Sections [Project 5](05-farkas-witnesses-for-a-joystick-program.md) and [Project 7](07-the-esp32-proves-two-commitments-open-to-one.md). No leads to a diamond asking whether the circuit is fixed for the life of the product; yes leads to the Groth16 leaf of this chapter with its three elements and circuit-specific setup. No leads to a diamond asking whether a hand-written constraint system is acceptable; yes leads to the PLONK leaf of Section [Project 12](12-a-plonk-gate-for-the-inductive-step.md) with gnark and a universal setup, no to the Noir leaf of Section [Project 13](13-the-obligation-in-noir.md) with UltraHonk.*
+*Figure 8.3. Which proof system for the step relation. The root diamond asks whether the statement is one of the paper's tailored sub-protocols (a range, an equality, a matrix product); yes leads to the leaf that says no SNARK, use the paper's own protocols of Sections [Project 5](05-farkas-witnesses-for-a-joystick-program.md) and [Project 7](07-the-esp32-proves-one-secret-behind-two-public.md). No leads to a diamond asking whether the circuit is fixed for the life of the product; yes leads to the Groth16 leaf of this chapter with its three elements and circuit-specific setup. No leads to a diamond asking whether a hand-written constraint system is acceptable; yes leads to the PLONK leaf of Section [Project 12](12-a-plonk-gate-for-the-inductive-step.md) with gnark and a universal setup, no to the Noir leaf of Section [Project 13](13-the-obligation-in-noir.md) with UltraHonk.*
 
 ## Benchmark
 
@@ -351,9 +406,11 @@ stateDiagram-v2
 
 | **Quantity** | **Value** | **Status** | **Instrument** |
 | --- | --- | --- | --- |
-| constraints of `Step(5)` | 727 | computed: $`29 \cdot 17 + 5 \cdot (4 + 35) + 4 + 35`$ | none; to confirm with `snarkjs r1cs info` |
+| constraints of `Step(5)`, the arithmetic rows | 727 | computed: $`29 \cdot 17 + 5 \cdot (4 + 35) + 4 + 35`$ | none; to confirm with `snarkjs r1cs info` on a build with the row digest removed |
+| constraints of the boolean constraint on $`f`$ | 1 | computed: one row of (8.3) | none |
+| constraints of the Poseidon row digest | not measured, because the constraint count of circomlib's `Poseidon` at arity 5 has not been read on this bench | read, not computed | none; to read from circomlib, then to confirm as the difference of the two `snarkjs r1cs info` counts |
 | proof size | 128 bytes | computed: $`2 \cdot 32 + 64`$ for BN254 compressed $`\mathbb{G}_1, \mathbb{G}_2`$ | none; `proof.json` is larger because it is decimal text |
-| public signals | 7 field elements | computed: $`2 + 1 + 2 + 1 + 1`$ | none |
+| public signals | 8 field elements | computed: $`2 + 1 + 2 + 1 + 1 + 1`$ | none |
 | pairings per verification | 3 | computed from (8.7) | none |
 | ceremony time, build laptop | not measured |  | `time` around the two snarkjs phases |
 | prove time, build laptop | not measured |  | `performance.now()` around `fullProve`, 64 repeats |
@@ -366,9 +423,9 @@ For scale, the paper's own figures are for its tailored protocols and not for a 
 
 **Step 1.** On the authoring laptop, write `step.circom`, `zk08.mjs`, the kiosk page `zk08.html` with a large verdict element and a touch handler, and the `package.json` pinning `snarkjs` at 0.7.6; commit.
 
-**Step 2.** On the build laptop in WSL, `git pull --ff-only`, install circom and Node 22, compile the circuit, and record the constraint count that `snarkjs r1cs info` prints beside the computed 727.
+**Step 2.** On the build laptop in WSL, `git pull --ff-only`, install circom and Node 22, compile the circuit twice, once as printed and once with the row digest removed, and record both counts that `snarkjs r1cs info` prints: the second beside the computed 727 plus the one boolean constraint on $`f`$, and their difference as the Poseidon cost.
 
-**Step 3.** On the build laptop, run the two ceremony phases and the proof; copy `proof.json`, `public.json`, `verification_key.json`, `snarkjs.min.js` and the page to the Pi 4B.
+**Step 3.** On the build laptop, run the two ceremony phases and the proof; print the digest `rowHash` computed over the printed rows and write it into the page as `ROW_HASH` beside the key; copy `proof.json`, `public.json`, `verification_key.json`, `snarkjs.min.js` and the page to the Pi 4B.
 
 **Step 4.** On the Pi 4B with the touchscreen attached and the header empty, read `vcgencmd get_throttled`; serve the directory and open the page in kiosk mode.
 
@@ -376,11 +433,15 @@ For scale, the paper's own figures are for its tailored protocols and not for a 
 
 **Step 6.** On the build laptop, change one public signal in a copy of `public.json`, copy it to the Pi, and confirm reject on the screen; then change the witness to $`x' = (2, 0)`$ and confirm that `fullProve` fails at witness generation.
 
-**Step 7.** Repeat the 64 repeats on a second day; a median that moved by more than 15 percent is withdrawn and both figures are printed.
+**Step 7.** On the build laptop, prove a different statement honestly, with the ranking coefficients changed and a fresh matching `public.json`, copy both to the Pi, and confirm that the page shows "reject: wrong statement" because the fetched signals are not the ones it holds.
+
+**Step 8.** On the build laptop, keep the honest witness and $`f = 1`$ and set the public ranking function to the increasing one, $`w_j = w_k = (0, 1)`$ with $`u_j = u_k = 3`$; confirm that `fullProve` fails on the ranking comparison and on no premise row, which is the only case that reaches the conclusion. Then set the public $`f = 2`$ and confirm that it fails on the boolean constraint on $`f`$ instead.
+
+**Step 9.** Repeat the 64 repeats on a second day; a median that moved by more than 15 percent is withdrawn and both figures are printed.
 
 ## Acceptance test
 
-The chapter passes when the honest proof shows accept on the touchscreen, the proof with one public signal changed shows reject, the witness $`x' = (2, 0)`$ (no progress of $`\mathit{done}`$) is refused by the witness calculator with an assertion in `Num2Bits`, the circuit's reported constraint count is within 10 of the computed 727, the median `verify_ms` over 64 repeats has a median absolute deviation under 5 percent, and the throttle register reads 0x0 on both reads. It fails if any of those does not hold, or if the page is served from the build laptop rather than from the Pi, because then the WebAssembly might be fetched but the verifier would still run on the Pi while the measurement claims otherwise in the console line.
+The chapter passes when the honest proof shows accept on the touchscreen, the proof with one public signal changed shows reject, a freshly proved different statement shows "reject: wrong statement", the witness $`x' = (2, 0)`$ (no progress of $`\mathit{done}`$) is refused by the witness calculator with an assertion in `Num2Bits`, the honest witness under the increasing public ranking function $`w_j = w_k = (0, 1)`$ is refused on the ranking comparison and on no premise row, the honest witness with the public $`f = 2`$ is refused on the boolean constraint on $`f`$, the reported constraint count of the build without the row digest is within 10 of the computed 728, the median `verify_ms` over 64 repeats has a median absolute deviation under 5 percent, and the throttle register reads 0x0 on both reads. It fails if any of those does not hold, or if the page is served from the build laptop rather than from the Pi, because then the WebAssembly might be fetched but the verifier would still run on the Pi while the measurement claims otherwise in the console line.
 
 ## Variants
 
@@ -391,6 +452,8 @@ The chapter passes when the honest proof shows accept on the touchscreen, the pr
 - A negative integer written as `-1` in the input JSON reaches the witness calculator as a JavaScript number; `fe` reduces it into the field first so that the lemma's residue is the one the circuit sees.
 - A dot product written as one expression is refused by circom as non-quadratic; each product gets its own signal, which is why `Step(5)` has 24 product signals.
 - The range checks are the soundness of the comparison: without the $`k = 16`$ checks on the entries, a witness could use $`A_i`$ entries near $`p`$ and make every row hold modulo $`p`$ while failing over the integers; Lemma **Lemma Z8.5** needs its hypothesis.
+- A page that fetches the public signals from the same directory as the proof checks only that some statement was proved. The page holds `EXPECTED` and compares it before it calls `groth16.verify`, because the negative test that changes one signal in `public.json` tests tampering and not substitution: a prover who writes a fresh `public.json` and a matching fresh proof would otherwise be shown accept on any ranking function it liked.
+- The three circuits are presented as one relation written three times. They are not the same constraint system. The typed route of Section [Project 13](13-the-obligation-in-noir.md) gets its integer windows from the compiler and so protects the comparison against an out-of-range public coefficient, where Sections **Project 8** and [Project 12](12-a-plonk-gate-for-the-inductive-step.md) rest on the verifier pinning those coefficients inside $`I`$. The boolean constraint on $`f`$ is enforced by all three only with the line the Circom template now carries. And the three instantiate the relation's hash $`H`$ with the gadget their own toolchain ships, so the digest $`h`$ is not portable between them. A relation repeated word for word in prose is not a relation repeated in constraints, and the three chapters list their differences here rather than claiming none.
 - The one-party ceremony is a stand-in; a proof system whose toxic waste is held by the prover proves nothing to anyone else. The chapter draws the artefacts dashed for that reason.
 - Chromium's `performance.now()` is coarsened on purpose as a timing side channel defence; a single verification is therefore timed over 64 repeats and reported as a median, never as one reading.
 - The official display's touch needs the KMS overlay on trixie; if the panel lights but touch is dead, the `config.txt` overlay is the first check, not the ribbon.
@@ -420,10 +483,10 @@ The chapter passes when the honest proof shows accept on the touchscreen, the pr
 3. Eli Ben-Sasson, Alessandro Chiesa, Eran Tromer and Madars Virza. Succinct non-interactive zero knowledge for a von Neumann architecture. In USENIX Security 2014, pages 781 to 796. USENIX Association, 2014. [usenix.org, Security 2014](https://www.usenix.org/conference/usenixsecurity14/technical-sessions/presentation/ben-sasson) (to verify).
 4. Bryan Parno, Jon Howell, Craig Gentry and Mariana Raykova. Pinocchio: nearly practical verifiable computation. In IEEE Symposium on Security and Privacy 2013, pages 238 to 252. IEEE, 2013. [doi:10.1109/SP.2013.47](https://doi.org/10.1109/SP.2013.47) (to verify).
 5. Geoffroy Couteau, Michael Klooß, Huang Lin and Michael Reichle. Efficient range proofs with transparent setup from bounded integer commitments. In EUROCRYPT 2021, LNCS 12698, pages 247 to 277. Springer, 2021. [doi:10.1007/978-3-030-77883-5\_9](https://doi.org/10.1007/978-3-030-77883-5_9) (to verify).
-6. iden3. snarkjs: zkSNARK implementation in JavaScript and WebAssembly. Release v0.7.6, Monday 26 January 2026. [github.com/iden3/snarkjs, latest release](https://api.github.com/repos/iden3/snarkjs/releases/latest) (verified Friday 6 November 2026).
+6. iden3. snarkjs: zkSNARK implementation in JavaScript and WebAssembly. Release v0.7.6, Monday 26 January 2026. The licence is not recorded here because it has not been read; read it from the repository's LICENSE file (to verify). [github.com/iden3/snarkjs, latest release](https://api.github.com/repos/iden3/snarkjs/releases/latest) (verified Friday 6 November 2026).
 7. Advanced hardware-software architectures for edge artificial intelligence and zero-knowledge model checking. A design brief of twenty project sketches, read on Friday 6 November 2026 and held locally at `a local design brief`. It is the input to this second edition and is not a published source; where its hardware claims disagree with the bench, the bench is followed and the disagreement is stated.
-8. iden3. circom: a circuit compiler for zero-knowledge proofs. [github.com/iden3/circom](https://github.com/iden3/circom) (to verify).
+8. iden3. circom: a circuit compiler for zero-knowledge proofs. The licence is not recorded here because it has not been read; read it from the repository's LICENSE file (to verify). [github.com/iden3/circom](https://github.com/iden3/circom) (to verify).
 
 ---
 
-[Previous](07-the-esp32-proves-two-commitments-open-to-one.md) &nbsp;&nbsp;|&nbsp;&nbsp; [Contents](../CONTENTS.md) &nbsp;&nbsp;|&nbsp;&nbsp; [Next](09-nova-versus-one-shot-folding-on-a-pi.md)
+[Previous](07-the-esp32-proves-one-secret-behind-two-public.md) &nbsp;&nbsp;|&nbsp;&nbsp; [Contents](../CONTENTS.md) &nbsp;&nbsp;|&nbsp;&nbsp; [Next](09-nova-versus-one-shot-folding-on-a-pi.md)

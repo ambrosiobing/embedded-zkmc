@@ -386,4 +386,4 @@ The chapter passes when both logs hold thirteen `zk06 N=` lines whose $`|K|`$ va
 
 ---
 
-[Previous](05-farkas-witnesses-for-a-joystick-program.md) &nbsp;&nbsp;|&nbsp;&nbsp; [Contents](../CONTENTS.md) &nbsp;&nbsp;|&nbsp;&nbsp; [Next](07-the-esp32-proves-two-commitments-open-to-one.md)
+[Previous](05-farkas-witnesses-for-a-joystick-program.md) &nbsp;&nbsp;|&nbsp;&nbsp; [Contents](../CONTENTS.md) &nbsp;&nbsp;|&nbsp;&nbsp; [Next](07-the-esp32-proves-one-secret-behind-two-public.md)

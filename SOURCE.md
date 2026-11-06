@@ -16,7 +16,7 @@ the page.
 
 ## Where the rest of the reference list is
 
-All 144 entries are in [`chapters/25-appendix.md`](chapters/25-appendix.md), numbered, and
+All 145 entries are in [`chapters/25-appendix.md`](chapters/25-appendix.md), numbered, and
 each chapter repeats the subset it cites at its own foot so that a chapter read on its own
 is complete. Every entry carries one of two marks:
 
@@ -43,12 +43,18 @@ not fit on a board with 512 MB, which chapter 22 works out as a lemma.
 
 ## Licences of the work this volume leans on
 
-Every chapter's reference list records the licence of each implementation it names, because
-a reader who builds on a chapter and publishes the result needs to know what that commits
-them to before writing code around a dependency. The software entries span MIT, Apache 2.0
-and GNU GPL version 3; the model entries span Apache 2.0, the Llama community licence and
-the Gemma terms, and the two under a licence that forbids redistribution are linked rather
-than mirrored.
+A reader who builds on a chapter and publishes the result needs to know what that commits
+them to before writing code around a dependency, so the reference list records a licence
+wherever one has been read. Fourteen of the 145 entries do. Three of those record a
+licence read from the project itself, MIT for two and GNU GPL version 3 for one; the rest
+name the file in which the licence is stated and say plainly that it has not yet been
+read. No identifier is guessed, because a guessed licence is worse than an admitted gap
+for exactly the reader this paragraph is written for.
+
+This paragraph previously claimed that every entry recorded a licence and named the Llama
+community licence and the Gemma terms. Neither appears anywhere in this volume's
+reference list; the sentence had travelled from a sibling volume that does carry model
+weights. It was corrected on Friday 6 November 2026.
 
 ## What is absent, and why that is written down
 

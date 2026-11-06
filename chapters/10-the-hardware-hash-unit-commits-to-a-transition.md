@@ -18,7 +18,7 @@
 > - **Secret:** the log: the sequence of rows $`(i, s_i, s_{i+1})`$ with their salts $`r_i`$
 > - **Public:** the Merkle root, 32 bytes; later, membership openings for at most eight rows per root, each a row, its salt and ten sibling hashes
 > - **Model:** none
-> - **Acceptance:** the hash unit's digest of the three bytes `abc` equals the published SHA-256 test vector and the Pi's `hashlib` digest byte for byte; in a disclosure run the Pi recomputes the root of 1024 rows and matches it; eight openings verify and two altered openings are refused; DWT and MCC 118 agree within 2 percent on the tree build
+> - **Acceptance:** the hash unit's digest of the three bytes `abc` equals the published SHA-256 test vector and the Pi's `hashlib` digest byte for byte; in a disclosure run the Pi recomputes the root of 1024 rows and matches it; eight openings verify and two altered openings are refused; and the DWT cycle count and the MCC 118 marker interval agree within 2 percent on the tree build, which is attainable only for an interval of at least 1000 microseconds, that is 280000 cycles at 280 MHz. The resolution is computed, not assumed: the MCC 118 samples one channel every 10 microseconds, so an interval read from two marker edges carries up to two sample periods of quantisation, and for that to be 2 percent or less the interval must exceed 1000 microseconds. This chapter's build is expected to clear the floor but not by much: $`1024 \cdot 1 + 1023 \cdot 2 = 3070`$ compressed blocks is $`3070 \times 64 = 196480`$ bytes, which at the expected HASH throughput of $`10^7`$ to $`10^8`$ bytes per second is 1.96 to 19.6 milliseconds, so the fast end sits at $`20 / 1960 = 1.0`$ percent of the interval, inside the criterion with no margin (all computed). If the build is measured below 1000 microseconds the marker is held over a block of $`N`$ consecutive builds rather than one, as [Project 1](01-the-price-list.md) does for its sub-100-microsecond operations, $`N`$ is chosen so that the block exceeds 1 millisecond, and the published figure names the block size
 > - **Difficulty:** 3 of 5
 > - **Effort:** one evening for the HAL hash and RNG bring-up on the build laptop, one evening for the state machine and the tree, one afternoon on the bench with the Pi recomputing roots
 
@@ -138,7 +138,8 @@ static uint8_t    nodes[2 * ROWS][32];   /* nodes[1] is the root; leaves at ROWS
 
 uint8_t  imu_read_reg(uint8_t addr, uint8_t reg);
 uint32_t imu_deviation_mg(void);
-void     to_hex_line(uint8_t *out, const char *prefix, const uint8_t d[32]);
+size_t   to_hex_line(uint8_t *out, size_t cap, const char *prefix, const uint8_t d[32],
+                     uint32_t rows);   /* returns the byte count written, CR LF included */
 void     serve_requests(void);            /* open i (eight per root), disclose */
 
 static void sha256(const uint8_t *in, uint32_t len, uint8_t out[32])
@@ -210,9 +211,10 @@ static enum state step(enum state s, uint32_t dev_mg, uint32_t *run)
 int main(void)
 {
     static const uint8_t abc[3] = { 'a', 'b', 'c' };
-    uint8_t digest[32], line[8 + 64 + 12];
+    uint8_t digest[32], line[96];
     HAL_Init(); SystemClock_Config(); MX_GPIO_Init(); MX_I2C1_Init(); MX_USB_DEVICE_Init();
     __HAL_RCC_HASH_CLK_ENABLE(); __HAL_RCC_RNG_CLK_ENABLE();
+    hhash.Instance = HASH;                   /* without this the handle's register base is 0 */
     hhash.Init.DataType = HASH_DATATYPE_8B;
     hrng.Instance = RNG;
     if (HAL_HASH_Init(&hhash) != HAL_OK || HAL_RNG_Init(&hrng) != HAL_OK) for (;;) {}
@@ -231,8 +233,9 @@ int main(void)
     HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_4);
     build_tree();
     HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_4);
-    to_hex_line(line, "zk10 root=", nodes[1]);
-    CDC_Transmit_FS(line, sizeof line);
+    /* "zk10 root=" is 10 bytes, the digest is 64 hex, " rows=1024\r\n" is 12: 86 in all */
+    size_t n_line = to_hex_line(line, sizeof line, "zk10 root=", nodes[1], ROWS);
+    CDC_Transmit_FS(line, (uint16_t)n_line);
     for (;;) serve_requests();
 }
 ```
@@ -258,7 +261,7 @@ None. The log is produced by the state machine and committed by arithmetic; noth
 
 - **have:** real: the Nucleo with its HASH and RNG units, the IKS5A1 with the LSM6DSO16IS at 0x6b and the 0x73 part at 0x6a (both measured on Tuesday 27 October 2026), the Pi 4B, the MCC 118 live since Friday 9 October 2026
 - **learn:** modelled: every bar in the benchmark figure is the order of magnitude from the reference manual's cycles-per-block figure for the HASH unit (to verify in RM0455 \[[7](#references)\]) against a software SHA-256 count of about 15 to 20 cycles per byte on a Cortex-M7, drawn dashed; the HAL function names and the generated initialisation are to be read from the HAL sources before the build
-- **absent:** absent: a signature on the root, so the root's integrity over USB is not authenticity ([Project 18](18-a-proof-over-the-wire.md) says what a signature adds); a kernel driver for the 0x6a part, so the Pi cannot cross-read that sensor and the firmware uses it only to identify the shield; an oscilloscope, so the tree-build marker is witnessed at 10 microseconds
+- **absent:** absent: a signature on the root, so the root's integrity over USB is not authenticity ([Project 18](18-a-proof-over-the-wire.md) says what a signature adds); a kernel driver for the 0x6a part, so the Pi cannot cross-read that sensor and the firmware uses it only to identify the shield; an oscilloscope, so the tree-build marker is witnessed at 10 microseconds; a timer-driven sampling loop, so the listing's period is 20 ms plus the work and the row count is a count of periods rather than elapsed time
 
 ## System architecture
 
@@ -319,7 +322,7 @@ stateDiagram-v2
   Cooldown --> Cooldown : any movement resets the count
 ```
 
-The second diagram is the device's own machine, the thing the log records: each arrow taken is one row $`(i, s_i, s_{i+1})`$, and a row with $`s_i = s_{i+1}`$ is a self-loop, which the log records too, so that the row count is the elapsed time.
+The second diagram is the device's own machine, the thing the log records: each arrow taken is one row $`(i, s_i, s_{i+1})`$, and a row with $`s_i = s_{i+1}`$ is a self-loop, which the log records too, so that the row count is a count of sampling periods. It is not elapsed time unless the period is held by a timer. The listing above closes its loop with `HAL_Delay(20)` after the sensor read and the eight random-number draws, so the period is 20 ms plus the work and plus up to one millisecond of `HAL_Delay` granularity, and the drift accumulates over 1024 rows. The $`1024 \times 20 = 20.48`$ seconds that step 4 waits for is therefore a floor and not an estimate (computed), and the state machine's two counters, eight rows above 400 mg and fifty quiet rows, are the 160 ms and the one second the Pitch claims only if the period is held. The per-row period is **not measured, no run and no timer in the listing to measure it against**; driving the sampling loop from a hardware timer at 50 Hz and refusing a run with a missed period is the repair, and it is recorded in the absent list above rather than written into the listing.
 
 ## Decision tree
 
@@ -338,7 +341,7 @@ The second diagram is the device's own machine, the thing the log records: each 
 | HASH unit, long buffer, DMA | $`10^7`$ to $`10^8`$ B/s | not measured | DWT around a 64 kB buffer, 64 repeats, median |
 | software SHA-256, long buffer | $`10^7`$ B/s | not measured | DWT, the same buffer, the same repeats; the routine is the one of the firmware volume |
 | HASH unit, one 39-byte leaf | $`10^6`$ to $`10^7`$ B/s | not measured | DWT around one `HAL_HASHEx_SHA256_Start` call |
-| tree build, 1024 rows | 2047 calls | not measured | DWT and the MCC 118 marker; must agree within 2 percent |
+| tree build, 1024 rows | 2047 calls | not measured, no run | DWT and the MCC 118 marker; must agree within 2 percent, which needs an interval over 1000 microseconds, that is 280000 cycles at 280 MHz, or a block of $`N`$ builds under one marker |
 | root check on the Pi 4B | under 10 ms | not measured | `time.perf_counter` around `hashlib`, 64 repeats |
 | opening, bytes | 358 | computed | Lemma **Lemma Z10.6** |
 
@@ -362,7 +365,7 @@ The paper's Table 1 has no column for a hash commitment; the paper hashes only i
 
 ## Acceptance test
 
-The chapter passes when the HASH unit's digest of `abc` begins `ba7816bf` and equals `hashlib`'s 32 bytes, when one disclosure run of 1024 rows rebuilds in Python to the root the board sent, when eight openings verify and the two altered ones are refused, when the ninth request is refused, and when the DWT count of the tree build divided by 280 MHz agrees with the MCC 118 interval within 2 percent. It fails if any digest differs in one byte, if an altered opening verifies, if the board starts against WHO\_AM\_I bytes other than 0x73 and 0x22, or if two roots over different logs ever coincide, which by Corollary **Corollary Z10.4** would be a SHA-256 collision and would be reported as such.
+The chapter passes when the HASH unit's digest of `abc` begins `ba7816bf` and equals `hashlib`'s 32 bytes, when one disclosure run of 1024 rows rebuilds in Python to the root the board sent, when eight openings verify and the two altered ones are refused, when the ninth request is refused, and when the DWT count of the tree build divided by 280 MHz agrees with the MCC 118 interval within 2 percent, the interval being over 1000 microseconds so that the instrument's two sample periods of quantisation are inside that 2 percent, or else the marker being held over a block of $`N`$ builds whose size is published beside the figure. It fails if any digest differs in one byte, if an altered opening verifies, if the board starts against WHO\_AM\_I bytes other than 0x73 and 0x22, or if two roots over different logs ever coincide, which by Corollary **Corollary Z10.4** would be a SHA-256 collision and would be reported as such.
 
 ## Variants
 

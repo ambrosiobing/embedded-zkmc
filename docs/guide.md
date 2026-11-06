@@ -177,7 +177,7 @@ Four groupings cut across the table and are worth knowing before choosing. Z1 an
 
 ### Z19. A commitment over NB-IoT and the energy per proof byte
 
-- **Assumes** the commitment of [Project 2](../chapters/02-a-sensor-reading-committed-on-the-microcontroller.md) and the transport discipline of [Project 18](../chapters/18-a-proof-over-the-wire.md); the proof it later carries is the one of [Project 4](../chapters/04-two-group-elements.md) or [Project 20](../chapters/20-the-occupancy-counter-that-proves-it-stayed-under.md).
+- **Assumes** the commitment of [Project 2](../chapters/02-a-sensor-reading-committed-on-the-microcontroller.md) and the transport discipline of [Project 18](../chapters/18-a-proof-over-the-wire.md); the proof it later carries is the one of [Project 4](../chapters/04-two-group-elements.md) or [Project 20](../chapters/20-the-occupancy-counter-that-proves-its-committed-count.md).
 - **The idea** is that privacy has a price in joules on a battery-class radio, and that the price is per payload byte, so a constant-size proof is an energy argument and not only a bandwidth one.
 - **Read first** the four radio windows the energy figure is split into, because an aggregate figure over a whole send hides which window a design change would move.
 - **The trap** is the meter's own limit: the current meter on the bench cannot meter a Raspberry Pi under load, so a trace taken on the board's own supply is a different and wrong quantity, and only the module's supply may be metered.

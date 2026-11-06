@@ -13,7 +13,7 @@
 > - **Board:** Raspberry Pi 4 Model B Rev 1.4 (8 GB), card A, address \<pi4b\>; Raspberry Pi 3 Model B Rev 1.2 (1 GB) as a second verifier running the same binary
 > - **Parts:** two Joy-it LEDs: green on BCM 17 (header pin 11) for accept, red on BCM 22 (header pin 15) for reject, grounds on pins 9 and 14; the files `zk03_proof.bin` (192 bytes) and `zk03_setup.bin` from [Project 3](03-the-modems-backoff-machine.md)
 > - **Interface:** SSH to both Pis; the two files by `scp` or, in [Project 18](18-a-proof-over-the-wire.md), over the CAN bus; the verdict on the LEDs and on `stdout`
-> - **Language and library:** C17 with `blst` v0.3.17 \[[7](#references)\] (pairing API: `blst_p1_affine`, `blst_miller_loop`, `blst_final_exp`, `blst_fp12_finalverify`) and `libgpiod` 2.x for the LEDs (names to verify)
+> - **Language and library:** C17 with `blst` v0.3.17 \[[8](#references)\] (pairing API: `blst_p1_affine`, `blst_miller_loop`, `blst_final_exp`, `blst_fp12_finalverify`) and `libgpiod` 2.x for the LEDs (names to verify)
 > - **Primitive:** KZG batch opening and its verification: the vanishing check of the paper's relation $`R_{\mathrm{eval}}`$ \[[1](#references), [2](#references)\]
 > - **Secret:** none on this board
 > - **Public:** $`c_{S_0}, c_T`$, the sets $`E_{\mathrm{init}}`$ (16 points) and $`E_{\mathrm{step}} \cup E_{\mathrm{fair}}`$ (8088 points), the proof $`\pi = (\pi_{S_0}, \pi_T)`$, the setup
@@ -36,7 +36,7 @@ The paper's explicit-state scheme ends in one sentence: the proof is two group e
 | red LED, Joy-it | reject, and any refusal before the pairings | GPIO, driven high | BCM 22, header pin 15; ground pin 14 |
 | `zk03_proof.bin` | $`c_{S_0} \Vert c_T \Vert \pi_{S_0} \Vert \pi_T`$, 192 bytes | file | from [Project 3](03-the-modems-backoff-machine.md) by `scp`, or from [Project 18](18-a-proof-over-the-wire.md) over CAN |
 | `zk03_setup.bin` | the toy setup: $`\omega`$, 65538 $`\mathbb{G}_1`$ powers, 8089 $`\mathbb{G}_2`$ powers | file | from [Project 3](03-the-modems-backoff-machine.md) |
-| `blst` v0.3.17 | pairings, $`\mathbb{G}_2`$ arithmetic, field arithmetic | static library, cross built | \[[7](#references)\] |
+| `blst` v0.3.17 | pairings, $`\mathbb{G}_2`$ arithmetic, field arithmetic | static library, cross built | \[[8](#references)\] |
 | `libgpiod` 2.x | the LED lines | the Pi's own package, linked through a sysroot | (to verify) |
 | the build laptop, WSL side | every compile | LAN | \<build-laptop\> |
 
@@ -45,13 +45,15 @@ The paper's explicit-state scheme ends in one sentence: the proof is two group e
 The verifier holds no witness. It decides membership in the statement side of the paper's evaluation relation \[[1](#references)\], written for a vanishing set:
 
 ```math
-R_{\mathrm{eval}} = \mathsf{PoK}\Big\{\, \underbrace{(p, b)}_{w} ;\; \underbrace{(c_p, E)}_{u} \;:\;
-    c_p = \mathsf{Com}(p; b) \;\wedge\; \forall e \in E .\; p(e) = 0 \,\Big\},
+R_{\mathrm{eval}} = \mathsf{PoK}\Big\{\, \underbrace{(p, b_0, b_1)}_{w} ;\;
+    \underbrace{(c_p, E)}_{u} \;:\;
+    \deg p < n \;\wedge\; \forall e \in E .\; p(e) = 0 \;\wedge\;
+    c_p = \mathsf{Com}\big(p + (b_0 + b_1 X)(X^{n} - 1)\big) \,\Big\},
 ```
 
 *(4.1)*
 
-twice: once with $`u_1 = (c_{S_0}, E_{\mathrm{init}})`$ and $`\pi_{S_0}`$, once with $`u_2 = (c_T, E_{\mathrm{step}} \cup E_{\mathrm{fair}})`$ and $`\pi_T`$. The sets of this project are
+where $`n`$ is the order of the interpolation domain of [Project 3](03-the-modems-backoff-machine.md) ($`n = 256`$ for $`c_{S_0}`$, $`n = 65536`$ for $`c_T`$), $`E`$ is a subset of that domain, and $`(b_0, b_1)`$ is the mask of Remark rem:z03\_blind. The witness carries $`b_0`$ and $`b_1`$ and not a single opening scalar $`b`$, because the commitment of Definition **Definition Z4.2** is a deterministic function of its argument: all the randomness of this relation lives inside the committed polynomial. The degree bound belongs in the relation because the verifier cannot check it and the soundness argument of Remark **Remark Z4.5** needs it. The relation is read twice: once with $`u_1 = (c_{S_0}, E_{\mathrm{init}})`$ and $`\pi_{S_0}`$, once with $`u_2 = (c_T, E_{\mathrm{step}} \cup E_{\mathrm{fair}})`$ and $`\pi_T`$. The sets of this project are
 
 ```math
 \begin{gathered}
@@ -64,15 +66,19 @@ u \in \mathbb{G}_1 \times \mathbb{G}_1 \times 2^{\mathbb{F}_r} \times 2^{\mathbb
 
 and the verdict is $`\mathsf{Verify}(c_{S_0}, E_{\mathrm{init}}, \pi_{S_0}) \wedge \mathsf{Verify}(c_T, E_{\mathrm{step}} \cup E_{\mathrm{fair}}, \pi_T)`$. The sets $`E_\star`$ are not read from the file: the verifier recomputes them from the certificate exactly as [Project 3](03-the-modems-backoff-machine.md) does, and refuses if its counts differ from the prover's printed 16 and 8088.
 
+**What the verdict does and does not say.** The two checks decide that the polynomial behind $`c_T`$ vanishes on $`E_{\mathrm{step}} \cup E_{\mathrm{fair}}`$ and the polynomial behind $`c_{S_0}`$ on $`E_{\mathrm{init}}`$. They do not decide that either polynomial is the indicator function of a set, because nothing in Equation 4.2 constrains the committed polynomial's values away from $`E`$. A prover that commits the zero polynomial passes both checks: $`Z_E`$ divides $`0`$ for every $`E`$, so $`\pi = g_1^{0}`$ is accepted, and the "committed system" is then the one with no initial state and no transition, which satisfies every liveness property vacuously. The step from an accepted verdict to "the committed system satisfies $`\phi`$" therefore needs one further obligation, that $`p_{S_0}`$ and $`p_T`$ take values in $`\{0, 1\}`$ on the whole interpolation domain, which this chapter does not check and which the bench has no instrument for. Until it is added, read the verdict as a statement about whichever polynomial $`c_T`$ commits to, bound to the prover by Theorem thm:z01\_binding and no more. This is a separate gap from the ceremony of Remark **Remark Z4.5** and is not closed by a real ceremony.
+
 ## The mathematics
 
-**Definition Z4.1 (Bilinear pairing).** Let $`\mathbb{G}_1, \mathbb{G}_2, \mathbb{G}_T`$ be cyclic groups of prime order $`r`$ with generators $`g_1, g_2`$ and $`g_T = e(g_1, g_2)`$. A pairing is a map $`e : \mathbb{G}_1 \times \mathbb{G}_2 \to \mathbb{G}_T`$ that is bilinear, $`e(g_1^a, g_2^b) = e(g_1, g_2)^{ab}`$ for all $`a, b \in \mathbb{F}_r`$, and non-degenerate, $`e(g_1, g_2) \ne 1`$ \[[4](#references)\]. On BLS12-381 a $`\mathbb{G}_1`$ element compresses to 48 bytes and a $`\mathbb{G}_2`$ element to 96 bytes \[[7](#references)\], which is why the proof file of [Project 3](03-the-modems-backoff-machine.md) is $`4 \times 48 = 192`$ bytes (computed).
+**Definition Z4.1 (Bilinear pairing).** Let $`\mathbb{G}_1, \mathbb{G}_2, \mathbb{G}_T`$ be cyclic groups of prime order $`r`$ with generators $`g_1, g_2`$ and $`g_T = e(g_1, g_2)`$. A pairing is a map $`e : \mathbb{G}_1 \times \mathbb{G}_2 \to \mathbb{G}_T`$ that is bilinear, $`e(g_1^a, g_2^b) = e(g_1, g_2)^{ab}`$ for all $`a, b \in \mathbb{F}_r`$, and non-degenerate, $`e(g_1, g_2) \ne 1`$ \[[5](#references)\]. On BLS12-381 a $`\mathbb{G}_1`$ element compresses to 48 bytes and a $`\mathbb{G}_2`$ element to 96 bytes \[[8](#references)\], which is why the proof file of [Project 3](03-the-modems-backoff-machine.md) is $`4 \times 48 = 192`$ bytes (computed).
 
 **Definition Z4.2 (KZG commit, open, batch open).** Let $`\tau \in \mathbb{F}_r`$ be the setup secret and $`\mathsf{sp} = \big((g_1^{\tau^i})_{0 \le i \le d},\, (g_2^{\tau^i})_{0 \le i \le m}\big)`$ the public setup \[[2](#references)\]. For $`p(X) = \sum_{i=0}^{d} a_i X^i \in \mathbb{F}_r[X]`$:
 
 ```math
 \begin{aligned}
-\mathsf{Com}(p) &= \prod_{i=0}^{d} \big(g_1^{\tau^i}\big)^{a_i} = g_1^{p(\tau)}, \\
+\mathsf{Com}(p) &= \prod_{i=0}^{d} \big(g_1^{\tau^i}\big)^{a_i} = g_1^{p(\tau)}
+    \quad \text{(deterministic in $p$)},
+    \\
   \mathsf{Open}(p, z) &= g_1^{q_z(\tau)} \text{ with } q_z(X) = \frac{p(X) - p(z)}{X - z}, \qquad
     \text{checked by } e\big(c_p \cdot g_1^{-p(z)}, g_2\big) = e\big(\pi, g_2^{\tau} \cdot g_2^{-z}\big), \\
   \mathsf{BatchOpen}(p, E) &= g_1^{q(\tau)} \text{ with } q(X) = \frac{p(X)}{Z_E(X)}, \quad
@@ -82,7 +88,7 @@ and the verdict is $`\mathsf{Verify}(c_{S_0}, E_{\mathrm{init}}, \pi_{S_0}) \wed
 
 *(4.2)*
 
-Equation 4.2 is the special case of KZG batch opening in which every claimed value is zero, the case the paper's Section 4 singles out \[[1](#references)\]; it needs $`|E| \le m`$ so that $`g_2^{Z_E(\tau)}`$ can be formed from the setup.
+The commitment of (4.2) is deterministic in $`p`$ and so is not hiding on its own. The mask that makes it hiding, and the argument for it, are Remark rem:z03\_blind. Equation 4.2 is the special case of KZG batch opening in which every claimed value is zero, the case the paper's Section 4 singles out \[[1](#references)\]; it needs $`|E| \le m`$ so that $`g_2^{Z_E(\tau)}`$ can be formed from the setup.
 
 **Theorem Z4.3 (Correctness of the vanishing check).** Let $`E \subseteq \mathbb{F}_r`$ be a finite set of distinct elements and $`p \in \mathbb{F}_r[X]`$ with $`\deg p \le d`$. If $`p(e) = 0`$ for every $`e \in E`$, then (i) $`Z_E`$ divides $`p`$ in $`\mathbb{F}_r[X]`$, and (ii) with $`q = p / Z_E`$ and $`\pi = g_1^{q(\tau)}`$ the equation $`e(\mathsf{Com}(p), g_2) = e(\pi, g_2^{Z_E(\tau)})`$ holds. Hence an honest prover is always accepted.
 
@@ -100,7 +106,7 @@ e(\mathsf{Com}(p), g_2) &= e\big(g_1^{p(\tau)}, g_2\big) = e(g_1, g_2)^{p(\tau)}
 
 which is the verifier's equation. An honest prover computes exactly this $`\pi`$, so the check passes. &#9632;
 
-**Lemma Z4.4 (The vanishing element is public and cheap).** Given $`E`$ with $`|E| = n \le m`$ and the setup, the coefficients $`z_0, \dots, z_n`$ of $`Z_E`$ are computable with $`n(n+1)/2`$ multiplications and as many additions in $`\mathbb{F}_r`$, and $`g_2^{Z_E(\tau)}`$ with $`n + 1`$ scalar multiplications and $`n`$ additions in $`\mathbb{G}_2`$, that is, $`O(n)`$ group operations; neither step uses $`\tau`$ or any secret.
+**Lemma Z4.4 (The vanishing element is public and cheap).** Given $`E`$ with $`|E| = n \le m`$ and the setup, the coefficients $`z_0, \dots, z_n`$ of $`Z_E`$ are computable with $`n(n+1)/2`$ multiplications and $`n(n-1)/2`$ subtractions in $`\mathbb{F}_r`$, and $`g_2^{Z_E(\tau)}`$ with $`n + 1`$ scalar multiplications and $`n`$ additions in $`\mathbb{G}_2`$, that is, $`O(n)`$ group operations; neither step uses $`\tau`$ or any secret.
 
 *Proof.* Order $`E = \{e_1, \dots, e_n\}`$ and let $`Z_k = \prod_{i \le k}(X - e_i)`$, so $`Z_0 = 1`$ and $`Z_n = Z_E`$. If $`Z_{k-1} = \sum_{j=0}^{k-1} z_j X^j`$ then
 
@@ -118,7 +124,7 @@ g_2^{Z_E(\tau)} = g_2^{\sum_{j=0}^{n} z_j \tau^j} = \prod_{j=0}^{n} \big(g_2^{\t
 
 one scalar multiplication per term and one group addition to fold each product in, which is $`n + 1`$ scalar multiplications and $`n`$ additions. Every input is public. &#9632;
 
-**Remark Z4.5 (The trusted setup and the assumption the bench cannot buy).** Soundness of Equation 4.2, the statement that a prover who does not hold a vanishing $`p`$ cannot produce an accepted $`\pi`$, rests on the $`q`$-strong Diffie-Hellman assumption in the bilinear group and on $`\tau`$ being unknown to every party \[[2](#references)\]; the paper assumes the setup is produced by a multi-party powers-of-tau ceremony and treats it as part of $`\mathsf{sp}`$ \[[1](#references)\]. The setup this chapter reads was written by [Project 3](03-the-modems-backoff-machine.md)'s own script, which drew $`\tau`$ from `/dev/urandom` and printed it. So the verdict below is correct as a computation and worthless as a proof to anyone but the bench: whoever reads the setup log can open $`c_T`$ to a polynomial that vanishes anywhere. The acceptance test keeps this visible by also running a forged proof made with the printed $`\tau`$, which must be accepted, so that nobody mistakes the green LED for a security claim.
+**Remark Z4.5 (The trusted setup and the assumption the bench cannot buy).** Soundness of Equation 4.2 comes in two strengths and the chapter needs the stronger one. The weaker statement, evaluation binding, is that no prover opens one commitment to two different values at one point; it rests on the $`q`$-strong Diffie-Hellman assumption in the bilinear group and on $`\tau`$ being unknown to every party \[[2](#references)\]. The statement this chapter's verdict needs is knowledge soundness: that from an accepted $`(c_p, \pi)`$ one can extract a polynomial $`p`$ of degree at most $`d`$ with $`c_p = g_1^{p(\tau)}`$ and $`Z_E \mid p`$. Extraction of $`p`$ from a single group element is not implied by $`q`$-strong Diffie-Hellman; it needs an extractability assumption, either the algebraic group model or a power knowledge-of-exponent assumption, which is how the KZG-based arguments in the literature obtain it \[[4](#references), [3](#references)\]. Granting extraction, the rest is a polynomial identity: $`p(\tau) = Z_E(\tau) q(\tau)`$ with $`\deg(p - Z_E q) \le d`$ forces $`p = Z_E q`$ unless $`\tau`$ is a root of the difference, which happens with probability at most $`d / r`$ for a $`\tau`$ the prover does not know. The paper assumes the setup is produced by a multi-party powers-of-tau ceremony and treats it as part of $`\mathsf{sp}`$ \[[1](#references)\]. The setup this chapter reads was written by [Project 3](03-the-modems-backoff-machine.md)'s own script, which drew $`\tau`$ from `/dev/urandom` and printed it. So the verdict below is correct as a computation and worthless as a proof to anyone but the bench: whoever reads the setup log can open $`c_T`$ to a polynomial that vanishes anywhere. The acceptance test keeps this visible by also running a forged proof made with the printed $`\tau`$, which must be accepted, so that nobody mistakes the green LED for a security claim.
 
 ## The protocol
 
@@ -331,7 +337,7 @@ stateDiagram-v2
 | setup read |  | 8089 $`\mathbb{G}_2`$ decompressions | same | `blst_p2_uncompress` |
 | throttle word |  | not read yet | not read yet | `vcgencmd get_throttled` before and after |
 
-The paper's verifier column runs from 20 ms at $`|S| = 2^5`$ to 590 ms at $`|S| = 2^{9.6}`$ \[[1](#references)\]; on the paper's machine the pairings are a small constant inside those figures and the growth is the batch work. On the Pi the same split holds, and [Project 1](01-the-price-list.md)'s price list is the number that turns 8106 scalar multiplications in $`\mathbb{G}_2`$ into seconds.
+The paper's verifier column runs from 20 ms at $`|S| = 2^5`$ to 590 ms at $`|S| = 2^{9.6}`$ \[[1](#references)\]; on the paper's machine the pairings are a small constant inside those figures and the growth is the batch work. On the Pi the same split holds, so the figure that would turn 8106 scalar multiplications in $`\mathbb{G}_2`$ into seconds is the second-group row of [Project 1](01-the-price-list.md)'s price list, and that row reads **not measured** on every board: the harness that would fill it has not been built. A second-group scalar multiplication is not priced by the first-group row either, since a $`\mathbb{G}_2`$ coordinate of BLS12-381 lies in $`\mathbb{F}_{p^2}`$, so no seconds figure for this verifier exists anywhere in the volume and none is asserted here.
 
 ## Steps
 
@@ -355,7 +361,7 @@ The chapter passes when (i) the generator round-trip of Step 3 agrees byte for b
 
 ## Variants
 
-**The verifier as a zkVM guest.** The swap is what the board produces: the same two pairing equations are compiled to RISC-V and executed inside a zero-knowledge virtual machine \[[9](#references)\], so the artefact is no longer the word `accept` on a terminal but a proof that the verifier ran and accepted, which is the design brief's third sketch \[[8](#references)\]. In the parts this replaces `blst`'s aarch64 assembly with a portable build for the guest's instruction set, and it moves the green and red LEDs from this verifier to whichever board checks the guest's proof. What it buys is a verdict a third party can check without watching the board, and the artefact stays small: a Groth16 proof over BLS12-381 is two compressed $`\mathbb{G}_1`$ elements of 48 bytes and one compressed $`\mathbb{G}_2`$ element of 96 bytes, so $`48 + 48 + 96 = 192`$ bytes, computed, exactly the length of the file this chapter already reads \[[3](#references)\]. What it costs is the whole difference between running a program and proving it, because every guest instruction becomes committed trace rows; [Project 21](21-a-zero-knowledge-virtual-machine-on-the-bench.md) counts that factor rather than assuming it, and its cells read **not measured** until the guest has run on this bench. Choose it when the party that must be convinced cannot watch the board, and keep this chapter's C verifier when that party is the one asking the question. The brief carries the wrapped proof outward over an LTE link from a 4G HAT; no SIM is on the bench and nothing in this volume goes outward, so the guest's proof is a file checked on the Pi 4B beside the prover.
+**The verifier as a zkVM guest.** The swap is what the board produces: the same two pairing equations are compiled to RISC-V and executed inside a zero-knowledge virtual machine \[[10](#references)\], so the artefact is no longer the word `accept` on a terminal but a proof that the verifier ran and accepted, which is the design brief's third sketch \[[9](#references)\]. In the parts this replaces `blst`'s aarch64 assembly with a portable build for the guest's instruction set, and it moves the green and red LEDs from this verifier to whichever board checks the guest's proof. What it buys is a verdict a third party can check without watching the board, and the artefact stays small: a Groth16 proof over BLS12-381 is two compressed $`\mathbb{G}_1`$ elements of 48 bytes and one compressed $`\mathbb{G}_2`$ element of 96 bytes, so $`48 + 48 + 96 = 192`$ bytes, computed, exactly the length of the file this chapter already reads \[[3](#references)\]. What it costs is the whole difference between running a program and proving it, because every guest instruction becomes committed trace rows; [Project 21](21-a-zero-knowledge-virtual-machine-on-the-bench.md) counts that factor rather than assuming it, and its cells read **not measured** until the guest has run on this bench. Choose it when the party that must be convinced cannot watch the board, and keep this chapter's C verifier when that party is the one asking the question. The brief carries the wrapped proof outward over an LTE link from a 4G HAT; no SIM is on the bench and nothing in this volume goes outward, so the guest's proof is a file checked on the Pi 4B beside the prover.
 
 ## Pitfalls
 
@@ -369,8 +375,8 @@ The chapter passes when (i) the generator round-trip of Step 3 agrees byte for b
 
 ## Languages and libraries not chosen
 
-- Rust with `ark-bls12-381` 0.6.0 \[[5](#references)\]: the paper's own verifier and [Project 1](01-the-price-list.md)'s harness; slower pairings on aarch64 than `blst`'s assembly by a factor [Project 1](01-the-price-list.md) measures, and this chapter wants the verifier readable in one C file.
-- Go with `gnark-crypto` \[[6](#references)\]: one-flag cross compilation to the NanoPi, used in [Project 12](12-a-plonk-gate-for-the-inductive-step.md); on the Pi 4B it adds a runtime the verifier does not need.
+- Rust with `ark-bls12-381` 0.6.0 \[[6](#references)\]: the paper's own verifier and [Project 1](01-the-price-list.md)'s harness; slower pairings on aarch64 than `blst`'s assembly by a factor [Project 1](01-the-price-list.md) measures, and this chapter wants the verifier readable in one C file.
+- Go with `gnark-crypto` \[[7](#references)\]: one-flag cross compilation to the NanoPi, used in [Project 12](12-a-plonk-gate-for-the-inductive-step.md); on the Pi 4B it adds a runtime the verifier does not need.
 - Python with `py_ecc`: a pure-Python pairing is seconds, not milliseconds; the language of the encoder in [Project 3](03-the-modems-backoff-machine.md), never of a verifier.
 
 ## Sources
@@ -387,12 +393,13 @@ The chapter passes when (i) the generator round-trip of Step 3 agrees byte for b
 1. Pascal Berrang, Mirco Giacobbe, Jacob Swales and Xiao Yang. Zero-Knowledge Model Checking. arXiv:2605.00487v2 \[cs.CR\], version 1 submitted Friday 1 May 2026, version 2 Tuesday 8 September 2026. [arxiv.org/abs/2605.00487](https://arxiv.org/abs/2605.00487) (verified Friday 6 November 2026).
 2. Aniket Kate, Gregory M. Zaverucha and Ian Goldberg. Constant-size commitments to polynomials and their applications. In ASIACRYPT 2010, LNCS 6477, pages 177 to 194. Springer, 2010. [doi:10.1007/978-3-642-17373-8\_11](https://doi.org/10.1007/978-3-642-17373-8_11) (to verify).
 3. Jens Groth. On the size of pairing-based non-interactive arguments. In EUROCRYPT 2016, LNCS 9666, pages 305 to 326. Springer, 2016. [doi:10.1007/978-3-662-49896-5\_11](https://doi.org/10.1007/978-3-662-49896-5_11) (to verify).
-4. Steven D. Galbraith, Kenneth G. Paterson and Nigel P. Smart. Pairings for cryptographers. Discrete Applied Mathematics, 156(16), pages 3113 to 3121, 2008. [doi:10.1016/j.dam.2007.12.010](https://doi.org/10.1016/j.dam.2007.12.010) (to verify).
-5. arkworks contributors. arkworks: a Rust ecosystem for zkSNARK programming. The ark-bls12-381 crate is at version 0.6.0, updated Sunday 26 April 2026, 25.3 million downloads. [crates.io, ark-bls12-381](https://crates.io/api/v1/crates/ark-bls12-381) (verified Friday 6 November 2026).
-6. Consensys. gnark: a fast zk-SNARK library in Go. Release v0.16.4, Wednesday 7 October 2026, carrying a high-severity soundness fix in emulated elliptic-curve scalar multiplication and a BW6-761 pairing fix. [github.com/Consensys/gnark, latest release](https://api.github.com/repos/Consensys/gnark/releases/latest) (verified Friday 6 November 2026).
-7. Supranational. blst: a BLS12-381 signature and pairing library in C and assembly. Release v0.3.17, Friday 24 July 2026. [github.com/supranational/blst, latest release](https://api.github.com/repos/supranational/blst/releases/latest) (verified Friday 6 November 2026).
-8. Advanced hardware-software architectures for edge artificial intelligence and zero-knowledge model checking. A design brief of twenty project sketches, read on Friday 6 November 2026 and held locally at `a local design brief`. It is the input to this second edition and is not a published source; where its hardware claims disagree with the bench, the bench is followed and the disagreement is stated.
-9. Succinct Labs. SP1: a zero-knowledge virtual machine that proves the execution of a RISC-V binary. Release v6.10.0, Friday 23 October 2026. [github.com/succinctlabs/sp1](https://github.com/succinctlabs/sp1) (verified Friday 6 November 2026).
+4. Ariel Gabizon, Zachary J. Williamson and Oana Ciobotaru. PLONK: permutations over Lagrange-bases for oecumenical noninteractive arguments of knowledge. IACR Cryptology ePrint Archive, report 2019/953. [eprint.iacr.org/2019/953](https://eprint.iacr.org/2019/953) (to verify).
+5. Steven D. Galbraith, Kenneth G. Paterson and Nigel P. Smart. Pairings for cryptographers. Discrete Applied Mathematics, 156(16), pages 3113 to 3121, 2008. [doi:10.1016/j.dam.2007.12.010](https://doi.org/10.1016/j.dam.2007.12.010) (to verify).
+6. arkworks contributors. arkworks: a Rust ecosystem for zkSNARK programming. The ark-bls12-381 crate is at version 0.6.0, updated Sunday 26 April 2026, 25.3 million downloads. The licence is not recorded here because it has not been read; read it from the crate's own licence field and from the repository's LICENSE file (to verify). [crates.io, ark-bls12-381](https://crates.io/api/v1/crates/ark-bls12-381) (verified Friday 6 November 2026).
+7. Consensys. gnark: a fast zk-SNARK library in Go. Release v0.16.4, Wednesday 7 October 2026, carrying a high-severity soundness fix in emulated elliptic-curve scalar multiplication and a BW6-761 pairing fix. The licence is not recorded here because it has not been read; read it from the repository's LICENSE file (to verify). [github.com/Consensys/gnark, latest release](https://api.github.com/repos/Consensys/gnark/releases/latest) (verified Friday 6 November 2026).
+8. Supranational. blst: a BLS12-381 signature and pairing library in C and assembly. Release v0.3.17, Friday 24 July 2026. The licence is not recorded here because it has not been read; read it from the repository's LICENSE file (to verify). [github.com/supranational/blst, latest release](https://api.github.com/repos/supranational/blst/releases/latest) (verified Friday 6 November 2026).
+9. Advanced hardware-software architectures for edge artificial intelligence and zero-knowledge model checking. A design brief of twenty project sketches, read on Friday 6 November 2026 and held locally at `a local design brief`. It is the input to this second edition and is not a published source; where its hardware claims disagree with the bench, the bench is followed and the disagreement is stated.
+10. Succinct Labs. SP1: a zero-knowledge virtual machine that proves the execution of a RISC-V binary. Release v6.10.0, Friday 23 October 2026. The licence is not recorded here because it has not been read; read it from the repository's LICENSE file (to verify). [github.com/succinctlabs/sp1](https://github.com/succinctlabs/sp1) (verified Friday 6 November 2026).
 
 ---
 

@@ -16,9 +16,9 @@
 > - **Language and library:** Noir v1.0.0 \[[5](#references)\] with `nargo`; Barretenberg's `bb` as the backend, version to verify, with an aarch64 Linux binary to verify; if there is none, the proof is made on the build laptop and the Pi verifies, marked learn
 > - **Primitive:** sumcheck-based proving (Honk) \[[3](#references), [2](#references)\] of the uniform obligation of the paper's Equation 22 written as a Noir program with `assert` \[[1](#references)\], the statement of Section [Project 8](08-a-ranking-function-as-a-circuit.md)
 > - **Secret:** the transition $`x, x'`$ of the modem machine and the row $`A_i, b_i`$ of the guarded update it belongs to
-> - **Public:** the ranking pieces $`w_j, u_j, w_k, u_k`$ and the fairness bit $`\mathbf{1}_F`$
+> - **Public:** the ranking pieces $`w_j, u_j, w_k, u_k`$, the fairness bit $`\mathbf{1}_F`$, and the digest $`h`$ of the guard row of the published program
 > - **Model:** none
-> - **Acceptance:** `nargo test` passes on the instance; the honest proof verifies with `bb verify` on the Pi; the proof with one public value changed is rejected; the witness $`x' = (2, 0)`$ is refused by `nargo execute` with a failed assertion; the verifier's median time over 64 repeats has a spread under 5 percent with the throttle register at 0x0 before and after
+> - **Acceptance:** `nargo test` passes on the instance; the honest proof verifies with `bb verify` on the Pi; the proof with one public value changed is rejected; the witness $`x' = (2, 0)`$ is refused by `nargo execute` on the fourth row assertion `dot <= b[r]`; the honest witness under an increasing public ranking function is refused on the ranking assertion `vj - vk >= f` alone, which is the only case that reaches the conclusion; the verifier's median time over 64 repeats has a spread under 5 percent with the throttle register at 0x0 before and after
 > - **Difficulty:** 2 of 5 for the program, 4 of 5 for the backend on the board
 > - **Effort:** one evening for the program and the tests on the build laptop, one session for `bb` on the Pi, a third for the repeat
 
@@ -36,20 +36,28 @@ The paper's Equation 22 writes every obligation in one uniform shape, a universa
 
 ## The secret, the statement and the relation
 
-The statement is the one of Section [Project 8](08-a-ranking-function-as-a-circuit.md), repeated word for word so that the three circuit chapters prove the same thing. Let $`n = 2`$ be the number of program variables of the modem machine of Section [Project 3](03-the-modems-backoff-machine.md), $`x = (\mathit{delay}, \mathit{done})`$, and let $`y = (x, x') \in \mathbb{Z}^4`$ be a transition. Every integer in the statement is a signed 16-bit integer, $`I = [-2^{15}, 2^{15} - 1]`$, which is the paper's bounded integer encoding with $`M = 2^{15}`$ \[[1](#references)\]. The witness is the transition and the row of the guarded update it belongs to, the statement is the ranking function's two pieces and the fairness bit, and the relation is
+The statement is the one of Section [Project 8](08-a-ranking-function-as-a-circuit.md), repeated word for word so that the three circuit chapters prove the same thing. Let $`n = 2`$ be the number of program variables of the modem machine of Section [Project 3](03-the-modems-backoff-machine.md), $`x = (\mathit{delay}, \mathit{done})`$, and let $`y = (x, x') \in \mathbb{Z}^4`$ be a transition. Every integer in the statement is a signed 16-bit integer, $`I = [-2^{15}, 2^{15} - 1]`$, which is the paper's bounded integer encoding with $`M = 2^{15}`$ \[[1](#references)\]. The witness is the transition and the row of the guarded update it belongs to, the statement is the ranking function's two pieces, the fairness bit and the digest of the guard row, and the relation is
 
 ```math
 \begin{aligned}
-  \mathcal{R}_{\mathrm{step}} = \Big\{\, \big( (x, x', A_i, b_i) ;\; (w_j, u_j, w_k, u_k, f) \big)
+  \mathcal{R}_{\mathrm{step}} = \Big\{\, \big( (x, x', A_i, b_i) ;\;
+      (w_j, u_j, w_k, u_k, f, h) \big)
     \;:\;\; & x, x' \in I^2,\; A_i \in I^{m \times 4},\; b_i \in I^m,\; f \in \{0, 1\}, \\
-    & A_i \begin{bmatrix} x \\ x' \end{bmatrix} \le b_i, \;\;
+    & h = H(A_i, b_i), \;\;
+      A_i \begin{bmatrix} x \\ x' \end{bmatrix} \le b_i, \;\;
       (w_j \cdot x + u_j) - (w_k \cdot x' + u_k) \ge f \,\Big\}.
 \end{aligned}
 ```
 
 *(13.1)*
 
-This is the paper's Equation 21 read at one point: the premise $`A_i [x\; x']^\top \le b_i`$ is membership of the transition in the $`i`$-th guarded update of Equation 16, and the conclusion is $`V(x, q) - V(x', q') > \mathbf{1}_F(q, \sigma, q') - 1`$ with $`V`$ the piecewise-linear function of Equation 18, which over integers is $`V(x, q) - V(x', q') \ge f`$ with $`f = \mathbf{1}_F(q, \sigma, q')`$. In the paper's uniform form, Equation 22, the premise is $`A_s y \le b_s`$ with $`A_s, b_s`$ secret and the conclusion is a public row that must not hold; the program below asserts the premise and the negation of that row, which is the conclusion. The concrete instance is the retry loop of Section [Project 8](08-a-ranking-function-as-a-circuit.md), whose instance equation it repeats: $`A_i`$ with five rows over $`y = (\mathit{delay}, \mathit{done}, \mathit{delay}', \mathit{done}')`$, $`b_i = (0, 0, 1, -1, 2)`$, $`w_j = w_k = (0, -1)`$, $`u_j = u_k = 3`$, $`f = 1`$, witness $`x = (1, 0)`$, $`x' = (2, 1)`$. Remark rem:z08\_step on one step against the universal obligation applies here unchanged.
+The public digest $`h`$ binds the secret guard row to the published program, and the relation is unsound without it. $`H`$ is a collision-resistant hash over $`\mathbb{F}`$, and $`h = H(A_i, b_i)`$ is published once with the circuit as the digest of the guarded update of the program of Section [Project 3](03-the-modems-backoff-machine.md) that the transition belongs to. If $`h`$ is left out, $`A_i`$ and $`b_i`$ are free witness values: a prover takes $`A_i = 0`$ and $`b_i = 0`$, every row of the premise reads $`0 \le 0`$, the entry range checks pass, and the only obligation left is the ranking inequality, which the prover then satisfies by choosing $`x`$ and $`x'`$ freely, so an accepted proof says nothing about the modem machine. With $`h`$ on the statement side the premise is a claim about the published program and not about inequalities the prover liked. The three chapters instantiate $`H`$ with the hash their own toolchain ships, named in each listing and marked to verify, so a digest made for one chapter is not a digest for another.
+
+This is the paper's Equation 21 read at one point: the premise $`A_i [x\; x']^\top \le b_i`$ is membership of the transition in the $`i`$-th guarded update of Equation 16, and the conclusion is $`V(x, q) - V(x', q') > \mathbf{1}_F(q, \sigma, q') - 1`$ with $`V`$ the piecewise-linear function of Equation 18, which over integers is $`V(x, q) - V(x', q') \ge f`$ with $`f = \mathbf{1}_F(q, \sigma, q')`$. In the paper's uniform form, Equation 22, the premise is $`A_s y \le b_s`$ with $`A_s, b_s`$ secret and the conclusion is a public row that must not hold; the program below asserts the premise and the negation of that row, which is the conclusion. The concrete instance is the retry command of Section [Project 8](08-a-ranking-function-as-a-circuit.md), whose instance equation (eq:z08\_instance) it repeats: the five printed rows over $`y = (\mathit{delay}, \mathit{done}, \mathit{delay}', \mathit{done}')`$, which pin $`\mathit{delay} = 0`$ and $`\mathit{done}' = \mathit{done} + 1`$ under the guard $`\mathit{done} \le 1`$, with $`b_i = (0, 0, 1, -1, 1)`$, $`w_j = w_k = (0, -1)`$, $`u_j = u_k = 3`$, $`f = 1`$, and the witness $`x = (0, 0)`$, $`x' = (3, 1)`$, which is a transition of the machine of Section [Project 3](03-the-modems-backoff-machine.md) because $`3 < D_1 = 8`$. Remark rem:z08\_step on one step against the universal obligation applies here unchanged.
+
+Rows 3 and 4 pin $`\mathit{done}' = \mathit{done} + 1`$, so $`(w_j \cdot x + u_j) - (w_k \cdot x' + u_k) = \mathit{done}' - \mathit{done} = 1`$ for every witness that satisfies the premise, and with $`f \in \{0, 1\}`$ the conclusion then holds by construction on this instance whatever the witness is. Two consequences follow for the negative tests. A case that changes the witness cannot reach the ranking constraint, because the premise refuses it first; and the public $`f = 2`$ cannot reach it either, because the boolean constraint on $`f`$ refuses that before the comparison. The case that does reach it keeps the honest witness and $`f = 1`$ and makes the public ranking function increase across the transition, $`w_j = w_k = (0, 1)`$ with $`u_j = u_k = 3`$, which satisfies every premise row and the boolean constraint and then fails the ranking inequality alone, since $`(0 + 3) - (1 + 3) = -1 < 1`$. All three chapters run that case, and the $`f = 2`$ case beside it as the test of the boolean constraint. Without the first of the two the conclusion, which is the thing all three chapters exist to prove, is exercised by no test.
+
+Of the five public signals, the typed route constrains the comparison itself: every `i64` operation below is range-checked by the compiler, so Lemma lem:z08\_cmp's hypothesis for the ranking row does not rest on the four ranking coefficients being in $`I`$, which is the one place where this chapter's constraint system is stronger than those of Sections [Project 8](08-a-ranking-function-as-a-circuit.md) and [Project 12](12-a-plonk-gate-for-the-inductive-step.md).
 
 ## The mathematics
 
@@ -103,7 +111,7 @@ which is the claim for $`v`$. &#9632;
 
 Counting the $`3 \cdot 2^{v-i}`$ fold of the last round as unnecessary, since no table is needed after round $`v`$, leaves fewer than $`4 \cdot 2^v`$ operations; either count is $`O(2^v)`$, linear in the size of the table and with no transform in sight. &#9632;
 
-**Remark Z13.4 (Honk and the program).** UltraHonk keeps PLONK's gate relation of Definition def:z12\_gate but indexes the $`n = 2^v`$ gates by the Boolean hypercube rather than by roots of unity: each wire vector becomes a multilinear polynomial on $`\{0,1\}^v`$, the gate relation becomes a polynomial $`g`$ of small degree $`d`$ in each variable (a product of a few multilinears), and the prover shows that $`g`$ sums to zero over the hypercube with Theorem **Theorem Z13.2**, randomised by a Lagrange-like weighting so that a zero sum means every gate is satisfied. The final oracle query is answered by opening the committed multilinear wire polynomials at the random point with a polynomial commitment scheme (the names of the opening protocol in the `bb` version on the bench are to verify). Lemma **Lemma Z13.3** is the reason this prover has no NTT: its cost is linear in $`2^v`$, where the quotient of Section [Project 12](12-a-plonk-gate-for-the-inductive-step.md) needs transforms of size a small multiple of $`n`$ \[[4](#references)\]. The Noir program never sees any of this; it sees a `main` with assertions, and the soundness bound $`dv / |\mathbb{F}|`$ with $`|\mathbb{F}| > 2^{253}`$ and $`dv`$ in the hundreds is a probability below $`2^{-240}`$, which the chapter states as computed.
+**Remark Z13.4 (Honk and the program).** UltraHonk keeps PLONK's gate relation of Definition def:z12\_gate but indexes the $`n = 2^v`$ gates by the Boolean hypercube rather than by roots of unity: each wire vector becomes a multilinear polynomial on $`\{0,1\}^v`$, the gate relation becomes a polynomial $`g`$ of small degree $`d`$ in each variable (a product of a few multilinears), and the prover shows that $`g`$ sums to zero over the hypercube with Theorem **Theorem Z13.2**, randomised by a Lagrange-like weighting so that a zero sum means every gate is satisfied. The final oracle query is answered by opening the committed multilinear wire polynomials at the random point with a polynomial commitment scheme (the names of the opening protocol in the `bb` version on the bench are to verify). Lemma **Lemma Z13.3** is the reason this prover has no NTT: its cost is linear in $`2^v`$, where the quotient of Section [Project 12](12-a-plonk-gate-for-the-inductive-step.md) needs transforms of size a small multiple of $`n`$ \[[4](#references)\]. The Noir program never sees any of this; it sees a `main` with assertions, and the sumcheck's soundness bound $`dv / |\mathbb{F}|`$ with $`|\mathbb{F}| > 2^{253}`$ and $`dv`$ in the hundreds is a probability below $`2^{-240}`$, which the chapter states as computed. That bound is Theorem **Theorem Z13.2**'s, for the interactive protocol with an honest oracle. It is not the soundness of the artefact `bb verify` accepts, which adds the binding error of the polynomial commitment scheme, the Fiat-Shamir term, and the trust in the universal SRS, and none of those three has been read for the `bb` version on the bench.
 
 ## The protocol
 
@@ -126,6 +134,20 @@ fn in_i16(v: i64) {
     assert(v < M);
 }
 
+// h = H(a, b): the public binding of the guard row to the published program. Without it a
+// prover takes a = 0 and b = 0, satisfies every row of the premise trivially, and the proof
+// says nothing about the modem machine. The stdlib path and the arity-5 entry point are to
+// verify against v1.0.0.
+fn row_digest(a: [[i64; 4]; 5], b: [i64; 5]) -> Field {
+    let mut rows: [Field; 5] = [0; 5];
+    for r in 0..5 {
+        rows[r] = std::hash::poseidon::bn254::hash_5(
+            [a[r][0] as Field, a[r][1] as Field, a[r][2] as Field, a[r][3] as Field,
+             b[r] as Field]);
+    }
+    std::hash::poseidon::bn254::hash_5(rows)
+}
+
 fn main(
     x: [i64; 2],
     xp: [i64; 2],
@@ -136,11 +158,14 @@ fn main(
     wk: pub [i64; 2],
     uk: pub i64,
     f: pub i64,
+    h: pub Field,
 ) {
     let y: [i64; 4] = [x[0], x[1], xp[0], xp[1]];
     for c in 0..4 {
         in_i16(y[c]);
     }
+    // the guard row is the published program's row, not one the prover chose
+    assert(row_digest(a, b) == h);
     // the premise: the transition lies in the guarded update, A y <= b row by row
     for r in 0..5 {
         in_i16(b[r]);
@@ -158,16 +183,41 @@ fn main(
     assert(vj - vk >= f);
 }
 
+// the retry command of the modem machine of Z3: delay = 0, done' = done + 1, guard done <= 1
+global ROWS_A: [[i64; 4]; 5] = [[1, 0, 0, 0], [-1, 0, 0, 0], [0, -1, 0, 1],
+                                [0, 1, 0, -1], [0, 1, 0, 0]];
+global ROWS_B: [i64; 5] = [0, 0, 1, -1, 1];
+
 #[test]
 fn test_retry_step() {
-    let a = [[-2, 0, 1, 0], [2, 0, -1, 0], [0, -1, 0, 1], [0, 1, 0, -1], [0, 1, 0, 0]];
-    main([1, 0], [2, 1], a, [0, 0, 1, -1, 2], [0, -1], 3, [0, -1], 3, 1);
+    let h = row_digest(ROWS_A, ROWS_B);
+    main([0, 0], [3, 1], ROWS_A, ROWS_B, [0, -1], 3, [0, -1], 3, 1, h);
 }
 
-#[test(should_fail)]
+// This case fails on the premise, not on the conclusion: with x' = (2, 0) the four rows read
+// 0 <= 0, 0 <= 0, 0 <= 1 and 0 <= -1, and the fourth refuses the witness first. The message
+// is pinned so that a pass for another reason is not read as a pass.
+#[test(should_fail_with = "dot <= b[r]")]
 fn test_no_progress() {
-    let a = [[-2, 0, 1, 0], [2, 0, -1, 0], [0, -1, 0, 1], [0, 1, 0, -1], [0, 1, 0, 0]];
-    main([1, 0], [2, 0], a, [0, 0, 1, -1, 2], [0, -1], 3, [0, -1], 3, 1);
+    let h = row_digest(ROWS_A, ROWS_B);
+    main([0, 0], [2, 0], ROWS_A, ROWS_B, [0, -1], 3, [0, -1], 3, 1, h);
+}
+
+// This case is the only one that reaches the conclusion: the honest witness satisfies every
+// row and the boolean constraint, and the increasing public ranking function (0, 1) with
+// uj = uk = 3 gives vj - vk = 3 - 4 = -1, which fails the ranking assertion alone.
+#[test(should_fail_with = "vj - vk >= f")]
+fn test_ranking_conclusion() {
+    let h = row_digest(ROWS_A, ROWS_B);
+    main([0, 0], [3, 1], ROWS_A, ROWS_B, [0, 1], 3, [0, 1], 3, 1, h);
+}
+
+// f = 2 does not reach the ranking assertion: the boolean constraint refuses it first. The
+// case is kept because that constraint is part of the relation and nothing else tests it.
+#[test(should_fail_with = "(f == 0) | (f == 1)")]
+fn test_f_not_boolean() {
+    let h = row_digest(ROWS_A, ROWS_B);
+    main([0, 0], [3, 1], ROWS_A, ROWS_B, [0, -1], 3, [0, -1], 3, 2, h);
 }
 ```
 
@@ -179,8 +229,17 @@ bb prove --scheme ultra_honk -b target/zk13.json -w target/step.gz -o target
 bb write_vk --scheme ultra_honk -b target/zk13.json -o target
 # on the Pi 4B over ssh: the verifier, 64 repeats, throttle register before and after
 vcgencmd get_throttled
+# Each invocation pays process start and an SRS load, so this measures a command and not
+# a verification. The number is kept, labelled as such, and a second number is taken from
+# inside one process so that it can be set beside Z8's in-page groth16.verify and Z12's
+# in-process plonk.Verify. The wrapper is the repository's own bb_verify_loop, which loads
+# the key once and calls the library's verify 64 times, printing one millisecond figure per
+# call; until that wrapper exists, the in-process cell reads "not measured, the wrapper is
+# not written" with this as its reason.
 for i in $(seq 64); do /usr/bin/time -f "%e" bb verify --scheme ultra_honk \
-  -k target/vk -p target/proof -i target/public_inputs; done 2> zk13_times.txt
+  -k target/vk -p target/proof -i target/public_inputs; done 2> zk13_process_times.txt
+./bb_verify_loop --scheme ultra_honk -k target/vk -p target/proof \
+  -i target/public_inputs -n 64 > zk13_times.txt   # in-process, name to verify
 vcgencmd get_throttled
 ```
 
@@ -243,7 +302,7 @@ sequenceDiagram
 ```mermaid
 stateDiagram-v2
   [*] --> Checked : nargo check clean
-  Checked --> Tested : both tests behave
+  Checked --> Tested : the four tests behave
   Tested --> Compiled : target/zk13.json
   Compiled --> Executed : witness written, assertions held
   Compiled --> Refused : an assertion failed on the witness
@@ -271,12 +330,13 @@ stateDiagram-v2
 | --- | --- | --- | --- |
 | gates of `main` | not measured | read, not computed | `bb gates` on `target/zk13.json` |
 | sumcheck rounds $`v`$ | $`\lceil \log_2 n \rceil`$ | computed once $`n`$ is read | none |
-| soundness bound $`dv / \vert \mathbb{F}\vert `$ | below $`2^{-240}`$ | computed for $`dv < 2^{13}`$ and $`\vert \mathbb{F}\vert > 2^{253}`$ | none |
+| sumcheck soundness bound $`dv / \vert \mathbb{F}\vert `$ | below $`2^{-240}`$ | computed for $`dv < 2^{13}`$ and $`\vert \mathbb{F}\vert > 2^{253}`$; this is Theorem **Theorem Z13.2**'s bound for the interactive sumcheck with an honest oracle, and not the soundness of the artefact `bb verify` accepts. The deployed error adds the binding error of the polynomial commitment scheme, the Fiat-Shamir term, which in the random oracle model grows with the number of queries a prover may make, and the trust in the universal SRS; none of those three has been read for the `bb` version on the bench, so the artefact's own bound reads **not read** | none |
 | proof size | not measured | read, not computed | `ls -l target/proof` |
 | compile and witness, build laptop | not measured |  | `time` around `nargo` |
 | prove time, build laptop | not measured |  | `time` around `bb prove`, 8 repeats |
 | prove time, Pi 4B | not measured | `bb` on aarch64 to verify | `time`, 8 repeats, `get_throttled` 0x0 before and after |
-| verify time, Pi 4B | not measured |  | `time`, 64 repeats, `get_throttled` 0x0 before and after |
+| verify time, Pi 4B, whole `bb verify` process | not measured | process timing: each repeat pays process start, dynamic linking and an SRS read from disk, so it is not comparable with the in-page `groth16.verify` figure of Section [Project 8](08-a-ranking-function-as-a-circuit.md) or the in-process `plonk.Verify` figure of Section [Project 12](12-a-plonk-gate-for-the-inductive-step.md) | `/usr/bin/time` around the command, 64 repeats, `get_throttled` 0x0 before and after |
+| verify time, Pi 4B, inside one process | not measured, because the `bb_verify_loop` wrapper that loads the key once and calls the library's verify 64 times is not written | this is the cell the two sibling chapters’ figures may be set beside | the wrapper's own clock, 64 calls in one process, `get_throttled` 0x0 before and after |
 
 For scale, the paper's symbolic prover took about 1 min and its verifier 10 s for `exb_i4a3` on its AWS `c6g.8xlarge` \[[1](#references)\], with tailored protocols and not a SNARK; those numbers are attributed to that machine and predict nothing for the Pi.
 
@@ -284,19 +344,21 @@ For scale, the paper's symbolic prover took about 1 min and its verifier 10 s fo
 
 **Step 1.** On the authoring laptop, write `Nargo.toml`, `src/main.nr` and `Prover.toml` for the instance; commit.
 
-**Step 2.** On the build laptop in WSL, `git pull --ff-only`, install `nargo` v1.0.0 and `bb` with their installers, run `nargo check`, `nargo test` (both tests must behave as named), `nargo compile` and `nargo execute`; record the gate count from `bb gates`.
+**Step 2.** On the build laptop in WSL, `git pull --ff-only`, install `nargo` v1.0.0 and `bb` with their installers, run `nargo check`, `nargo test` (the four tests must behave as named), `nargo compile` and `nargo execute`; record the gate count from `bb gates`.
 
 **Step 3.** On the build laptop, try the `bb` installer's aarch64 Linux artefact (to verify that one exists); if it does, copy it to the Pi 4B with the `target` directory; if not, run `bb prove` and `bb write_vk` on the build laptop and copy the proof, the public inputs and the key.
 
 **Step 4.** On the Pi 4B over ssh, read `vcgencmd get_throttled`, run `bb verify` 64 times under `time`, read the register again, and compute the median.
 
-**Step 5.** On the build laptop, change one public value in a copy of the public inputs file, copy it to the Pi and confirm a non-zero exit from `bb verify`; then set $`x' = (2, 0)`$ in `Prover.toml` and confirm that `nargo execute` fails on the assertion `vj - vk >= f`.
+**Step 5.** On the build laptop, change one public value in a copy of the public inputs file, copy it to the Pi and confirm a non-zero exit from `bb verify`; then set $`x' = (2, 0)`$ in `Prover.toml` and confirm that `nargo execute` fails on the fourth row assertion `dot <= b[r]`, which is where it fails: with $`y = (0, 0, 2, 0)`$ the fourth row $`(0, 1, 0, -1)`$ gives $`\mathit{done} - \mathit{done}' = 0`$ against $`b_4 = -1`$, so the premise is refused before the conclusion is reached.
 
-**Step 6.** Repeat the 64 verifications on a second day; a median that moved by more than 15 percent is withdrawn and both figures are printed.
+**Step 6.** On the build laptop, keep the honest witness and $`f = 1`$ and set the public ranking function in `Prover.toml` to the increasing one, $`w_j = w_k = (0, 1)`$ with $`u_j = u_k = 3`$; confirm that `nargo execute` fails on the ranking assertion `vj - vk >= f` and on no row assertion, which is the only case that reaches the conclusion. Then set the public $`f = 2`$ and confirm that it fails on `(f == 0) | (f == 1)` instead.
+
+**Step 7.** Repeat the 64 verifications on a second day; a median that moved by more than 15 percent is withdrawn and both figures are printed.
 
 ## Acceptance test
 
-The chapter passes when `nargo test` reports the first test passing and the second failing as declared, the honest proof makes `bb verify` exit 0 on the Pi 4B 64 times, the proof with one changed public value makes it exit non-zero, the witness $`x' = (2, 0)`$ makes `nargo execute` fail on the named assertion, the median verify time over 64 repeats has a median absolute deviation under 5 percent, and the throttle register reads 0x0 on both reads. It fails if any of those does not hold, or if a prover time taken on the build laptop is written into the Pi 4B's row of the benchmark table.
+The chapter passes when `nargo test` reports the first test passing and the three negative `should_fail_with` tests failing on the messages they name, the honest proof makes `bb verify` exit 0 on the Pi 4B 64 times, the proof with one changed public value makes it exit non-zero, the witness $`x' = (2, 0)`$ makes `nargo execute` fail on the fourth row assertion `dot <= b[r]`, the honest witness under the increasing public ranking function $`w_j = w_k = (0, 1)`$ makes it fail on the ranking assertion `vj - vk >= f` and on no row assertion, the honest witness with the public $`f = 2`$ makes it fail on `(f == 0) | (f == 1)`, the median verify time over 64 repeats has a median absolute deviation under 5 percent, and the throttle register reads 0x0 on both reads. It fails if any of those does not hold, or if a prover time taken on the build laptop is written into the Pi 4B's row of the benchmark table, or if the whole process timing of `bb verify` is set beside the in-page figure of Section [Project 8](08-a-ranking-function-as-a-circuit.md) or the in-process figure of Section [Project 12](12-a-plonk-gate-for-the-inductive-step.md) as though the three were one quantity.
 
 ## Variants
 
@@ -307,7 +369,8 @@ The chapter passes when `nargo test` reports the first test passing and the seco
 - A comparison on `Field` in Noir is not an integer comparison; the program uses `i64` throughout so that every `<=` is the constrained integer one, which is the compiler doing Lemma lem:z08\_cmp's decomposition.
 - `i32` would overflow: a row's dot product reaches $`2^{32}`$ in magnitude, and Noir's overflow check would then refuse an honest witness; `i64` has the room.
 - The `bb` command line changed between its 0.x releases (scheme flags, output directories, the separate public-inputs file); the lines above are marked to verify and the repository's script is the one that was run.
-- A test marked `should_fail` that passes because of a typo in the witness is a test that cannot fail; the second test is run once with the honest witness to see it pass, before it is committed with the no-progress witness.
+- A test marked `should_fail` that passes because of a typo in the witness is a test that cannot fail; both negative tests use `should_fail_with` so that the message is pinned to the assertion the case is meant to reach, and each is run once with the honest witness to see it pass before it is committed with its own failing input.
+- The three circuits are presented as one relation written three times. They are not the same constraint system. The typed route of Section **Project 13** gets its integer windows from the compiler and so protects the comparison against an out-of-range public coefficient, where Sections [Project 8](08-a-ranking-function-as-a-circuit.md) and [Project 12](12-a-plonk-gate-for-the-inductive-step.md) rest on the verifier pinning those coefficients inside $`I`$. The boolean constraint on $`f`$ is enforced by all three only with the line the Circom template now carries. And the three instantiate the relation's hash $`H`$ with the gadget their own toolchain ships, so the digest $`h`$ is not portable between them. A relation repeated word for word in prose is not a relation repeated in constraints, and the three chapters list their differences here rather than claiming none.
 - `bb` downloads the SRS on first use; on the Pi behind the bench LAN that download is done once on the build laptop and the file copied, so that a verify is never timed with a download inside it.
 - The Pi 4B's throttle register is read before and after the 64 repeats, like every chapter; a Honk verify is short, but the first `bb` start loads the SRS and is discarded as warm-up.
 
@@ -335,10 +398,10 @@ The chapter passes when `nargo test` reports the first test passing and the seco
 2. Justin Thaler. Proofs, arguments, and zero-knowledge. Foundations and Trends in Privacy and Security, 4(2 to 4), pages 117 to 660, 2022. [doi:10.1561/3300000030](https://doi.org/10.1561/3300000030) (to verify).
 3. Carsten Lund, Lance Fortnow, Howard Karloff and Noam Nisan. Algebraic methods for interactive proof systems. Journal of the ACM, 39(4), pages 859 to 868, 1992. [doi:10.1145/146585.146605](https://doi.org/10.1145/146585.146605) (to verify).
 4. Jianqiao Mo, Alhad Daftardar, Barath GaneshKumar, Kaiyue Guo, Hong Wang, Benedikt Bunz, Siddharth Garg and Brandon Reagen. When proofs meet hardware: comparing NTT and SumCheck in zero-knowledge systems. arXiv:2606.16146, submitted Monday 15 June 2026. [arxiv.org/abs/2606.16146](https://arxiv.org/abs/2606.16146) (verified Friday 6 November 2026).
-5. Aztec. Noir: a domain-specific language for zero-knowledge circuits. Release v1.0.0, Thursday 29 October 2026; 1431 stars when read. [github.com/noir-lang/noir, latest release](https://api.github.com/repos/noir-lang/noir/releases/latest) (verified Friday 6 November 2026).
+5. Aztec. Noir: a domain-specific language for zero-knowledge circuits. Release v1.0.0, Thursday 29 October 2026; 1431 stars when read. The licence is not recorded here because it has not been read; read it from the repository's LICENSE file (to verify). [github.com/noir-lang/noir, latest release](https://api.github.com/repos/noir-lang/noir/releases/latest) (verified Friday 6 November 2026).
 6. Advanced hardware-software architectures for edge artificial intelligence and zero-knowledge model checking. A design brief of twenty project sketches, read on Friday 6 November 2026 and held locally at `a local design brief`. It is the input to this second edition and is not a published source; where its hardware claims disagree with the bench, the bench is followed and the disagreement is stated.
-7. Succinct Labs. SP1: a zero-knowledge virtual machine that proves the execution of a RISC-V binary. Release v6.10.0, Friday 23 October 2026. [github.com/succinctlabs/sp1](https://github.com/succinctlabs/sp1) (verified Friday 6 November 2026).
-8. RISC Zero. risc0: a RISC-V zero-knowledge virtual machine and proof system. Release v3.0.6, Friday 17 July 2026. [github.com/risc0/risc0](https://github.com/risc0/risc0) (verified Friday 6 November 2026).
+7. Succinct Labs. SP1: a zero-knowledge virtual machine that proves the execution of a RISC-V binary. Release v6.10.0, Friday 23 October 2026. The licence is not recorded here because it has not been read; read it from the repository's LICENSE file (to verify). [github.com/succinctlabs/sp1](https://github.com/succinctlabs/sp1) (verified Friday 6 November 2026).
+8. RISC Zero. risc0: a RISC-V zero-knowledge virtual machine and proof system. Release v3.0.6, Friday 17 July 2026. The licence is not recorded here because it has not been read; read it from the repository's LICENSE file (to verify). [github.com/risc0/risc0](https://github.com/risc0/risc0) (verified Friday 6 November 2026).
 
 ---
 

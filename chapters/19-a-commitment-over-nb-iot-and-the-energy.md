@@ -6,7 +6,7 @@
 > [!IMPORTANT]
 > **The question, instanced**
 >
-> What can a verifier learn from a device without the device revealing itself, and what does it cost on this board? Here the cost is energy and the board is a battery-class radio: a Pi 4B commits to one sensor sample with a Pedersen commitment, hands the 32 bytes to a SIM7070G over its UART, and the module would carry them over NB-IoT to a verifier that later receives the proof of [Project 4](04-two-group-elements.md) or [Project 20](20-the-occupancy-counter-that-proves-it-stayed-under.md). The verifier's view is the commitment and the proof bytes and nothing about the sample; the chapter prices that privacy in joules per byte, and every joule reads "not measured, no SIM" until a card arrives.
+> What can a verifier learn from a device without the device revealing itself, and what does it cost on this board? Here the cost is energy and the board is a battery-class radio: a Pi 4B commits to one sensor sample with a Pedersen commitment, hands the 32 bytes to a SIM7070G over its UART, and the module would carry them over NB-IoT to a verifier that later receives the proof of [Project 4](04-two-group-elements.md) or [Project 20](20-the-occupancy-counter-that-proves-its-committed-count.md). The verifier's view is the commitment and the proof bytes and nothing about the sample; the chapter prices that privacy in joules per byte, and every joule reads "not measured, no SIM" until a card arrives.
 
 > **Key facts**
 >
@@ -16,9 +16,9 @@
 > - **Language and library:** C17 with POSIX `termios` for the UART and `libsodium` (version to verify) for the ristretto255 commitment; no other library
 > - **Primitive:** commitment transport, the paper's $`c_\mathcal{M}`$ leaving the device \[[1](#references)\], priced by the energy per payload byte on a narrowband radio
 > - **Secret:** the committed value $`v \in [0, 2^{16})`$, here the board's own temperature sample, and its randomness $`r \in \mathbb{Z}_p`$
-> - **Public:** $`c = g^v h^r`$ on ristretto255, the AT dialogue, the byte counts, and later the proof of [Project 4](04-two-group-elements.md) or [Project 20](20-the-occupancy-counter-that-proves-it-stayed-under.md)
+> - **Public:** $`c = g^v h^r`$ on ristretto255, the AT dialogue, the byte counts, and later the proof of [Project 4](04-two-group-elements.md) or [Project 20](20-the-occupancy-counter-that-proves-its-committed-count.md)
 > - **Model:** none
-> - **Acceptance:** with a SIM: the attach, PDP, socket and send sequence completes with `OK` on every step and the PPK2 trace shows the four windows, each energy figure with a repeat spread under 10 percent over five sends; without a SIM: the driver reaches `AT+CPIN?` on the live modem, stops with the reason "no SIM", and replays the whole sequence from the log with the same parser, byte for byte
+> - **Acceptance:** with a SIM: the attach, PDP, socket and send sequence completes with `OK` on every step and the PPK2 trace shows the four windows, each energy figure with a repeat spread under 10 percent over five sends; without a SIM: the driver reaches `AT+CPIN?` on the live modem, stops with the reason "no SIM", and replays the whole sequence from the log with the same parser, line for line, with the one declared exception of the `AT+CASEND` prompt, which a log read line by line cannot carry
 > - **Difficulty:** 3 of 5
 > - **Effort:** one evening for the driver and the replay log on the host, one afternoon on the Pi with the HAT and the PPK2, a second afternoon when a SIM exists
 
@@ -61,7 +61,7 @@ E(n) = E_{\mathrm{attach}} + n \cdot e_{\mathrm{byte}},
 
 *(19.2)*
 
-where $`E_{\mathrm{attach}}`$ is the energy of the fixed sequence and $`e_{\mathrm{byte}}`$ the marginal energy per payload byte, both measured as $`U \int I \, dt`$ over the respective window of a PPK2 current trace, with $`U`$ the module rail voltage read once from the wiki and $`I`$ the metered current. Both constants are "not measured, no SIM" on this bench; the lemma below is about their ratio, not their values.
+where $`E_{\mathrm{attach}}`$ is the energy of the fixed sequence and $`e_{\mathrm{byte}}`$ the marginal energy per payload byte, both measured as $`U \int I \, dt`$ over the respective window of a PPK2 current trace, with $`I`$ the current metered by the PPK2 and $`U`$ the voltage at the node the PPK2 is wired into, which is the 5 V feed to the HAT of the wiring table and not the module rail downstream of the HAT's own regulator. Those are two nodes and two energies; this chapter prices the first, the energy the Pi's 5 V rail delivers to the HAT, and $`U`$ is read at that node with the meter in the loop rather than taken from the wiki. Both constants are "not measured, no SIM" on this bench; the lemma below is about their ratio, not their values.
 
 **Lemma Z19.2 (Per-sample energy and the two crossovers).** Let a sample be $`s`$ bytes in the clear and let a proof that covers $`k`$ samples be $`b`$ bytes. Consider three strategies: (A) send every sample in the clear, one transmission per sample; (B) send one proof of $`b`$ bytes per $`k`$ samples; (C) send the $`k`$ samples in the clear in one transmission per $`k`$ samples. Under (19.2) the energy per sample is
 
@@ -91,7 +91,7 @@ k^{*} = \frac{E_{\mathrm{attach}} + b \, e_{\mathrm{byte}}}{E_{\mathrm{attach}} 
 
 (ii) and (iii) Subtracting (19.3) from (19.3), the attach terms cancel: $`E_B(k) - E_C(k) = b \, e_{\mathrm{byte}} / k - s \, e_{\mathrm{byte}} = (b - k s) \, e_{\mathrm{byte}} / k`$, which is (iii). Since $`e_{\mathrm{byte}} / k > 0`$, the difference is negative exactly when $`b - k s < 0`$, that is $`k > b / s`$, which is (ii). &#9632;
 
-**Remark Z19.7.** Part (iii) is the chapter's price tag. Against batched clear text, the privacy of a batch costs exactly $`(b - k s) \, e_{\mathrm{byte}}`$ joules, the energy of the proof bytes beyond the sample bytes; the attach cost is paid by both. With the range proofs of [Project 20](20-the-occupancy-counter-that-proves-it-stayed-under.md), counted there as 960 bytes for two single 8-bit proofs or 544 bytes for the aggregated pair, and $`s = 2`$ bytes per 16-bit sample, the proof route beats batched clear text only past $`k = 480`$ or $`k = 272`$ samples per batch. With the KZG proof of [Project 4](04-two-group-elements.md) at two $`\mathbb{G}_1`$ elements plus two commitments, $`b = 192`$ bytes, the crossover is $`k = 96`$.
+**Remark Z19.7.** Part (iii) is the chapter's price tag. Against batched clear text, the privacy of a batch costs exactly $`(b - k s) \, e_{\mathrm{byte}}`$ joules, the energy of the proof bytes beyond the sample bytes; the attach cost is paid by both. With the range proofs of [Project 20](20-the-occupancy-counter-that-proves-its-committed-count.md), counted there as 960 bytes for two single 8-bit proofs or 544 bytes for the aggregated pair, and $`s = 2`$ bytes per 16-bit sample, the proof route beats batched clear text only past $`k = 480`$ or $`k = 272`$ samples per batch. With the KZG proof of [Project 4](04-two-group-elements.md) at two $`\mathbb{G}_1`$ elements plus two commitments, $`b = 192`$ bytes, the crossover is $`k = 96`$.
 
 **Definition Z19.4 (The verifier's view and its consistent set).** For a view $`\omega`$ of the channel, the consistent set is $`S(\omega) = \{\, v' \in [0, 2^{16}) \mid \exists r' \in \mathbb{Z}_p .\; \omega \text{ is the view produced by } (v', r') \,\}`$, the set of samples the verifier cannot rule out after seeing $`\omega`$.
 
@@ -122,7 +122,7 @@ The transport protocol, written as the AT dialogue it is, with the PPK2 windows 
 
 ## The code
 
-The driver keeps one query open at a time and treats any line that is neither the awaited answer nor a final result as unsolicited, which is the parser design of the sibling volume's cellular chapters. In replay mode the modem's lines come from a file, so the whole sequence runs with no SIM and the parser is exercised byte for byte.
+The driver keeps one query open at a time and treats any line that is neither the awaited answer nor a final result as unsolicited, which is the parser design of the sibling volume's cellular chapters. In replay mode the modem's lines come from a file, so the whole sequence runs with no SIM and the parser is exercised line by line, with one exception named under the listing: the `AT+CASEND` prompt is not a line and the replay cannot reproduce it.
 
 ```c
 /* z19_at.c: SIM7070G over /dev/serial0, one query at a time, replay from a log when
@@ -178,15 +178,44 @@ static at_result at_query(at_port *p, const char *cmd, const char *want, double 
         if (p->line[0] == '+') printf("        (unsolicited, kept out of the match)\n");
     }
 }
-static void commit(unsigned char c[32], unsigned v) {     /* c = g^v h^r, libsodium names */
-    unsigned char r[32], s[32] = {0}, seed[64] = {0}, h[32], gv[32], hr[32];
+/* AT+CASEND: write the command, read characters until the two-character prompt "> " has
+   been seen (no line terminator follows it), write the payload, then wait for a final
+   result in the ordinary line-oriented way. Command name and prompt to verify against the
+   SIM7070 AT manual. */
+static at_result at_send_payload(at_port *p, const unsigned char *payload, size_t n,
+                                 double timeout) {
+    char cmd[32]; int seen = 0; char ch;
+    snprintf(cmd, sizeof cmd, "AT+CASEND=0,%zu", n);
+    if (p->fd >= 0) dprintf(p->fd, "%s\r", cmd);
+    printf("%.3f > %s\n", now_s(), cmd);
+    double deadline = now_s() + timeout;
+    while (seen < 2 && now_s() < deadline) {               /* '>' then ' ' */
+        if (p->replay) { if (!fgets(p->line, sizeof p->line, p->replay)) return AT_TIMEOUT;
+                         if (strchr(p->line, '>')) seen = 2; continue; }
+        if (read(p->fd, &ch, 1) != 1) continue;
+        seen = (seen == 0 && ch == '>') ? 1 : (seen == 1 && ch == ' ') ? 2 : 0;
+    }
+    if (seen < 2) return AT_TIMEOUT;
+    if (p->fd >= 0 && write(p->fd, payload, n) != (ssize_t)n) return AT_ERR;
+    return at_query(p, "", NULL, timeout);                 /* the final OK */
+}
+/* c = g^(v+1) h^r / g, because the library refuses a scalar multiplication whose result is
+   the identity and v = 0 is a legal temperature sample; the same device as project Z15. */
+static int commit(unsigned char c[32], unsigned v) {
+    unsigned char r[32], s[32] = {0}, seed[64], h[32], gv[32], hr[32], g1[32], one[32] = {0};
     crypto_core_ristretto255_scalar_random(r);
-    s[0] = v & 0xff; s[1] = (v >> 8) & 0xff;               /* v as a little-endian scalar */
-    memcpy(seed, "z19 pedersen h", 14);
-    crypto_core_ristretto255_from_hash(h, seed);           /* log_g h unknown (to verify) */
-    crypto_scalarmult_ristretto255_base(gv, s);
-    crypto_scalarmult_ristretto255(hr, r, h);
-    crypto_core_ristretto255_add(c, gv, hr);
+    unsigned w = v + 1u;                                   /* 1 <= w <= 65536 */
+    s[0] = w & 0xff; s[1] = (w >> 8) & 0xff; s[2] = (w >> 16) & 0xff;
+    one[0] = 1;
+    /* h is a hash to the group of a fixed label: the label is hashed first, which is what
+       from_hash expects and what the relation at the head of this chapter states. */
+    crypto_hash_sha512(seed, (const unsigned char *)"z19 pedersen h", 14);
+    if (crypto_core_ristretto255_from_hash(h, seed) != 0) return -1;
+    if (crypto_scalarmult_ristretto255_base(gv, s) != 0) return -1;
+    if (crypto_scalarmult_ristretto255_base(g1, one) != 0) return -1;
+    if (crypto_core_ristretto255_sub(gv, gv, g1) != 0) return -1;      /* back to [v]G */
+    if (crypto_scalarmult_ristretto255(hr, r, h) != 0) return -1;
+    return crypto_core_ristretto255_add(c, gv, hr);
 }
 int main(int argc, char **argv) {
     at_port p; unsigned char c[32]; char cmd[96]; unsigned v = 0;
@@ -194,7 +223,7 @@ int main(int argc, char **argv) {
     if (sodium_init() < 0 || at_open(&p, "/dev/serial0", log) < 0) return 2;
     FILE *tz = fopen("/sys/class/thermal/thermal_zone0/temp", "r");
     if (tz) { int milli = 0; if (fscanf(tz, "%d", &milli) == 1) v = milli / 100; fclose(tz); }
-    commit(c, v);                                          /* v never leaves this process */
+    if (commit(c, v) != 0) return 6;                       /* v never leaves this process */
     if (at_query(&p, "AT", NULL, 2) != AT_OK) return 3;
     if (at_query(&p, "AT+CPIN?", "+CPIN", 5) != AT_OK) { puts("z19 stop: no SIM"); return 4; }
     at_query(&p, "AT+CGATT?", "+CGATT", 30);
@@ -202,8 +231,14 @@ int main(int argc, char **argv) {
     at_query(&p, "AT+CNACT=0,1", NULL, 30);                /* to verify */
     snprintf(cmd, sizeof cmd, "AT+CAOPEN=0,0,\"UDP\",\"%s\",5683", host);
     at_query(&p, cmd, "+CAOPEN", 30);                      /* to verify */
-    at_query(&p, "AT+CASEND=0,32", ">", 5);                /* the prompt, to verify */
-    if (p.fd >= 0) write(p.fd, c, 32);
+    /* AT+CASEND is the one step the line-oriented parser above cannot serve. The module
+       answers it with the two characters "> " and no CR LF, and at_readline returns only on
+       a '\n', so the prompt is never delivered as a line; and at_query, which treats a
+       matched "want" with continue, returns only on OK, which the module will not send
+       until the 32 bytes have arrived. A line-oriented query on this command therefore
+       times out and the payload is written 5 s late, after the module has given up. The
+       send is driven by its own character-level function instead: */
+    if (at_send_payload(&p, c, 32, 10) != AT_OK) { puts("z19 stop: CASEND prompt"); return 5; }
     printf("z19 window send closed %.3f, 32 bytes of c\n", now_s());
     at_query(&p, "AT+CACLOSE=0", NULL, 5); at_query(&p, "AT+CNACT=0,0", NULL, 5);
     return 0;
@@ -219,7 +254,7 @@ sudo ./z19_at 0.0.0.0
 ./z19_at 0.0.0.0 z19_replay.log
 ```
 
-The replay log is the modem's side of the dialogue as the wiki prints it, one line per reply, with the `>` prompt on its own line; the driver's `AT+CASEND` branch reads it as the awaited answer, which is what the live modem is expected to send and is marked to verify. The address `0.0.0.0` is a placeholder for the verifier endpoint, which does not exist on this bench.
+The replay log is the modem's side of the dialogue as the wiki prints it, one line per reply. It cannot exercise the `AT+CASEND` prompt faithfully: the live module sends "\> " with no line terminator and a log file is read line by line, so the replay path takes the prompt as a line and the live path must take it as two characters. This is the one place where a replay cannot stand for the live path, which is why the acceptance criterion reads "line for line" with this step named as its one exception and no longer claims "byte for byte": a passing replay is not evidence of a working live send for `AT+CASEND`. The address `0.0.0.0` is a placeholder for the verifier endpoint, which does not exist on this bench.
 
 ## The model, if any
 
@@ -308,7 +343,7 @@ stateDiagram-v2
 
 | **Quantity** | **Pi 4B, SIM7070G** | **Window** | **Instrument** |
 | --- | --- | --- | --- |
-| boot to `AT` `OK`, energy | not measured, no SIM | boot | PPK2 ampere meter, 100 kS/s, $`U`$ from the wiki |
+| boot to `AT` `OK`, energy | not measured, no SIM | boot | PPK2 ampere meter, 100 kS/s, $`U`$ read at the HAT's 5 V feed with the meter in the loop, and the access technology from `AT+CPSI?` recorded beside the figure |
 | attach to `+CGATT: 1`, energy and seconds | not measured, no SIM | attach | the same; the driver's clock |
 | PDP activation, energy | not measured, no SIM | pdp | the same |
 | socket open and close, energy | not measured, no SIM | socket | the same |
@@ -348,7 +383,8 @@ Without a SIM the chapter passes when the live driver prints `OK` to `AT`, stops
 
 - On the Pi 4B `/dev/serial0` points at the mini UART unless Bluetooth is moved off the PL011; the mini UART's baud rate follows the core clock, and a modem that answers garbage under load is this, not the HAT.
 - A module keyed on without its antenna can damage its output stage; the antenna goes on first, every time.
-- The PPK2 cannot meter a Raspberry Pi; it meters the module's supply only, and a trace taken on the Pi's 5 V input is a different, wrong, quantity. The PPK2's own limit is about 1 A; NB-IoT transmit peaks are under it, the SIM7600E-H's are not, which is why that HAT is not seated by any project here.
+- The PPK2 cannot meter a Raspberry Pi; it meters the module's supply only, and a trace taken on the Pi's 5 V input is a different, wrong, quantity. The PPK2's ampere-meter range tops out at about 1 A, a figure read from the Power Profiler Kit II user guide \[[7](#references)\] and not measured here. Whether a SIM7070G transmit burst stays under it has not been measured on this bench and is not assumed: the module is a Cat-M, NB-IoT and GPRS part, `AT+CNMP=38` only *prefers* LTE, and a GPRS fallback burst on a quad-band module is specified well above 1 A, so a run that falls back exceeds the meter's range and the trace is discarded rather than reported. The first live run therefore reads `AT+CPSI?` or `AT+CNSMOD?` and records the access technology beside every energy figure; a figure with no recorded technology is withdrawn. The SIM7600E-H is not seated by any project here for the same reason, one rank worse.
+- The PPK2 in ampere-meter mode is a shunt in the supply path and drops its own voltage. The module's minimum operating rail and the drop at the peak current have not been measured; a cellular module browning out mid-transmit looks like a failed attach and not like an instrument problem, so the first live run reads the module rail at the HAT with the PPK2 in the loop before any energy figure is kept. No multimeter is on this bench, so this reading uses the PPK2's own source-meter mode and is marked to verify.
 - The parser matches the awaited answer by prefix; a reply that begins with the same prefix as an unsolicited code (for example `+CA` family lines) is why one query is open at a time and the match is on the exact command's prefix.
 - `AT+CASEND` has a maximum length per command that the manual states; a 544-byte proof may need more than one command, and the energy row for it counts every command.
 - A 16-bit sample in a commitment with no randomness is found in $`2^{16}`$ group operations; $`r`$ is 32 random bytes from `libsodium`, never a counter.
@@ -356,7 +392,7 @@ Without a SIM the chapter passes when the live driver prints `OK` to `AT`, stops
 ## Languages and libraries not chosen
 
 - Python with `pyserial`: the sibling volume's samplers; here the driver must run on a board with no interpreter in a later project, so it is C.
-- Rust with `serialport` and `curve25519-dalek`: one crate for the group and one for the port; [Project 2](02-a-sensor-reading-committed-on-the-microcontroller.md) and [Project 20](20-the-occupancy-counter-that-proves-it-stayed-under.md) take that route, and here the delta is only the language.
+- Rust with `serialport` and `curve25519-dalek`: one crate for the group and one for the port; [Project 2](02-a-sensor-reading-committed-on-the-microcontroller.md) and [Project 20](20-the-occupancy-counter-that-proves-its-committed-count.md) take that route, and here the delta is only the language.
 - The kernel's PPP or QMI path instead of AT sockets: a full IP stack on the module costs attach energy the lemma cannot see; AT sockets keep every byte counted.
 
 ## Sources
@@ -374,11 +410,11 @@ Without a SIM the chapter passes when the live driver prints `OK` to `AT`, stops
 2. Benedikt Bunz, Jonathan Bootle, Dan Boneh, Andrew Poelstra, Pieter Wuille and Greg Maxwell. Bulletproofs: short proofs for confidential transactions and more. In IEEE Symposium on Security and Privacy 2018, pages 315 to 334. IEEE, 2018. [doi:10.1109/SP.2018.00020](https://doi.org/10.1109/SP.2018.00020) (to verify).
 3. Mike Hamburg. Decaf: eliminating cofactors through point compression. In CRYPTO 2015, LNCS 9215, pages 705 to 723. Springer, 2015. The construction ristretto255 descends from. [doi:10.1007/978-3-662-47989-6\_34](https://doi.org/10.1007/978-3-662-47989-6_34) (to verify).
 4. dalek cryptography contributors. curve25519-dalek: group operations on ristretto255 and Curve25519. Version 5.0.0, updated Monday 6 July 2026, 318.9 million downloads. [crates.io, curve25519-dalek](https://crates.io/api/v1/crates/curve25519-dalek) (verified Friday 6 November 2026).
-5. iden3. snarkjs: zkSNARK implementation in JavaScript and WebAssembly. Release v0.7.6, Monday 26 January 2026. [github.com/iden3/snarkjs, latest release](https://api.github.com/repos/iden3/snarkjs/releases/latest) (verified Friday 6 November 2026).
+5. iden3. snarkjs: zkSNARK implementation in JavaScript and WebAssembly. Release v0.7.6, Monday 26 January 2026. The licence is not recorded here because it has not been read; read it from the repository's LICENSE file (to verify). [github.com/iden3/snarkjs, latest release](https://api.github.com/repos/iden3/snarkjs/releases/latest) (verified Friday 6 November 2026).
 6. Advanced hardware-software architectures for edge artificial intelligence and zero-knowledge model checking. A design brief of twenty project sketches, read on Friday 6 November 2026 and held locally at `a local design brief`. It is the input to this second edition and is not a published source; where its hardware claims disagree with the bench, the bench is followed and the disagreement is stated.
-7. Nordic Semiconductor. Power Profiler Kit II user guide. (to verify)
-8. Waveshare. SIM7070G Cat-M, NB-IoT and GPRS HAT wiki. [waveshare.com/wiki/SIM7070G\_Cat-M/NB-IoT/GPRS\_HAT](https://www.waveshare.com/wiki/SIM7070G_Cat-M/NB-IoT/GPRS_HAT) (to verify).
+7. Nordic Semiconductor. Power Profiler Kit II user guide. No sample rate is quoted here, for the same reason: chapter Z19 integrates energy over a window and that integration depends on the rate, so the rate is read from the guide on the day of the first capture and the reading is written into the chapter's steps. A rate printed in a benchmark table before that reading has no source in this list. (to verify)
+8. Waveshare. SIM7070G Cat-M, NB-IoT and GPRS HAT wiki. No supply voltage is quoted here, because no page was fetched for it and chapter Z19's energy integration depends on the rail the symbol $`U`$ names. The reading to take on the day of the first capture is the module's own supply rail voltage and the node the probe is wired into, since the HAT's regulator sits between the 5 V feed and the module. [waveshare.com/wiki/SIM7070G\_Cat-M/NB-IoT/GPRS\_HAT](https://www.waveshare.com/wiki/SIM7070G_Cat-M/NB-IoT/GPRS_HAT) (to verify).
 
 ---
 
-[Previous](18-a-proof-over-the-wire.md) &nbsp;&nbsp;|&nbsp;&nbsp; [Contents](../CONTENTS.md) &nbsp;&nbsp;|&nbsp;&nbsp; [Next](20-the-occupancy-counter-that-proves-it-stayed-under.md)
+[Previous](18-a-proof-over-the-wire.md) &nbsp;&nbsp;|&nbsp;&nbsp; [Contents](../CONTENTS.md) &nbsp;&nbsp;|&nbsp;&nbsp; [Next](20-the-occupancy-counter-that-proves-its-committed-count.md)

@@ -8,7 +8,7 @@ Joseph Ambrose Pagaran. Friday 6 November 2026.
 
 ## How to read this document
 
-### The question behind all twenty
+### The question behind all twenty-four
 
 One question runs through the volume and is instanced at the head of every project:
 
@@ -66,10 +66,10 @@ Measured, not asserted: every colour pair was computed with the WCAG 2.2 relativ
 | **Part** | **What it is here, and the fact that constrains it** |
 | --- | --- |
 | Raspberry Pi 4 Model B Rev 1.4 | 8 GB, Cortex-A72; the verifier of most chapters and the only Pi that may carry the WS-28164 CAN HAT or the MCC 118, never both on one `config.txt` |
-| Raspberry Pi 3 Model B Plus Rev 1.3 | 905 MB, 1.4 GHz; soft thermal limit at 60 C reached in about four minutes of sustained load, no fan on the bench; any longer run is "not measured, thermal" |
+| Raspberry Pi 3 Model B Plus Rev 1.3 | 905 MB, 1.4 GHz, no fan on the bench. The working limit every chapter on this board uses is a soft thermal limit at 60 C reached after about four minutes of sustained load, and that four minutes is this volume's assumption rather than its reading. The nearest dated record on this bench is a ramp of Tuesday 27 and Wednesday 28 October 2026 under a different load, one to four threads of a language-model benchmark, which went from 36.5 C to 68.2 C in about seven minutes and engaged the limit by dropping 1400 MHz to 1200 MHz. That load is not a multi-scalar multiplication, so it neither confirms the four minutes nor replaces it, and no run of this volume's own work has been timed to 60 C. Every chapter therefore writes "not measured, thermal" rather than a number, and [Project 11](11-the-provers-cost.md) sets a 200 s budget and prints the last size it reached so that the first real run replaces the assumption. The reading to take is `/sys/class/thermal/thermal_zone0/temp` sampled once a second across a sustained multi-scalar multiplication, three times on separate days, with the ambient temperature written beside each |
 | Raspberry Pi 3 Model B Rev 1.2 | 1 GB; the second verifier where a chapter needs two Linux boards |
 | NanoPi NEO Air | Allwinner H3, 512 MB, armv7, no 40-pin header; the floor for a verifier |
-| NUCLEO-H7A3ZI-Q | STM32H7A3ZI, Cortex-M7 at 280 MHz, 1312 kB SRAM, hardware HASH unit, FDCAN; the prover on the device side; shared with other volumes, reflash before every capture |
+| NUCLEO-H7A3ZI-Q | STM32H7A3ZI, Cortex-M7 at 280 MHz, 1312 kB of SRAM as a sum over four separate regions and not one contiguous arena, sizes to be read from RM0455, hardware HASH unit, FDCAN; the prover on the device side; shared with other volumes, reflash before every capture |
 | SBC-NodeMCU-ESP32, SBC-ESP8266-PROG | USB sidecars; the ESP32 proves with mbedTLS's P-256, the ESP8266 is the weaker sibling that only commits |
 | X-NUCLEO-IKS4A1, X-NUCLEO-IKS5A1 | the sensor shields whose readings are the secrets; one at a time on the Nucleo's Arduino header or on a Pi I2C bus by flying leads |
 | X-NUCLEO-53L8A1, Adafruit VL53L4CD | time-of-flight; the 8 by 8 part's firmware is licence gated and marked learn, the single-zone part is on I2C at 0x29 |
@@ -92,20 +92,20 @@ Measured, not asserted: every colour pair was computed with the WCAG 2.2 relativ
 | Z4 | Two group elements: the KZG batch verifier in C | C | KZG batch opening | Pi 4B, Pi 3B |
 | Z5 | Farkas witnesses for a joystick program | Rust | symbolic ZKMC, Z3, Bulletproofs | Pi 4B, Explorer700 |
 | Z6 | Folding and the Salem-Spencer schedule, computed exactly | Julia | folding, Schwartz-Zippel | Pi 4B, STWIN.box |
-| Z7 | The ESP32 proves two commitments open to one calibration constant | C# and C | Chaum-Pedersen equality | Pi 4B, ESP32 |
+| Z7 | The ESP32 proves one secret behind two public points: Chaum-Pedersen on P-256 | C# and C | Chaum-Pedersen equality | Pi 4B, ESP32 |
 | Z8 | A ranking function as a circuit, verified in a kiosk browser | JavaScript, Circom | Groth16 | Pi 4B, touchscreen |
 | Z9 | Nova versus one-shot folding on a Pi | Rust | Nova, relaxed R1CS | Pi 4B |
 | Z10 | The hardware hash unit commits to a transition log | C | hash and Merkle commitments | Nucleo, IKS5A1 |
 | Z11 | The prover's cost: multi-scalar multiplication and FFT on two Pis | C++ | MSM, NTT | Pi 4B, Pi 3B+ |
 | Z12 | A PLONK gate for the inductive step, verified on the NanoPi | Go | PLONK, gnark | NanoPi, Pi 4B |
 | Z13 | The obligation in Noir, proved with UltraHonk | Noir | sumcheck-based proving | Pi 4B |
-| Z14 | Theorem 3.2 in Lean 4: the ranking-function rule, machine checked | Lean 4 | the certifier's soundness | Pi 4B |
+| Z14 | Theorem 3.2 in Lean 4: the descent lemma machine checked, the rule stated | Lean 4 | the certifier's soundness | Pi 4B |
 | Z15 | A Zig verifier of Pedersen openings for the Pi 3B+ | Zig | ristretto255 openings | Pi 3B+, Nucleo |
 | Z16 | The model proposes a ranking function; the certifier decides | Python and C | Z3 certification, GBNF | Pi 4B, build laptop |
 | Z17 | From a sentence to a Buchi automaton with Spot | C++ | LTL to automata | Pi 4B |
 | Z18 | A proof over the wire: KZG elements in CAN frames | C | proof transport, ISO-TP | Pi 4B, WS-28164, Nucleo |
 | Z19 | A commitment over NB-IoT and the energy per proof byte | C | commitment transport | Pi 4B, SIM7070G, PPK2 |
-| Z20 | The occupancy counter that proves it stayed under the limit | Rust | Bulletproofs range proof | Pi 4B, VL53L4CD, LCD |
+| Z20 | The occupancy counter that proves its committed count is under the limit | Rust | Bulletproofs range proof | Pi 4B, VL53L4CD, LCD |
 | Z21 | A zero-knowledge virtual machine on the bench | Rust | proving a program, not a circuit | Pi 4B, build laptop |
 | Z22 | Embedded Swift on the microcontroller | Swift | Pedersen, with the language as the variable | Nucleo, IKS4A1, LCD |
 | Z23 | Elixir and Nerves: the CAN node on the Erlang virtual machine | Elixir and Rust | batch zero-check over a bus | Pi 4B, WS-28164, Nucleo |

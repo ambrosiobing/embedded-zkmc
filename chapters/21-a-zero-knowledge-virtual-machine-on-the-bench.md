@@ -24,7 +24,7 @@
 
 ## Pitch
 
-A circuit is written once for one statement and is then cheap. A machine is written once for every statement and is then expensive. That is the whole trade, and this chapter is the one place in the volume where it is counted rather than asserted. The guest is small and already exists in prose: the filter of [Project 19](19-a-commitment-over-nb-iot-and-the-energy.md) reads a telemetry log, drops every record whose value falls outside a public band, rounds what survives to a grid, and never copies the site identifier into its output. Compiled to RISC-V and executed inside SP1 \[[6](#references)\], that program yields a proof that the published series is its own output on a log whose digest is public and whose contents are not. Nothing about this is free: the prover commits one row of the arithmetisation per executed instruction, so a software pairing inside the machine costs thousands of rows where [Project 4](04-two-group-elements.md) spends one group operation. The mathematics below states that cost as a lemma with its constant named, and the corollary turns the two counts into a single factor, computed from two stated inputs and from no measurement on this bench.
+A circuit is written once for one statement and is then cheap. A machine is written once for every statement and is then expensive. That is the whole trade, and this chapter is the one place in the volume where it is costed rather than asserted, as far as two stated inputs allow, one of which is still unread. The guest is small and already exists in prose: the filter of [Project 19](19-a-commitment-over-nb-iot-and-the-energy.md) reads a telemetry log, drops every record whose value falls outside a public band, rounds what survives to a grid, and never copies the site identifier into its output. Compiled to RISC-V and executed inside SP1 \[[6](#references)\], that program yields a proof that the published series is its own output on a log whose digest is public and whose contents are not. Nothing about this is free: the prover commits one row of the arithmetisation per executed instruction, so a software pairing inside the machine costs thousands of rows where [Project 4](04-two-group-elements.md) spends one group operation. The mathematics below states that cost as a lemma with its constant named, and the corollary turns the two counts into a single ratio, derived from one computed input and one figure that has not been read on this bench, and from no measurement anywhere.
 
 ## Parts and interface
 
@@ -112,11 +112,11 @@ Both bounds are linear in $`n`$ with the constants $`w`$ and $`2w`$, so $`N = \T
 
 **Remark Z21.8.** The constant of Lemma **Lemma Z21.5** is the column count $`w`$ together with the per-row hashing that turns those columns into a commitment, and that product is precisely what the trace-generation accelerator work addresses \[[8](#references)\]; a gate-level accelerator addresses the other half, the proof over the committed rows \[[9](#references)\]. Neither accelerator is on this bench, so every row here is produced by a general-purpose core on the build laptop.
 
-**Corollary Z21.7 (The factor a general machine pays over a tailored protocol).** Let a tailored protocol perform $`m`$ operations in the base field, as the KZG batch verifier of [Project 4](04-two-group-elements.md) does with the counts of Lemma lem:z01\_counts, and let the same check run as a guest program that needs $`q`$ machine instructions per base-field operation. Then by Lemma **Lemma Z21.5** the machine prover commits $`N`$ field elements with $`w\,q\,m \le N < 2\,w\,q\,m`$, against the tailored prover's $`\Theta(m)`$ field operations: a factor of at least $`w\,q`$.
+**Corollary Z21.7 (The factor a general machine pays over a tailored protocol).** Let a tailored protocol perform $`m`$ operations in the base field, as the KZG batch verifier of [Project 4](04-two-group-elements.md) does with the counts of Lemma lem:z01\_counts, and let the same check run as a guest program that needs $`q`$ machine instructions per base-field operation. Then by Lemma **Lemma Z21.5** the machine prover commits $`N`$ field elements with $`w\,q\,m \le N < 2\,w\,q\,m`$, against the tailored prover's $`\Theta(m)`$ field operations. The ratio $`w\,q`$ is therefore committed field elements per base-field operation and not a ratio of like quantities: the tailored prover commits nothing at all in this check, so its committed count is $`0`$ and no finite ratio of committed elements exists. Read $`w\,q`$ as the number of elements the machine must commit for each operation the tailored route simply performs, which is the quantity that sets the prover's bill, and read the two routes’ wall times from [Project 11](11-the-provers-cost.md) rather than from this number.
 
 *Proof.* The guest executes $`n = q\,m`$ instructions by hypothesis, and Lemma **Lemma Z21.5** applied to that $`n`$ gives $`w\,q\,m \le N < 2\,w\,q\,m`$. Dividing the lower bound by the tailored count $`m`$ leaves $`w\,q`$. &#9632;
 
-Both inputs of the corollary can be put at numbers on this bench, and both are computed, not measured. For $`q`$: the base field of BLS12-381 is 381 bits, and $`\lceil 381 / 32 \rceil = 12`$ limbs on a 32-bit machine, so one schoolbook product is $`12 \times 12 = 144`$ limb multiplications and the Montgomery reduction adds $`12 \times 12 + 12 = 156`$ more, giving $`144 + 156 = 300`$ limb multiplications, hence $`q \ge 300`$ instructions per field multiplication, computed. For $`w`$: the width of the machine's arithmetisation is taken as 60 columns, a figure read from the proof system and marked (to verify). The product is $`60 \times 300 = 18000`$, computed from those two inputs: a general machine pays at least four orders of magnitude on an algebraic check that a tailored protocol does in one group operation. That is the argument for writing a circuit when the statement is fixed, and the argument for a machine when the statement is a program that already exists.
+Both inputs of the corollary can be put at numbers on this bench, and neither is measured: one is computed and the other has not been read, so the product inherits the weaker of the two. For $`q`$: the base field of BLS12-381 is 381 bits, and $`\lceil 381 / 32 \rceil = 12`$ limbs on a 32-bit machine, so one schoolbook product is $`12 \times 12 = 144`$ limb multiplications and the Montgomery reduction adds $`12 \times 12 + 12 = 156`$ more, giving $`144 + 156 = 300`$ limb multiplications, hence $`q \ge 300`$ instructions per field multiplication, computed. For $`w`$: the width of the machine's arithmetisation is taken as 60 columns, a figure taken from the proof system's documentation, not yet read on this bench, and marked (to verify). The product $`60 \times 300 = 18000`$ therefore moves with $`w`$ and is a shape and not a count; reading $`w`$ from the arithmetisation is what would turn it into a computed figure. Read as a shape it says that a general machine commits some four orders of magnitude more field elements per base-field operation than a tailored protocol performs operations in the same check. That is the argument for writing a circuit when the statement is fixed, and the argument for a machine when the statement is a program that already exists.
 
 ## The protocol
 
@@ -173,7 +173,15 @@ pub fn main() {
     assert!(lo <= hi, "zk21: the admitted band is empty");
     assert!(raw.len() % 8 == 0, "zk21: the log is not whole records");
 
-    let c_x: [u8; 32] = Sha256::digest(&raw).into();
+    // The relation names Com(sp, x; r_x), a randomised commitment. A bare digest of
+    // the log is not one: it is deterministic, so a guess at the log can be confirmed
+    // against c_x, and the site identifier is only 16 bits wide. Read a blinding value
+    // as part of the private input and commit to the blinded digest.
+    let r_x: [u8; 32] = sp1_zkvm::io::read::<[u8; 32]>();   // private blinding
+    let mut hx = Sha256::new();
+    hx.update(&r_x);
+    hx.update(&raw);
+    let c_x: [u8; 32] = hx.finalize().into();
     let kept = filter(&decode(&raw), lo, hi);
     let mut h = Sha256::new();
     for v in &kept { h.update(v.to_le_bytes()); }
@@ -197,6 +205,10 @@ fn prove_on_host() {
     stdin.write(&raw);
     stdin.write(&1200u16);
     stdin.write(&4800u16);
+    // the blinding the guest reads for c_x, drawn once per proof on the prover side
+    let mut r_x = [0u8; 32];
+    rand::thread_rng().fill(&mut r_x[..]);              // generator name (to verify)
+    stdin.write(&r_x);
 
     let client = ProverClient::from_env();              // constructor (to verify)
     let (_values, report) = client.execute(ELF, &stdin).run().expect("execute");
@@ -211,10 +223,25 @@ fn prove_on_host() {
 }
 
 // ---- verifier crate on the Pi 4B: the only side that must fit in 8 GB
-fn verify_on_the_pi() -> bool {
-    let vk = serde_json::from_slice(&std::fs::read("zk21_vk.json").unwrap()).unwrap();
+// The digest is the whole of the assurance (Remark rem:z21_honest), so the verifier
+// derives the key from the ELF it holds itself and never from the file that travelled
+// with the artefact. The two failures are reported apart, as the protocol requires.
+const ELF_ON_THE_PI: &[u8] = include_bytes!("../elf/zk21-guest");
+
+enum Verdict { Accept, BadArtefact, BadDigest }
+
+fn verify_on_the_pi() -> Verdict {
+    let (_pk, vk_own) = ProverClient::from_env().setup(ELF_ON_THE_PI);
     let proof = sp1_sdk::SP1ProofWithPublicValues::load("zk21_proof.bin").unwrap();
-    ProverClient::from_env().verify(&proof, &vk).is_ok()
+    let vk_sent: sp1_sdk::SP1VerifyingKey =                      // type name to verify
+        serde_json::from_slice(&std::fs::read("zk21_vk.json").unwrap()).unwrap();
+    if vk_sent.bytes32() != vk_own.bytes32() {                   // accessor to verify
+        return Verdict::BadDigest;
+    }
+    match ProverClient::from_env().verify(&proof, &vk_own) {
+        Ok(()) => Verdict::Accept,
+        Err(_) => Verdict::BadArtefact,
+    }
 }
 ```
 
@@ -236,6 +263,7 @@ None. No language model proposes anything here: the guest is a fixed program, th
 - **have:** real: the Pi 4B with 8 GB as the verifier, build laptop with 24 GB as the prover and the only machine that compiles, the two Joy-it LEDs on BCM 17 and BCM 22 measured on Saturday 3 October 2026, the Renkforce cable, the LAN between them
 - **learn:** modelled: the telemetry log is a file written once by the driver of [Project 19](19-a-commitment-over-nb-iot-and-the-energy.md) and replayed, drawn dashed in every figure here, because no SIM is on the bench and nothing arrives over a radio; the bars of the benchmark figure are expected orders of magnitude and are drawn dashed until a run exists
 - **absent:** absent: the trace-generation accelerator \[[8](#references)\] and the gate-level accelerator \[[9](#references)\], neither of which is on this bench, so every committed row is produced by a general-purpose core; and the radio of [Project 19](19-a-commitment-over-nb-iot-and-the-energy.md), so the input is a file
+- **learn:** modelled: the verifier cannot check $`c_x`$ against anything on this bench, because the only party that holds the log is the prover. The statement the Pi 4B actually accepts is therefore "some log with digest $`c_x`$ produces this series", and not "the log the device recorded produces this series". Anchoring $`c_x`$ needs the device-side commitment of [Project 2](02-a-sensor-reading-committed-on-the-microcontroller.md), which this chapter does not carry, so the assurance of [Project 19](19-a-commitment-over-nb-iot-and-the-energy.md)'s driver is named here and not claimed
 
 ## System architecture
 
@@ -309,7 +337,7 @@ stateDiagram-v2
 | guest instructions per record | not measured | not run | the host's own execute pass prints the count; no run has happened |
 | cycles per instruction, prover side | not measured | not run | no timing harness has been attached to the prover |
 | committed rows | computed | not run | Lemma **Lemma Z21.5**: between $`w n`$ and $`2 w n`$ for $`n`$ instructions and $`w`$ columns |
-| factor over the tailored route | computed | computed | Corollary **Corollary Z21.7** with $`q \ge 300`$ and $`w = 60`$: at least 18000 |
+| factor over the tailored route | computed from one bound and one unread figure | the same | Corollary **Corollary Z21.7** with $`q \ge 300`$ computed from the limb count, and $`w = 60`$ taken from the proof system's documentation and not yet read on this bench; the product 18000 therefore moves with $`w`$ and is a shape and not a measurement. Reading $`w`$ from the arithmetisation turns this cell into a computed one |
 | raw log size | computed | computed | 8 bytes per record by the layout of [Project 19](19-a-commitment-over-nb-iot-and-the-energy.md) |
 | core artefact bytes | not measured | not measured | no proof has been generated |
 | wrapped artefact bytes | claim to verify | claim to verify | the brief states 192 bytes \[[5](#references)\]; two compressed $`\mathbb{G}_1`$ elements and one compressed $`\mathbb{G}_2`$ element of BLS12-381 are $`2 \times 48 + 96 = 192`$, computed, but whether this toolchain emits exactly that is unread |
@@ -337,13 +365,13 @@ The only measured numbers anywhere near this chapter remain the paper's, taken o
 
 ## Acceptance test
 
-The chapter passes when, on one recorded day: the execute pass halts and prints an instruction count greater than zero for a log of at least 4096 records; the proving pass writes an artefact and a verifying key; the Pi 4B verifies that pair and lights the green LED; the five public values read back in the committed order and the kept count $`k`$ satisfies $`0 \le k \le 4096`$; an artefact with one byte altered lights the red LED with the reason "artefact"; and the verifying key of a second guest, built from a source whose grid constant is 32 rather than 64, lights the red LED with the reason "digest". It fails if the verifier accepts an artefact whose verifying key it did not derive itself, if any site identifier appears in any committed value, or if a figure in this chapter carries a solid bar without a named record.
+The chapter passes when, on one recorded day: the execute pass halts and prints an instruction count greater than zero for a log of exactly 4096 records, which is the size the record file is cut to for this test; the proving pass writes an artefact and a verifying key; the Pi 4B verifies that pair and lights the green LED; the five public values read back in the committed order and the kept count $`k`$ satisfies $`0 \le k \le 4096`$, which is the record count of that file and is the only bound the guest's own loop guarantees; an artefact with one byte altered lights the red LED with the reason "artefact"; and the verifying key of a second guest, built from a source whose grid constant is 32 rather than 64, lights the red LED with the reason "digest". It fails if the verifier accepts an artefact whose verifying key it did not derive itself, if any site identifier appears in any committed value, or if a figure in this chapter carries a solid bar without a named record.
 
 ## Variants
 
 **The same guest under RISC Zero.** The one thing swapped is the machine: the guest source is unchanged and is rebuilt for the second instrument \[[7](#references)\], so the statement, the band and the five public values are identical and only the arithmetisation and the artefact differ. What it buys is the only honest comparison available on one bench, because the two provers run the same program on the same input; what it costs is a second toolchain on the build laptop and a second verifier binary on the Pi. By Lemma **Lemma Z21.5** the row count differs only through the column count $`w`$, so a ratio of artefact sizes between the two is a measurement of $`w`$ and of the commitment layer, computed from the same $`n`$. Choose it whenever a cost figure from this chapter is about to be quoted as a property of zero-knowledge machines rather than of one of them. It is this volume's variant and not the brief's, which names one machine only \[[5](#references)\].
 
-**The verifier of a tailored protocol as the guest.** The guest is replaced by the KZG batch verifier of [Project 4](04-two-group-elements.md), so that a verifier's own run becomes the thing proved, and the parts and the language are unchanged. What it buys is recursion in its plainest form: one artefact that stands for a check someone else already performed. What it costs is the factor of Corollary **Corollary Z21.7**, at least $`60 \times 300 = 18000`$ committed rows per base field operation, computed. Choose it only when the tailored proof must be checked by a party that cannot run a pairing at all. It is the brief's own suggestion of compiling arbitrary logic into a machine \[[5](#references)\], with the bench correction that the prover runs on the build laptop and not on a Pi 3B+.
+**The verifier of a tailored protocol as the guest.** The guest is replaced by the KZG batch verifier of [Project 4](04-two-group-elements.md), so that a verifier's own run becomes the thing proved, and the parts and the language are unchanged. What it buys is recursion in its plainest form: one artefact that stands for a check someone else already performed. What it costs is the factor of Corollary **Corollary Z21.7**, of the order of $`60 \times 300 = 18000`$ committed rows per base field operation, which is a shape while $`w = 60`$ is unread and not a counted figure. Choose it only when the tailored proof must be checked by a party that cannot run a pairing at all. It is the brief's own suggestion of compiling arbitrary logic into a machine \[[5](#references)\], with the bench correction that the prover runs on the build laptop and not on a Pi 3B+.
 
 ## Pitfalls
 
@@ -373,16 +401,16 @@ The chapter passes when, on one recorded day: the execute pass halts and prints 
 ## References
 
 1. Pascal Berrang, Mirco Giacobbe, Jacob Swales and Xiao Yang. Zero-Knowledge Model Checking. arXiv:2605.00487v2 \[cs.CR\], version 1 submitted Friday 1 May 2026, version 2 Tuesday 8 September 2026. [arxiv.org/abs/2605.00487](https://arxiv.org/abs/2605.00487) (verified Friday 6 November 2026).
-2. Consensys. gnark: a fast zk-SNARK library in Go. Release v0.16.4, Wednesday 7 October 2026, carrying a high-severity soundness fix in emulated elliptic-curve scalar multiplication and a BW6-761 pairing fix. [github.com/Consensys/gnark, latest release](https://api.github.com/repos/Consensys/gnark/releases/latest) (verified Friday 6 November 2026).
-3. Supranational. blst: a BLS12-381 signature and pairing library in C and assembly. Release v0.3.17, Friday 24 July 2026. [github.com/supranational/blst, latest release](https://api.github.com/repos/supranational/blst/releases/latest) (verified Friday 6 November 2026).
-4. Aztec. Noir: a domain-specific language for zero-knowledge circuits. Release v1.0.0, Thursday 29 October 2026; 1431 stars when read. [github.com/noir-lang/noir, latest release](https://api.github.com/repos/noir-lang/noir/releases/latest) (verified Friday 6 November 2026).
+2. Consensys. gnark: a fast zk-SNARK library in Go. Release v0.16.4, Wednesday 7 October 2026, carrying a high-severity soundness fix in emulated elliptic-curve scalar multiplication and a BW6-761 pairing fix. The licence is not recorded here because it has not been read; read it from the repository's LICENSE file (to verify). [github.com/Consensys/gnark, latest release](https://api.github.com/repos/Consensys/gnark/releases/latest) (verified Friday 6 November 2026).
+3. Supranational. blst: a BLS12-381 signature and pairing library in C and assembly. Release v0.3.17, Friday 24 July 2026. The licence is not recorded here because it has not been read; read it from the repository's LICENSE file (to verify). [github.com/supranational/blst, latest release](https://api.github.com/repos/supranational/blst/releases/latest) (verified Friday 6 November 2026).
+4. Aztec. Noir: a domain-specific language for zero-knowledge circuits. Release v1.0.0, Thursday 29 October 2026; 1431 stars when read. The licence is not recorded here because it has not been read; read it from the repository's LICENSE file (to verify). [github.com/noir-lang/noir, latest release](https://api.github.com/repos/noir-lang/noir/releases/latest) (verified Friday 6 November 2026).
 5. Advanced hardware-software architectures for edge artificial intelligence and zero-knowledge model checking. A design brief of twenty project sketches, read on Friday 6 November 2026 and held locally at `a local design brief`. It is the input to this second edition and is not a published source; where its hardware claims disagree with the bench, the bench is followed and the disagreement is stated.
-6. Succinct Labs. SP1: a zero-knowledge virtual machine that proves the execution of a RISC-V binary. Release v6.10.0, Friday 23 October 2026. [github.com/succinctlabs/sp1](https://github.com/succinctlabs/sp1) (verified Friday 6 November 2026).
-7. RISC Zero. risc0: a RISC-V zero-knowledge virtual machine and proof system. Release v3.0.6, Friday 17 July 2026. [github.com/risc0/risc0](https://github.com/risc0/risc0) (verified Friday 6 November 2026).
+6. Succinct Labs. SP1: a zero-knowledge virtual machine that proves the execution of a RISC-V binary. Release v6.10.0, Friday 23 October 2026. The licence is not recorded here because it has not been read; read it from the repository's LICENSE file (to verify). [github.com/succinctlabs/sp1](https://github.com/succinctlabs/sp1) (verified Friday 6 November 2026).
+7. RISC Zero. risc0: a RISC-V zero-knowledge virtual machine and proof system. Release v3.0.6, Friday 17 July 2026. The licence is not recorded here because it has not been read; read it from the repository's LICENSE file (to verify). [github.com/risc0/risc0](https://github.com/risc0/risc0) (verified Friday 6 November 2026).
 8. Jieran Cui, Zhengkai Wen, Haowen Fang, Yinan Zhu, Jia Xiong, Cheng Ni, Mingchi Zhang, Nan Guan and Xi Wang. ZK-Tracer: a high-performance heterogeneous accelerator for zero-knowledge virtual machine trace generation. arXiv:2605.25493, submitted Monday 25 May 2026, revised Tuesday 26 May 2026. [arxiv.org/abs/2605.25493](https://arxiv.org/abs/2605.25493) (verified Friday 6 November 2026).
 9. zkPHIRE: a programmable accelerator for zero-knowledge proofs over high-degree, expressive gates. arXiv:2508.16738, 2025. [arxiv.org/abs/2508.16738](https://arxiv.org/abs/2508.16738) (to verify).
-10. Plonky3 contributors. Plonky3: a toolkit for polynomial commitment based proof systems, the backend of several zero-knowledge virtual machines. [github.com/Plonky3/Plonky3](https://github.com/Plonky3/Plonky3) (to verify).
+10. Plonky3 contributors. Plonky3: a toolkit for polynomial commitment based proof systems, the backend of several zero-knowledge virtual machines. The licence is not recorded here because it has not been read; read it from the repository's LICENSE file (to verify). [github.com/Plonky3/Plonky3](https://github.com/Plonky3/Plonky3) (to verify).
 
 ---
 
-[Previous](20-the-occupancy-counter-that-proves-it-stayed-under.md) &nbsp;&nbsp;|&nbsp;&nbsp; [Contents](../CONTENTS.md) &nbsp;&nbsp;|&nbsp;&nbsp; [Next](22-embedded-swift-on-the-microcontroller.md)
+[Previous](20-the-occupancy-counter-that-proves-its-committed-count.md) &nbsp;&nbsp;|&nbsp;&nbsp; [Contents](../CONTENTS.md) &nbsp;&nbsp;|&nbsp;&nbsp; [Next](22-embedded-swift-on-the-microcontroller.md)

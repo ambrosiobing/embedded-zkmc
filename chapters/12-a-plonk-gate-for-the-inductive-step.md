@@ -16,9 +16,9 @@
 > - **Language and library:** Go 1.23 (to verify) with `gnark` v0.16.4 \[[5](#references)\], `gnark-crypto` at the version `gnark`'s module file pins (to verify), curve BN254, the PLONK backend; the verifier is built with `GOOS=linux GOARCH=arm GOARM=7`
 > - **Primitive:** PLONK's gate constraint and permutation argument \[[2](#references)\] for the inductive-step obligation of the paper's Equations 20 and 21 \[[1](#references)\], the statement of Section [Project 8](08-a-ranking-function-as-a-circuit.md)
 > - **Secret:** the transition $`x, x'`$ of the modem machine and the row $`A_i, b_i`$ of the guarded update it belongs to
-> - **Public:** the ranking pieces $`w_j, u_j, w_k, u_k`$ and the fairness bit $`\mathbf{1}_F`$
+> - **Public:** the ranking pieces $`w_j, u_j, w_k, u_k`$, the fairness bit $`\mathbf{1}_F`$, and the digest $`h`$ of the guard row of the published program
 > - **Model:** none
-> - **Acceptance:** the honest proof verifies on the NanoPi; the proof with one public value changed is rejected; the witness $`x' = (2, 0)`$ is refused by the prover with a failed range constraint; the verifier's median time over 64 repeats has a spread under 5 percent and its peak resident memory is under 200 MB; the NanoPi's thermal zone is read before and after
+> - **Acceptance:** the honest proof verifies on the NanoPi; the proof with one public value changed is rejected; the witness $`x' = (2, 0)`$ is refused by the prover with a failed range constraint; the honest witness under an increasing public ranking function is refused on the ranking gate alone, which is the only case that reaches the conclusion; the verifier's median time over 64 repeats has a spread under 5 percent and its peak resident memory is under 200 MB; the NanoPi's thermal zone is read before and after
 > - **Difficulty:** 3 of 5
 > - **Effort:** one evening for the circuit and the prover on the Pi 4B, one evening for the armv7 cross build and the NanoPi's Wi-Fi, a third session for the repeat
 
@@ -37,20 +37,28 @@ The paper remarks that its uniform obligation could be handed to Groth16 or PLON
 
 ## The secret, the statement and the relation
 
-The statement is the one of Section [Project 8](08-a-ranking-function-as-a-circuit.md), repeated word for word so that the three circuit chapters prove the same thing. Let $`n = 2`$ be the number of program variables of the modem machine of Section [Project 3](03-the-modems-backoff-machine.md), $`x = (\mathit{delay}, \mathit{done})`$, and let $`y = (x, x') \in \mathbb{Z}^4`$ be a transition. Every integer in the statement is a signed 16-bit integer, $`I = [-2^{15}, 2^{15} - 1]`$, which is the paper's bounded integer encoding with $`M = 2^{15}`$ \[[1](#references)\]. The witness is the transition and the row of the guarded update it belongs to, the statement is the ranking function's two pieces and the fairness bit, and the relation is
+The statement is the one of Section [Project 8](08-a-ranking-function-as-a-circuit.md), repeated word for word so that the three circuit chapters prove the same thing. Let $`n = 2`$ be the number of program variables of the modem machine of Section [Project 3](03-the-modems-backoff-machine.md), $`x = (\mathit{delay}, \mathit{done})`$, and let $`y = (x, x') \in \mathbb{Z}^4`$ be a transition. Every integer in the statement is a signed 16-bit integer, $`I = [-2^{15}, 2^{15} - 1]`$, which is the paper's bounded integer encoding with $`M = 2^{15}`$ \[[1](#references)\]. The witness is the transition and the row of the guarded update it belongs to, the statement is the ranking function's two pieces, the fairness bit and the digest of the guard row, and the relation is
 
 ```math
 \begin{aligned}
-  \mathcal{R}_{\mathrm{step}} = \Big\{\, \big( (x, x', A_i, b_i) ;\; (w_j, u_j, w_k, u_k, f) \big)
+  \mathcal{R}_{\mathrm{step}} = \Big\{\, \big( (x, x', A_i, b_i) ;\;
+      (w_j, u_j, w_k, u_k, f, h) \big)
     \;:\;\; & x, x' \in I^2,\; A_i \in I^{m \times 4},\; b_i \in I^m,\; f \in \{0, 1\}, \\
-    & A_i \begin{bmatrix} x \\ x' \end{bmatrix} \le b_i, \;\;
+    & h = H(A_i, b_i), \;\;
+      A_i \begin{bmatrix} x \\ x' \end{bmatrix} \le b_i, \;\;
       (w_j \cdot x + u_j) - (w_k \cdot x' + u_k) \ge f \,\Big\}.
 \end{aligned}
 ```
 
 *(12.1)*
 
-This is the paper's Equation 21 read at one point: the premise $`A_i [x\; x']^\top \le b_i`$ is membership of the transition in the $`i`$-th guarded update of Equation 16, and the conclusion is $`V(x, q) - V(x', q') > \mathbf{1}_F(q, \sigma, q') - 1`$ with $`V`$ the piecewise-linear function of Equation 18, which over integers is $`V(x, q) - V(x', q') \ge f`$ with $`f = \mathbf{1}_F(q, \sigma, q')`$. Equation 20, the preservation of finiteness, has the same premise and a conclusion of the same shape (a public row that must not hold), and is appended as further rows in the full build. The concrete instance is the retry loop of Section [Project 8](08-a-ranking-function-as-a-circuit.md), whose instance equation it repeats: $`A_i`$ with five rows over $`y = (\mathit{delay}, \mathit{done}, \mathit{delay}', \mathit{done}')`$, $`b_i = (0, 0, 1, -1, 2)`$, $`w_j = w_k = (0, -1)`$, $`u_j = u_k = 3`$, $`f = 1`$, witness $`x = (1, 0)`$, $`x' = (2, 1)`$. Remark rem:z08\_step on one step against the universal obligation applies here unchanged.
+The public digest $`h`$ binds the secret guard row to the published program, and the relation is unsound without it. $`H`$ is a collision-resistant hash over $`\mathbb{F}`$, and $`h = H(A_i, b_i)`$ is published once with the circuit as the digest of the guarded update of the program of Section [Project 3](03-the-modems-backoff-machine.md) that the transition belongs to. If $`h`$ is left out, $`A_i`$ and $`b_i`$ are free witness values: a prover takes $`A_i = 0`$ and $`b_i = 0`$, every row of the premise reads $`0 \le 0`$, the entry range checks pass, and the only obligation left is the ranking inequality, which the prover then satisfies by choosing $`x`$ and $`x'`$ freely, so an accepted proof says nothing about the modem machine. With $`h`$ on the statement side the premise is a claim about the published program and not about inequalities the prover liked. The three chapters instantiate $`H`$ with the hash their own toolchain ships, named in each listing and marked to verify, so a digest made for one chapter is not a digest for another.
+
+This is the paper's Equation 21 read at one point: the premise $`A_i [x\; x']^\top \le b_i`$ is membership of the transition in the $`i`$-th guarded update of Equation 16, and the conclusion is $`V(x, q) - V(x', q') > \mathbf{1}_F(q, \sigma, q') - 1`$ with $`V`$ the piecewise-linear function of Equation 18, which over integers is $`V(x, q) - V(x', q') \ge f`$ with $`f = \mathbf{1}_F(q, \sigma, q')`$. Equation 20, the preservation of finiteness, has the same premise and a conclusion of the same shape (a public row that must not hold), and is appended as further rows in the full build. The concrete instance is the retry command of Section [Project 8](08-a-ranking-function-as-a-circuit.md), whose instance equation (eq:z08\_instance) it repeats: the five printed rows over $`y = (\mathit{delay}, \mathit{done}, \mathit{delay}', \mathit{done}')`$, which pin $`\mathit{delay} = 0`$ and $`\mathit{done}' = \mathit{done} + 1`$ under the guard $`\mathit{done} \le 1`$, with $`b_i = (0, 0, 1, -1, 1)`$, $`w_j = w_k = (0, -1)`$, $`u_j = u_k = 3`$, $`f = 1`$, and the witness $`x = (0, 0)`$, $`x' = (3, 1)`$, which is a transition of the machine of Section [Project 3](03-the-modems-backoff-machine.md) because $`3 < D_1 = 8`$. Remark rem:z08\_step on one step against the universal obligation applies here unchanged.
+
+Rows 3 and 4 pin $`\mathit{done}' = \mathit{done} + 1`$, so $`(w_j \cdot x + u_j) - (w_k \cdot x' + u_k) = \mathit{done}' - \mathit{done} = 1`$ for every witness that satisfies the premise, and with $`f \in \{0, 1\}`$ the conclusion then holds by construction on this instance whatever the witness is. Two consequences follow for the negative tests. A case that changes the witness cannot reach the ranking constraint, because the premise refuses it first; and the public $`f = 2`$ cannot reach it either, because the boolean constraint on $`f`$ refuses that before the comparison. The case that does reach it keeps the honest witness and $`f = 1`$ and makes the public ranking function increase across the transition, $`w_j = w_k = (0, 1)`$ with $`u_j = u_k = 3`$, which satisfies every premise row and the boolean constraint and then fails the ranking inequality alone, since $`(0 + 3) - (1 + 3) = -1 < 1`$. All three chapters run that case, and the $`f = 2`$ case beside it as the test of the boolean constraint. Without the first of the two the conclusion, which is the thing all three chapters exist to prove, is exercised by no test.
+
+Lemma lem:z08\_cmp's hypothesis for the ranking row, $`|(w_j \cdot x + u_j) - (w_k \cdot x' + u_k) - f| < 2^{34}`$, is derived from $`w_j, w_k \in I^2`$, $`u_j, u_k \in I`$ and $`f \in \{0, 1\}`$. Of those five public signals the circuit constrains one: `api.AssertIsLessOrEqual(c.F, 1)` below is the boolean constraint on $`f`$ and is part of the relation. The four ranking coefficients are not range-checked, so for them the hypothesis is not enforced by the proof. A public $`w`$ of large magnitude makes the field value handed to `api.ToBinary` a small residue of a difference that is negative over the integers, and the comparison then holds in the circuit and fails in $`\mathbb{Z}`$. Enforcing the hypothesis is therefore the verifier's obligation: the party that holds the verifying key must also hold the ranking function of the published program and refuse a public witness that is not it. The listing below reads `pub.bin` from disk and does not make that comparison, which is recorded as absent rather than claimed; Section [Project 8](08-a-ranking-function-as-a-circuit.md)'s kiosk page carries the comparison written out. A deployment that cannot pin the four coefficients must put the four $`k = 16`$ checks into the circuit instead and pay their gates.
 
 ## The mathematics
 
@@ -108,7 +116,7 @@ which is (12.3).
 
 *(12.4)*
 
-so that $`z(\omega^{n}) = z(1) = 1`$ is exactly (12.3) after the challenges $`\beta, \gamma`$ have been drawn, which is why the proof is called a grand product. The verifier checks the recurrence and the boundary as polynomial identities on $`H`$ through KZG openings at one random point, the primitive of Section [Project 4](04-two-group-elements.md); $`\beta`$ and $`\gamma`$ come from the Fiat-Shamir hash of the wire commitments, as in Section [Project 7](07-the-esp32-proves-two-commitments-open-to-one.md). The setup is a universal structured reference string that depends only on an upper bound on $`n`$, not on the circuit, which is the difference from Section [Project 8](08-a-ranking-function-as-a-circuit.md) the decision tree turns on \[[2](#references)\].
+so that $`z(\omega^{n}) = z(1) = 1`$ is exactly (12.3) after the challenges $`\beta, \gamma`$ have been drawn, which is why the proof is called a grand product. The verifier checks the recurrence and the boundary as polynomial identities on $`H`$ through KZG openings at one random point, the primitive of Section [Project 4](04-two-group-elements.md); $`\beta`$ and $`\gamma`$ come from the Fiat-Shamir hash of the wire commitments, as in Section [Project 7](07-the-esp32-proves-one-secret-behind-two-public.md). The setup is a universal structured reference string that depends only on an upper bound on $`n`$, not on the circuit, which is the difference from Section [Project 8](08-a-ranking-function-as-a-circuit.md) the decision tree turns on \[[2](#references)\].
 
 ## The protocol
 
@@ -127,21 +135,28 @@ package main
 import ("fmt"; "io"; "os"; "sort"; "time")
 import (
 	"github.com/consensys/gnark-crypto/ecc"
+	"github.com/consensys/gnark-crypto/ecc/bn254/fr"
+	frmimc "github.com/consensys/gnark-crypto/ecc/bn254/fr/mimc"
 	"github.com/consensys/gnark/backend/plonk"
 	"github.com/consensys/gnark/backend/witness"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/frontend/cs/scs"
+	"github.com/consensys/gnark/std/hash/mimc" // the in-circuit hash; gadget name to verify
 	"github.com/consensys/gnark/test/unsafekzg"
 )
 const M = 1 << 15 // every entry is a signed 16-bit integer; shifted by M for the range gate
 // StepCircuit is the relation shared with Z8 and Z13: A y <= b over y = (x, x'), and
-// (wj.x + uj) - (wk.x' + uk) >= f, every entry in [-M, M - 1].
+// (wj.x + uj) - (wk.x' + uk) >= f, every entry in [-M, M - 1], with the public digest
+// RowHash = H(A, b) binding the secret guard row to the published program. Without that
+// binding a prover takes A = 0 and b = 0, satisfies every row of the premise trivially, and
+// the proof says nothing about the modem machine.
 type StepCircuit struct {
 	X, Xp     [2]frontend.Variable
 	A         [5][4]frontend.Variable
 	B         [5]frontend.Variable
 	Wj, Wk    [2]frontend.Variable `gnark:",public"`
 	Uj, Uk, F frontend.Variable    `gnark:",public"`
+	RowHash   frontend.Variable    `gnark:",public"`
 }
 
 func int16Range(api frontend.API, v frontend.Variable) { api.ToBinary(api.Add(v, M), 16) }
@@ -152,6 +167,14 @@ func leq(api frontend.API, a, b frontend.Variable, k int) { api.ToBinary(api.Sub
 func (c *StepCircuit) Define(api frontend.API) error {
 	y := []frontend.Variable{c.X[0], c.X[1], c.Xp[0], c.Xp[1]}
 	for col := 0; col < 4; col++ { int16Range(api, y[col]) }
+	// h = H(A, b): the public binding of the guard row to the published program
+	h, err := mimc.NewMiMC(api)
+	if err != nil { return err }
+	for r := 0; r < 5; r++ {
+		for col := 0; col < 4; col++ { h.Write(c.A[r][col]) }
+		h.Write(c.B[r])
+	}
+	api.AssertIsEqual(h.Sum(), c.RowHash)
 	for r := 0; r < 5; r++ {
 		int16Range(api, c.B[r])
 		dot := frontend.Variable(0)
@@ -171,11 +194,26 @@ func (c *StepCircuit) Define(api frontend.API) error {
 func must[T any](v T, err error) T { if err != nil { panic(err) }; return v }
 func must2[A, B any](a A, b B, err error) (A, B) { if err != nil { panic(err) }; return a, b }
 
-var instance = StepCircuit{X: [2]frontend.Variable{1, 0}, Xp: [2]frontend.Variable{2, 1},
-	A: [5][4]frontend.Variable{{-2, 0, 1, 0}, {2, 0, -1, 0}, {0, -1, 0, 1},
+// rowDigest is the same hash out of circuit, over the same entries in the same order; the
+// package path and the encoding of a negative entry are to verify on v0.16.4
+func feBytes(v int64) []byte { var e fr.Element; e.SetInt64(v); bs := e.Bytes(); return bs[:] }
+func rowDigest(a [5][4]int64, b [5]int64) []byte {
+	h := frmimc.NewMiMC()
+	for r := 0; r < 5; r++ {
+		for col := 0; col < 4; col++ { h.Write(feBytes(a[r][col])) }
+		h.Write(feBytes(b[r]))
+	}
+	return h.Sum(nil)
+}
+
+// the retry command of the modem machine of Z3: delay = 0, done' = done + 1, guard done <= 1
+var rowsA = [5][4]int64{{1, 0, 0, 0}, {-1, 0, 0, 0}, {0, -1, 0, 1}, {0, 1, 0, -1}, {0, 1, 0, 0}}
+var rowsB = [5]int64{0, 0, 1, -1, 1}
+var instance = StepCircuit{X: [2]frontend.Variable{0, 0}, Xp: [2]frontend.Variable{3, 1},
+	A: [5][4]frontend.Variable{{1, 0, 0, 0}, {-1, 0, 0, 0}, {0, -1, 0, 1},
 		{0, 1, 0, -1}, {0, 1, 0, 0}},
-	B: [5]frontend.Variable{0, 0, 1, -1, 2}, Wj: [2]frontend.Variable{0, -1}, Uj: 3,
-	Wk: [2]frontend.Variable{0, -1}, Uk: 3, F: 1}
+	B: [5]frontend.Variable{0, 0, 1, -1, 1}, Wj: [2]frontend.Variable{0, -1}, Uj: 3,
+	Wk: [2]frontend.Variable{0, -1}, Uk: 3, F: 1, RowHash: rowDigest(rowsA, rowsB)}
 func main() {
 	field := ecc.BN254.ScalarField()
 	if os.Args[1] == "prove" { // Pi 4B, aarch64: compile, SRS stand-in, setup, prove, write
@@ -230,7 +268,7 @@ None. The circuit is fixed by the relation and the witness is a transition the m
 
 - **have:** real: the NanoPi NEO Air with its Wi-Fi, the Pi 4B, `gnark` v0.16.4 read on Friday 6 November 2026 \[[5](#references)\], the Go cross-compiler on the build laptop, the Renkforce cable for the NanoPi's console
 - **learn:** modelled: the SRS from `unsafekzg` is a one-party stand-in for a universal ceremony and is drawn dashed; every bar in the benchmark figure is an expected order of magnitude; the gate count is read from the compiled system when the run happens, not computed here
-- **absent:** absent: an Ethernet port and a 40-pin header on the NanoPi, so the verdict is a console line and never an LED; a fan, so a NanoPi run that warms the H3 past the point where its governor throttles is "not measured, thermal" by the same rule as the Pi 3B+; a ceremony party
+- **absent:** absent: an Ethernet port and a 40-pin header on the NanoPi, so the verdict is a console line and never an LED; a fan, so a NanoPi run that warms the H3 past the point where its governor throttles is "not measured, thermal" by the same rule as the Pi 3B+; a ceremony party; a comparison in the verifier between the public witness it reads from `pub.bin` and the statement of the published program, which is the party that must enforce Lemma lem:z08\_cmp's hypothesis on the four ranking coefficients and which Section [Project 8](08-a-ranking-function-as-a-circuit.md)'s page writes out
 
 ## System architecture
 
@@ -324,11 +362,13 @@ For scale, the paper's symbolic scheme verified 217 obligations in 10 s on its A
 
 **Step 5.** On the Pi 4B, change one public value in a second assignment, re-prove, copy only the new `pub.bin` beside the old proof, and confirm that the NanoPi prints a reject; then set $`x' = (2, 0)`$ and confirm that `plonk.Prove` fails on the range gate.
 
-**Step 6.** Repeat the 64 verifications on a second day; a median that moved by more than 15 percent is withdrawn and both figures are printed.
+**Step 6.** On the Pi 4B, keep the honest witness and $`f = 1`$ and set the public ranking function to the increasing one, $`w_j = w_k = (0, 1)`$ with $`u_j = u_k = 3`$; confirm that `plonk.Prove` fails on the ranking gate and on no premise row, which is the only case that reaches the conclusion. Then set the public $`f = 2`$ and confirm that it fails on `api.AssertIsLessOrEqual(c.F, 1)` instead.
+
+**Step 7.** Repeat the 64 verifications on a second day; a median that moved by more than 15 percent is withdrawn and both figures are printed.
 
 ## Acceptance test
 
-The chapter passes when the honest proof prints `verdict=true` on the NanoPi, the proof with the mismatched public witness prints `verdict=false`, the witness $`x' = (2, 0)`$ makes `plonk.Prove` return an error naming an unsatisfied constraint, the median `verify_ms` over 64 repeats has a median absolute deviation under 5 percent, the maximum resident set size is under 200 MB, the NanoPi's thermal zone after the run is below the value at which its governor throttles (to read from the running kernel's trip points), and the Pi 4B's throttle register reads 0x0 on both reads. It fails if the verifier was run on the Pi 4B and the number copied into the NanoPi cell, or if the SRS was regenerated between proving and verifying, since `unsafekzg` draws a fresh secret each time and the old proof would then be rejected for the wrong reason.
+The chapter passes when the honest proof prints `verdict=true` on the NanoPi, the proof with the mismatched public witness prints `verdict=false`, the witness $`x' = (2, 0)`$ makes `plonk.Prove` return an error naming an unsatisfied constraint, the honest witness under the increasing public ranking function $`w_j = w_k = (0, 1)`$ makes it fail on the ranking gate and on no premise row, the honest witness with the public $`f = 2`$ makes it fail on the boolean constraint on $`f`$, the median `verify_ms` over 64 repeats has a median absolute deviation under 5 percent, the maximum resident set size is under 200 MB, the NanoPi's thermal zone after the run is below the value at which its governor throttles (to read from the running kernel's trip points), and the Pi 4B's throttle register reads 0x0 on both reads. It fails if the verifier was run on the Pi 4B and the number copied into the NanoPi cell, or if the SRS was regenerated between proving and verifying, since `unsafekzg` draws a fresh secret each time and the old proof would then be rejected for the wrong reason.
 
 ## Variants
 
@@ -339,6 +379,7 @@ The chapter passes when the honest proof prints `verdict=true` on the NanoPi, th
 - `unsafekzg.NewSRS` draws its secret from a fixed seed or a fresh one depending on the version (to verify); either way it is the prover who holds the toxic waste, so the bench proof convinces nobody but the bench. The product form is a ceremony SRS loaded with `kzg.SRS.ReadFrom`.
 - On armv7 `gnark-crypto`'s field arithmetic takes its pure Go path, not the assembly it has for amd64 and arm64 (to verify); the NanoPi's verifier is therefore slower than a clock ratio would predict, and the data figure says order of magnitude, not ratio.
 - A negative literal assigned to a `frontend.Variable` is reduced into the field; a negative literal that reaches `api.ToBinary` without the `+ M` shift is a 254-bit number and the gate fails for the right reason, which is the behaviour the acceptance test's $`x' = (2, 0)`$ case relies on.
+- The three circuits are presented as one relation written three times. They are not the same constraint system. The typed route of Section [Project 13](13-the-obligation-in-noir.md) gets its integer windows from the compiler and so protects the comparison against an out-of-range public coefficient, where Sections [Project 8](08-a-ranking-function-as-a-circuit.md) and **Project 12** rest on the verifier pinning those coefficients inside $`I`$. The boolean constraint on $`f`$ is enforced by all three only with the line the Circom template now carries. And the three instantiate the relation's hash $`H`$ with the gadget their own toolchain ships, so the digest $`h`$ is not portable between them. A relation repeated word for word in prose is not a relation repeated in constraints, and the three chapters list their differences here rather than claiming none.
 - `api.AssertIsLessOrEqual(v, bound)` with a constant bound decomposes $`v`$ over the field's full bit length (to verify); it is used only for $`f`$, where the bound is tiny. The row comparisons use the explicit $`k`$-bit decomposition so that Lemma lem:z08\_cmp's hypothesis is visible in the code.
 - The NanoPi's Wi-Fi drops under sustained transfer on some access points; the three files are small, but `scp` is retried and the checksums compared before a verify is believed.
 - The NanoPi's Wi-Fi power saving can add hundreds of milliseconds to the first packet of an ssh session; it changes nothing in a verify timed with `time.Now` inside the binary, which is why the instrument is the binary's own clock and not the ssh round trip.
@@ -366,10 +407,10 @@ The chapter passes when the honest proof prints `verdict=true` on the NanoPi, th
 2. Ariel Gabizon, Zachary J. Williamson and Oana Ciobotaru. PLONK: permutations over Lagrange-bases for oecumenical noninteractive arguments of knowledge. IACR Cryptology ePrint Archive, report 2019/953. [eprint.iacr.org/2019/953](https://eprint.iacr.org/2019/953) (to verify).
 3. Jacob T. Schwartz. Fast probabilistic algorithms for verification of polynomial identities. Journal of the ACM, 27(4), pages 701 to 717, 1980. [doi:10.1145/322217.322225](https://doi.org/10.1145/322217.322225) (to verify).
 4. Richard Zippel. Probabilistic algorithms for sparse polynomials. In EUROSAM 1979, LNCS 72, pages 216 to 226. Springer, 1979. [doi:10.1007/3-540-09519-5\_73](https://doi.org/10.1007/3-540-09519-5_73) (to verify).
-5. Consensys. gnark: a fast zk-SNARK library in Go. Release v0.16.4, Wednesday 7 October 2026, carrying a high-severity soundness fix in emulated elliptic-curve scalar multiplication and a BW6-761 pairing fix. [github.com/Consensys/gnark, latest release](https://api.github.com/repos/Consensys/gnark/releases/latest) (verified Friday 6 November 2026).
+5. Consensys. gnark: a fast zk-SNARK library in Go. Release v0.16.4, Wednesday 7 October 2026, carrying a high-severity soundness fix in emulated elliptic-curve scalar multiplication and a BW6-761 pairing fix. The licence is not recorded here because it has not been read; read it from the repository's LICENSE file (to verify). [github.com/Consensys/gnark, latest release](https://api.github.com/repos/Consensys/gnark/releases/latest) (verified Friday 6 November 2026).
 6. Advanced hardware-software architectures for edge artificial intelligence and zero-knowledge model checking. A design brief of twenty project sketches, read on Friday 6 November 2026 and held locally at `a local design brief`. It is the input to this second edition and is not a published source; where its hardware claims disagree with the bench, the bench is followed and the disagreement is stated.
 7. TinyGo contributors. TinyGo: a Go compiler for microcontrollers and WebAssembly, on LLVM. Release v0.44.0, Wednesday 28 October 2026. [github.com/tinygo-org/tinygo](https://github.com/tinygo-org/tinygo) (verified Friday 6 November 2026).
-8. Nordic Semiconductor. Power Profiler Kit II user guide. (to verify)
+8. Nordic Semiconductor. Power Profiler Kit II user guide. No sample rate is quoted here, for the same reason: chapter Z19 integrates energy over a window and that integration depends on the rate, so the rate is read from the guide on the day of the first capture and the reading is written into the chapter's steps. A rate printed in a benchmark table before that reading has no source in this list. (to verify)
 9. FriendlyElec. NanoPi NEO Air wiki. [wiki.friendlyelec.com, NanoPi NEO Air](https://wiki.friendlyelec.com/wiki/index.php/NanoPi_NEO_Air) (to verify).
 
 ---

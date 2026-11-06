@@ -47,7 +47,7 @@ Nothing is hidden in this chapter. The relation it builds is the one the certifi
 
 *(17.1)*
 
-with $`\Sigma = 2^\Pi`$ over the propositions $`\Pi = \{\mathrm{Closed}, \mathrm{Wait}, \mathrm{Established}, \mathrm{Exhausted}\}`$ of the modem machine of [Project 3](03-the-modems-backoff-machine.md). The statement is public on both sides: $`\phi`$ is read by the verifier and $`\mathcal{A}`$ is checked by the verifier against it, which Spot's translator produces and its equivalence check confirms. The model's output $`\phi_m`$ enters only the second relation of the chapter,
+with $`\Sigma = 2^\Pi`$ over the propositions $`\Pi = \{\mathrm{Closed}, \mathrm{Wait}, \mathrm{Registered}, \mathrm{Exhausted}\}`$ of the modem machine of [Project 3](03-the-modems-backoff-machine.md), which are the four modes of its state triple; the observation function of that machine sends a state to the singleton of its mode, so exactly one of the four holds at every index of every trace. The statement is public on both sides: $`\phi`$ is read by the verifier and $`\mathcal{A}`$ is checked by the verifier against it, which Spot's translator produces and its equivalence check confirms. The model's output $`\phi_m`$ enters only the second relation of the chapter,
 
 ```math
 \mathcal{R}_{\mathrm{agree}} = \{\, (\phi_m, \phi_t) \;:\; \mathcal{L}_{\phi_m} = \mathcal{L}_{\phi_t} \,\},
@@ -100,9 +100,9 @@ Now $`\mathcal{L}_\mathcal{A} \subseteq \mathcal{L}_{\mathrm{FG}\,\mathrm{Wait}}
 
 Conversely, let $`\mathrm{Wait} \in \sigma_i`$ for all $`i \ge j`$. Define $`q_i = q_0`$ for $`i \le j`$ and $`q_i = q_1`$ for $`i > j`$. This is a run: $`q_0 \in Q_0`$; for $`i < j`$ the transition $`(q_0, \sigma_i, q_0)`$ is in $`\delta`$ for every letter; at $`i = j`$ the transition $`(q_0, \sigma_j, q_1)`$ is in $`\delta`$ because $`\mathrm{Wait} \in \sigma_j`$; for $`i > j`$ the transition $`(q_1, \sigma_i, q_1)`$ is in $`\delta`$ because $`\mathrm{Wait} \in \sigma_i`$. Every transition at $`i > j`$ is in $`F`$, so infinitely many fair transitions are taken and the run is accepting. Hence $`\sigma \in \mathcal{L}_\mathcal{A}`$. &#9632;
 
-**Theorem Z17.6 (A wrong proposal cannot cost soundness).** Let $`\phi_t`$ be the template's formula for a sentence, let $`\phi_m`$ be any formula the grammar admits, and let the decision rule be: $`\phi_{\mathrm{used}} = \phi_m`$ if Spot's equivalence check reports $`\mathcal{L}_{\phi_m} = \mathcal{L}_{\phi_t}`$, and $`\phi_{\mathrm{used}} = \phi_t`$ otherwise. Assume the check is correct, that is, it reports equivalence exactly when the two languages are equal. Then $`\mathcal{L}_{\phi_{\mathrm{used}}} = \mathcal{L}_{\phi_t}`$, and if the certifier accepts a certificate $`(\mathcal{A}_{\neg\phi_{\mathrm{used}}}, V)`$ for a system $`\mathcal{M}`$, then $`\mathcal{M} \models \phi_t`$. A proposal that is not equivalent changes only the agreement count, never the property that is certified.
+**Theorem Z17.6 (A wrong proposal cannot cost soundness).** Let $`\phi_t`$ be the template's formula for a sentence, let $`\phi_m`$ be any formula the grammar admits, and let the decision rule be: $`\phi_{\mathrm{used}} = \phi_m`$ if Spot's equivalence check reports $`\mathcal{L}_{\phi_m} = \mathcal{L}_{\phi_t}`$, and $`\phi_{\mathrm{used}} = \phi_t`$ otherwise. Assume two things. First, the equivalence check is correct: it reports equivalence exactly when the two languages are equal. Second, the translator is sound for the certificate, that is, for every formula $`\psi`$ it is given, the automaton it returns satisfies $`\mathcal{L}_{\mathcal{A}_{\neg\psi}} \supseteq \Sigma^\omega \setminus \mathcal{L}_{\psi}`$. The reverse inclusion $`\mathcal{L}_{\mathcal{A}_{\neg\psi}} \subseteq \Sigma^\omega \setminus \mathcal{L}_{\psi}`$ is not needed for the conclusion below; a translator that returns too large a language costs only completeness, because it makes the emptiness check harder to satisfy, while a translator that returns too small a language costs soundness, because a system whose traces all violate $`\psi`$ in a way the automaton misses would still pass. Then $`\mathcal{L}_{\phi_{\mathrm{used}}} = \mathcal{L}_{\phi_t}`$, and if the certifier accepts a certificate $`(\mathcal{A}_{\neg\phi_{\mathrm{used}}}, V)`$ for a system $`\mathcal{M}`$, then $`\mathcal{M} \models \phi_t`$. A proposal that is not equivalent changes only the agreement count, never the property that is certified.
 
-*Proof.* Two cases. If the check reports equivalence, then by its correctness $`\mathcal{L}_{\phi_m} = \mathcal{L}_{\phi_t}`$, and $`\phi_{\mathrm{used}} = \phi_m`$, so $`\mathcal{L}_{\phi_{\mathrm{used}}} = \mathcal{L}_{\phi_t}`$. Otherwise $`\phi_{\mathrm{used}} = \phi_t`$ and the equality is trivial. In both cases, by Theorem **Theorem Z17.3**(a), $`\mathcal{L}_{\neg\phi_{\mathrm{used}}} = \Sigma^\omega \setminus \mathcal{L}_{\phi_{\mathrm{used}}} = \Sigma^\omega \setminus \mathcal{L}_{\phi_t}`$, and the translator's automaton satisfies $`\mathcal{L}_{\mathcal{A}_{\neg\phi_{\mathrm{used}}}} = \mathcal{L}_{\neg\phi_{\mathrm{used}}}`$ by Theorem **Theorem Z17.4**. The certifier's acceptance of $`(\mathcal{A}_{\neg\phi_{\mathrm{used}}}, V)`$ is exactly the hypothesis of the paper's Theorem 3.2, proved in [Project 3](03-the-modems-backoff-machine.md) and stated for a machine in [Project 14](14-theorem-3-2-in-lean-4.md), whose conclusion is $`\mathcal{L}_\mathcal{M} \cap \mathcal{L}_{\mathcal{A}_{\neg\phi_{\mathrm{used}}}} = \emptyset`$, that is $`\mathcal{L}_\mathcal{M} \cap (\Sigma^\omega \setminus \mathcal{L}_{\phi_t}) = \emptyset`$. By Theorem **Theorem Z17.3**(b) this is $`\mathcal{L}_\mathcal{M} \subseteq \mathcal{L}_{\phi_t}`$, which is $`\mathcal{M} \models \phi_t`$. The model's output entered only through the check; a non-equivalent $`\phi_m`$ left $`\phi_{\mathrm{used}} = \phi_t`$ and incremented the disagreement count. &#9632;
+*Proof.* Two cases. If the check reports equivalence, then by its correctness $`\mathcal{L}_{\phi_m} = \mathcal{L}_{\phi_t}`$, and $`\phi_{\mathrm{used}} = \phi_m`$, so $`\mathcal{L}_{\phi_{\mathrm{used}}} = \mathcal{L}_{\phi_t}`$. Otherwise $`\phi_{\mathrm{used}} = \phi_t`$ and the equality is trivial. In both cases, by Theorem **Theorem Z17.3**(a), $`\mathcal{L}_{\neg\phi_{\mathrm{used}}} = \Sigma^\omega \setminus \mathcal{L}_{\phi_{\mathrm{used}}} = \Sigma^\omega \setminus \mathcal{L}_{\phi_t}`$. By the second hypothesis of the theorem, the translator is correct in the direction soundness uses, that is $`\mathcal{L}_{\mathcal{A}_{\neg\phi_{\mathrm{used}}}} \supseteq \mathcal{L}_{\neg\phi_{\mathrm{used}}}`$. Theorem **Theorem Z17.4** is an existence statement and does not by itself say that the automaton this program printed has that language; the assumption is named so that a reader knows which component the chain of soundness rests on. The certifier's acceptance of $`(\mathcal{A}_{\neg\phi_{\mathrm{used}}}, V)`$ is exactly the hypothesis of the paper's Theorem 3.2, proved in [Project 3](03-the-modems-backoff-machine.md) and stated for a machine in [Project 14](14-theorem-3-2-in-lean-4.md), whose conclusion is $`\mathcal{L}_\mathcal{M} \cap \mathcal{L}_{\mathcal{A}_{\neg\phi_{\mathrm{used}}}} = \emptyset`$. The containment just named gives $`\Sigma^\omega \setminus \mathcal{L}_{\phi_t} = \mathcal{L}_{\neg\phi_{\mathrm{used}}} \subseteq \mathcal{L}_{\mathcal{A}_{\neg\phi_{\mathrm{used}}}}`$, so emptiness of the larger intersection carries to $`\mathcal{L}_\mathcal{M} \cap (\Sigma^\omega \setminus \mathcal{L}_{\phi_t}) = \emptyset`$, which is the only direction the conclusion needs. By Theorem **Theorem Z17.3**(b) this is $`\mathcal{L}_\mathcal{M} \subseteq \mathcal{L}_{\phi_t}`$, which is $`\mathcal{M} \models \phi_t`$. The model's output entered only through the check; a non-equivalent $`\phi_m`$ left $`\phi_{\mathrm{used}} = \phi_t`$ and incremented the disagreement count. &#9632;
 
 ## The protocol
 
@@ -132,11 +132,11 @@ The names `spot::parse_formula`, `spot::parse_infix_psl`, `spot::translator`, `s
 struct Template { const char* sentence; const char* formula; };
 static const std::vector<Template> kTemplates = {
   {"The system does not wait forever.", "!FG Wait"},
-  {"Once established, the connection stays established.", "G(Established -> G Established)"},
+  {"Once registered, the connection stays registered.", "G(Registered -> G Registered)"},
   {"The system eventually leaves the closed state.", "F !Closed"},
-  {"Every wait is eventually followed by established or exhausted.",
-   "G(Wait -> F(Established | Exhausted))"},
-  {"The system is never both established and exhausted.", "G !(Established & Exhausted)"},
+  {"Every wait is eventually followed by registered or exhausted.",
+   "G(Wait -> F(Registered | Exhausted))"},
+  {"The system is never both registered and exhausted.", "G !(Registered & Exhausted)"},
 };
 
 // The automaton for the negated property: the certificate's first half, transition-based.
@@ -195,19 +195,21 @@ root ::= ws f ws
 f ::= atom | "(" ws f ws bin ws f ws ")" | un ws f
 bin ::= "&" | "|" | "->" | "U" | "R" | "W"
 un ::= "!" | "X" | "F" | "G"
-atom ::= "Wait" | "Closed" | "Established" | "Exhausted" | "true" | "false"
+atom ::= "Wait" | "Closed" | "Registered" | "Exhausted" | "true" | "false"
 ws ::= [ \t]*
 ```
 
-The grammar admits only LTL over the four propositions with binary operators in parentheses, so every output parses in Spot or is a grammar fault, and a model cannot return the sentence, an explanation, or a proposition the machine does not have. The control rule is the table of five templates; the model's formula is accepted iff Spot says it is equivalent to the template's, which is Theorem **Theorem Z17.6**.
+The grammar admits only LTL over the four propositions with binary operators in parentheses, so every output parses in Spot or is a grammar fault, and a model cannot return the sentence, an explanation, or a proposition the machine does not have. The operator set is wider than the syntax of Definition **Definition Z17.1**, which builds formulas from negation, conjunction, $`\mathrm{X}`$ and $`\mathrm{U}`$ alone: disjunction, implication, $`\mathrm{F}`$, $`\mathrm{G}`$, the release $`\mathrm{R}`$ and the weak until $`\mathrm{W}`$ are all definable from those, and Spot reads them, so the grammar is a superset of the definition's notation and not of its logic. The control rule is the table of five templates; the model's formula is accepted iff Spot says it is equivalent to the template's, which is Theorem **Theorem Z17.6**.
 
 | **No.** | **Sentence template** | **Template formula $`\phi_t`$** | **An equivalent form Spot accepts** |
 | --- | --- | --- | --- |
 | 1 | The system does not wait forever. | `!FG Wait` | `GF !Wait` |
-| 2 | Once established, the connection stays established. | `G(Established -> G Established)` | `G(!Established \| G Established)` |
+| 2 | Once registered, the connection stays registered. | `G(Registered -> G Registered)` | `G(!Registered \| G Registered)` |
 | 3 | The system eventually leaves the closed state. | `F !Closed` | `!G Closed` |
-| 4 | Every wait is eventually followed by established or exhausted. | `G(Wait -> F(Established \| Exhausted))` | `G(!Wait \| F Established \| F Exhausted)` |
-| 5 | The system is never both established and exhausted. | `G !(Established & Exhausted)` | `G(!Established \| !Exhausted)` |
+| 4 | Every wait is eventually followed by registered or exhausted. | `G(Wait -> F(Registered \| Exhausted))` | `G(!Wait \| F Registered \| F Exhausted)` |
+| 5 | The system is never both registered and exhausted. | `G !(Registered & Exhausted)` | `G(!Registered \| !Exhausted)` |
+
+Two remarks about the templates belong beside them. The fifth, mutual exclusion of the two terminal modes, is valid on every trace of this machine for a reason that has nothing to do with the machine's transitions: the observation function of [Project 3](03-the-modems-backoff-machine.md) sends a state to the singleton of its mode, so no letter of any trace contains two propositions and the formula is true of every word in $`\Sigma^\omega`$. Its negation automaton has an empty language, the emptiness check is trivial, and the constant $`V = 0`$ certifies it; the template is in the set to exercise the equivalence check and not because its certificate says anything. The other four are genuine, and of them only the first has a ranking function anywhere in this volume, namely the one of [Project 3](03-the-modems-backoff-machine.md) for $`\neg\,\mathrm{FG}\,\mathsf{Wait}`$. Step 4 of the protocol therefore hands [Project 3](03-the-modems-backoff-machine.md) an automaton for whichever template was used, and for four of the five the second half of the certificate, the ranking function, is still owed; [Project 16](16-the-model-proposes-a-ranking-function-the-certifier.md) proposes ranking functions only for the first.
 
 | **Model** | **agree** | **disagree** | **unparsed** | **Instrument** |
 | --- | --- | --- | --- | --- |
@@ -320,7 +322,7 @@ The state counts are Spot's output and are reported as computed facts once the p
 
 ## Acceptance test
 
-The chapter passes when `zk17` prints five HOA automata whose formulas are the templates’ negations, Spot reports each template's formula equivalent to its listed variant and not equivalent to a wrong variant (template 1 against `FG Wait` itself, template 5 against `G(Established & Exhausted)`), the hand-written Figure 2b automaton is reported equivalent to `FG Wait`, and the agreement table holds 100 counted prompts per model with agree plus disagree plus unparsed equal to 100. It fails if any wrong variant is reported equivalent, if any proposal that disagreed reached the translator, or if a cell is filled with a number taken from another machine.
+The chapter passes when `zk17` prints five HOA automata whose formulas are the templates’ negations, Spot reports each template's formula equivalent to its listed variant and not equivalent to a wrong variant (template 1 against `FG Wait` itself, template 5 against `G(Registered & Exhausted)`), the hand-written Figure 2b automaton is reported equivalent to `FG Wait`, and the agreement table holds 100 counted prompts per model with agree plus disagree plus unparsed equal to 100. It fails if any wrong variant is reported equivalent, if any proposal that disagreed reached the translator, or if a cell is filled with a number taken from another machine.
 
 ## Variants
 

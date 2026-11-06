@@ -1,4 +1,4 @@
-# Project 14. Theorem 3.2 in Lean 4: the ranking-function rule, machine checked
+# Project 14. Theorem 3.2 in Lean 4: the descent lemma machine checked, the rule stated
 
 > **Board:** Pi 4B alone over ssh; the Renkforce cable on its console; the build laptop elaborates, the Pi checks  
 > **Language:** Lean 4
@@ -24,7 +24,7 @@
 
 ## Pitch
 
-The paper's certifier accepts a public pair, a Buchi automaton for the negated property and a ranking function $`V`$, and its soundness is Theorem 3.2: if $`V`$ satisfies three conditions, the composed system has no fair execution, so the system satisfies the property \[[1](#references)\]. Every proof of the volume is sound only if that theorem is true, and its proof is a paper proof in [Project 3](03-the-modems-backoff-machine.md). A paper proof is checked by readers; a Lean proof is checked by a kernel of a few thousand lines, and zkPi \[[6](#references)\] shows that a kernel check can itself be the relation of a zero-knowledge proof. So this chapter states the transition system, the automaton, the fair execution and the ranking function as Lean structures, proves the one lemma the theorem rests on, that no sequence in $`\mathbb{N}`$ can be non-increasing and still decrease infinitely often, and leaves the theorem's assembly as a marked gap. The cost question is honest: elaboration happens on the build laptop, because a Mathlib cache is not something a Pi fetches in an afternoon, and the Pi 4B only re-elaborates one file against the copied olean tree, which is the check a verifier would replay.
+The paper's certifier accepts a public pair, a Buchi automaton for the negated property and a ranking function $`V`$, and its soundness is Theorem 3.2: if $`V`$ satisfies three conditions, the composed system has no fair execution, so the system satisfies the property \[[1](#references)\]. Every proof of the volume is sound only if that theorem is true, and its proof is a paper proof in [Project 3](03-the-modems-backoff-machine.md). A paper proof is checked by readers; a Lean proof is checked by a kernel of a few thousand lines, and zkPi \[[6](#references)\] shows that a kernel check can itself be the relation of a zero-knowledge proof. So this chapter states the transition system, the automaton, the fair execution and the ranking function as Lean structures, proves the one lemma the theorem rests on, that no sequence in $`\mathbb{N}`$ can be non-increasing and still decrease infinitely often, and leaves the theorem's remaining step, the construction of the finite-valued sequence that the lemma consumes, as a marked gap. The cost question is honest: elaboration happens on the build laptop, because a Mathlib cache is not something a Pi fetches in an afternoon, and the Pi 4B only re-elaborates one file against the copied olean tree, which is the check a verifier would replay.
 
 ## Parts and interface
 
@@ -97,7 +97,7 @@ which is Equation 14.3 at $`k + 1`$. Now take $`k = n_0`$: Equation 14.3 reads $
 
 Let $`((s_i, q_i))`$ be a fair execution and put $`m_i = V(s_i, q_i) \in \mathbb{N} \cup \{\infty\}`$. We show by induction on $`i`$ that $`m_i \ne \infty`$. For $`i = 0`$, (i) gives $`s_0 \in S_0`$ and $`q_0 \in Q_0`$, so Equation 14.2 gives $`m_0 \ne \infty`$. For the step, assume $`m_i \ne \infty`$; (ii) gives $`(s_i, s_{i+1}) \in T`$ and $`(q_i, \langle\!\langle s_i \rangle\!\rangle, q_{i+1}) \in \delta`$, so Equation 14.2 applies and yields a finite $`m_{i+1}`$ with $`m_{i+1} \le m_i`$. Hence $`(m_i)`$ is a sequence in $`\mathbb{N}`$ and non-increasing. At every index $`i`$ of the infinite set of (iii), the transition is in $`F`$, so Equation 14.2 applies and gives $`m_{i+1} < m_i`$. So $`(m_i)`$ is non-increasing and strictly decreases at infinitely many indices, which Lemma **Lemma Z14.5** rules out. Hence no fair execution exists and $`\mathcal{L}_\mathcal{M} \cap \mathcal{L}_\mathcal{A} = \emptyset`$. &#9632;
 
-**Remark Z14.8.** The rule is the fair-termination rule of Grumberg, Francez, Makowsky and de Roever \[[3](#references)\] read through the automata-theoretic approach \[[2](#references)\]; the paper's own proof is sketched on its page 17 and written out in [Project 3](03-the-modems-backoff-machine.md). What Lean adds is not a new argument but a kernel that refuses a gap: in the listing below the lemma is closed by `omega` at the two places where the prose says "chaining" and "no natural number satisfies this", and the theorem's assembly is the marked `sorry`.
+**Remark Z14.8.** The rule is the fair-termination rule of Grumberg, Francez, Makowsky and de Roever \[[3](#references)\] read through the automata-theoretic approach \[[2](#references)\]; the paper's own proof is sketched on its page 17 and written out in [Project 3](03-the-modems-backoff-machine.md). What Lean adds is not a new argument but a kernel that refuses a gap: in the listing below the lemma is closed by `omega` at the two places where the prose says "chaining" and "no natural number satisfies this", and the theorem's remaining step, the construction of the finite-valued sequence from `c4` and `c5`, is the marked `sorry`.
 
 ## The protocol
 
@@ -184,8 +184,16 @@ theorem no_infinite_descent (n : Nat -> Nat)
   cases key (n 0 + 1) with
   | intro i hi => omega
 
-/-- Theorem 3.2: with a ranking function there is no fair execution. The assembly of the
-finite-valued sequence from `c4` and `c5` and its hand-over to the lemma is the gap. -/
+/-- Theorem 3.2: with a ranking function there is no fair execution. The gap is the single
+`sorry` below, and it consists of three steps. First, finiteness along the execution: an
+induction on `i` using `c4` at zero and `c5` at the step, giving a natural number `m i` with
+`V (e.s i) (e.q i) = some (m i)` at every index. Second, monotonicity and descent: rewriting
+through that finiteness and reading `c5` and `c6`, which gives `m (i + 1) <= m i` at every
+index and `m (i + 1) < m i` at the infinitely many fair indices `fairInf` supplies. Third,
+the hand-over of `m` to `no_infinite_descent`, which is the only one of the three that is
+bookkeeping. The first step is a recursive construction over the existential of `c5`, so it
+needs either a choice principle or a reformulation of `V` through a total projection; that
+is why the gap is a step of proof and not an assembly. -/
 theorem no_fair_execution {S Q Sigma : Type} (M : TS S Sigma) (A : NBA Q Sigma)
     (R : Ranking M A) (e : FairExec M A) : False := by
   sorry

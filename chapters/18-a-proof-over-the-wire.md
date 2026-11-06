@@ -86,7 +86,7 @@ followed by the inter-frame space of 3 bits before the next start of frame, so 1
 
 1. On the build laptop, `xxd -i zk03_proof.bin` turns the 192 bytes into a C array linked into the Nucleo image; the image is copied to the ST-LINK drive immediately before the capture, because the board is shared.
 2. On the Pi 4B, after a boot, `dmesg` names which of `can0` and `can1` is the MCP2515; that interface is brought up at 500 kbit/s and `candump -t a -l` is started on it, then `zk18_rx`.
-3. The Nucleo computes $`\mathrm{crc}_{32}`$ of the array in its CRC unit, sends the header frame 0x300, then the 24 data frames 0x301 to 0x318 through the three-deep transmit FIFO, waiting for a free slot before each.
+3. The Nucleo computes $`\mathrm{crc}_{32}`$ of the array in its CRC unit, sends the header frame 0x300, then the 24 data frames 0x301 to 0x318 through the three-deep transmit FIFO, waiting for a free slot before each. The frames go out back to back, and the receiver has to absorb them at that rate: a classic frame with eight data bytes is 111 bit times, so at 500 kbit/s a back-to-back burst delivers one frame every 222 microseconds (computed, from Proposition **Proposition Z18.5**); the MCP2515 holds two receive buffers, which is about 444 microseconds of buffering, and every frame has to be lifted out over SPI0 by the `mcp251x` driver's threaded interrupt inside that window. An unserviced frame is lost to a receive overrun, and an overrun and a sender built to skip a frame produce the same short log, so the counter that separates them is read rather than assumed: after every run the receiver reads `ip -details -statistics link show` and records the overrun counter, and a run with a non-zero overrun is discarded and repeated, never reported as an incomplete message. Pacing the transmitter at one millisecond per frame would close the overrun path altogether, at the cost of making the message 25 ms rather than the 5.55 to 6.75 ms of bus time this chapter prices; that course is not taken here, and whoever takes it has to state the message duration and the bus time apart, because chapters [Project 19](19-a-commitment-over-nb-iot-and-the-energy.md) and [Project 23](23-elixir-and-nerves.md) reuse the bus-time figures.
 4. The Pi's reassembler collects frames by identifier, refuses a header with a length other than 192, stops when all 24 data identifiers are present or after 2 s without a frame, recomputes the CRC and writes the file only on a match.
 5. [Project 4](04-two-group-elements.md) reads the written file; the chapter ends when its verdict is the same as for the file delivered by `scp`.
 
@@ -292,7 +292,7 @@ stateDiagram-v2
 | bus time, this chapter | 5.55 to 6.75 ms | computed | $`2775`$ and $`3375`$ bit times at $`2\ \mu`$s |
 | bus time, CAN FD, 4 frames | about 1.1 ms | computed, to verify | not available on the MCP2515 channel |
 | candump span, first to last frame | not measured |  | kernel timestamps, `candump -t a`; a software clock at the driver, not the bus |
-| retries | not measured |  | `ip -details -statistics link show`, bus-off and error counters before and after |
+| retries, and receive overruns | not measured, no run on this bus has happened |  | `ip -details -statistics link show`: bus-off, error and receive-overrun counters, read before and after every run; a run with a non-zero overrun is discarded and repeated |
 | frames lost in 20 runs | not measured |  | `zk18_rx` exit codes over 20 runs |
 
 ## Steps
@@ -307,15 +307,15 @@ stateDiagram-v2
 
 **Step 5.** On the build laptop, copy the image to `NOD_H7A3ZIQ` immediately before the capture and open the USB CDC console; the board is shared and whatever it ran before is gone.
 
-**Step 6.** On the Pi 4B, start `candump -t a -l` and `zk18_rx`; press the Nucleo's user button; keep the `candump` log and the printed line; `cmp` the written file against the original; run [Project 4](04-two-group-elements.md) on it.
+**Step 6.** On the Pi 4B, read `ip -details -statistics link show` for the interface, start `candump -t a -l` and `zk18_rx`; press the Nucleo's user button; read the same command again and record the receive-overrun counter beside the run; keep the `candump` log and the printed line; `cmp` the written file against the original; run [Project 4](04-two-group-elements.md) on it. A run whose overrun counter moved is discarded and repeated, because an overrun and a skipped frame give the same short log.
 
 **Step 7.** Mutate twice on the build laptop: an image that skips frame 0x30C, and an image with byte 100 of the array complemented and the CRC computed over the original; capture both and keep the two printed lines, `incomplete` and `MISMATCH`.
 
-**Step 8.** Repeat Step 6 twenty times and count exit codes; a run with a lost frame is a counted fact, not a failure of the chapter.
+**Step 8.** Repeat Step 6 twenty times and count exit codes, each one beside its overrun counter; a run with a lost frame and a still overrun counter is a counted fact, not a failure of the chapter, and a run whose overrun counter moved is not counted at all.
 
 ## Acceptance test
 
-The chapter passes when (i) the Pi's `crc32_ieee` and the Nucleo's CRC unit both give $`\mathrm{0xCBF43926}`$ for `123456789`, printed on the CDC console and by a test build of the receiver; (ii) one `candump` log holds exactly 25 frames with identifiers 0x300 to 0x318 and no error frames; (iii) `zk18_rx` prints `match` and `cmp` is silent; (iv) [Project 4](04-two-group-elements.md) prints `accept` on the reassembled file; (v) the skipping image yields `incomplete: 23 of 24` and no file; (vi) the flipped image yields `MISMATCH` and no file; (vii) over 20 runs the number of `incomplete` outcomes is recorded, whatever it is. It fails if a file is ever written on a mismatch, if the two CRC implementations disagree on the check value, if the MCC 118 is found seated with the HAT, or if a bus-time cell is filled from Proposition **Proposition Z18.5** and labelled as measured.
+The chapter passes when (i) the Pi's `crc32_ieee` and the Nucleo's CRC unit both give $`\mathrm{0xCBF43926}`$ for `123456789`, printed on the CDC console and by a test build of the receiver; (ii) one `candump` log holds exactly 25 frames with identifiers 0x300 to 0x318 and no error frames, with the receive-overrun counter of `ip -details -statistics link show` unmoved across that run; (iii) `zk18_rx` prints `match` and `cmp` is silent; (iv) [Project 4](04-two-group-elements.md) prints `accept` on the reassembled file; (v) the skipping image yields `incomplete: 23 of 24` and no file; (vi) the flipped image yields `MISMATCH` and no file; (vii) over 20 runs the number of `incomplete` outcomes is recorded, whatever it is, each one beside its overrun counter. It fails if a file is ever written on a mismatch, if the two CRC implementations disagree on the check value, if the MCC 118 is found seated with the HAT, if an `incomplete` outcome is reported without the receive-overrun counter having been read for that run, or if a bus-time cell is filled from Proposition **Proposition Z18.5** and labelled as measured.
 
 ## Variants
 

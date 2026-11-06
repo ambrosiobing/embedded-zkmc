@@ -62,7 +62,7 @@ for a fixed primitive $`n`$-th root of unity $`\omega \in \mathbb{F}_r`$. What t
   \times \{2^8, 2^9, \ldots, 2^{14}\} \rightharpoonup \mathbb{R}_{\ge 0},
 ```
 
-undefined exactly on the cells that read **not measured**.
+undefined exactly on the cells that read **not measured**. Its operation argument is $`\mathsf{msm}`$ in $`\mathbb{G}_1`$ and $`\mathsf{ntt}`$ over $`\mathbb{F}_r`$ and nothing else: this chapter prices no second-group operation, so the $`|E| + 1`$ scalar multiplications and $`|E|`$ additions in $`\mathbb{G}_2`$ that [Project 4](04-two-group-elements.md)'s verifier forms, 8106 of them at its own $`|E|`$, cannot be turned into seconds from this table. [Project 1](01-the-price-list.md)'s price list owns the $`\mathbb{G}_2`$ rows and is the table to read them from; the harness here is built against `blst`'s $`\mathbb{G}_1`$ and $`\mathbb{F}_r`$ calls only, so a $`\mathbb{G}_2`$ cell would be **not built, no second-group path in this harness** rather than a figure.
 
 ## The mathematics
 
@@ -163,9 +163,9 @@ The harness evaluates the lemma iteratively: a bit-reversal permutation followed
 This is a measurement protocol, written so that it can fail.
 
 1. On each board read `vcgencmd get_throttled` and refuse to start unless it reads `0x0`.
-2. For $`k = 8`$ to $`14`$, with $`n = 2^k`$: draw $`n`$ scalars of 255 bits and $`n`$ points $`a_i P`$ from a seeded generator, run the bucket method three times and keep the median; draw a vector of $`n`$ field elements, run the transform eight times and keep the median.
+2. For $`k = 8`$ to $`14`$, with $`n = 2^k`$: draw $`n`$ scalars of 255 bits and $`n`$ points $`a_i P`$ from a seeded generator; run the bucket method twice as a warm-up and then nine times timed, keeping the median and the median absolute deviation; draw a vector of $`n`$ field elements, run the transform twice as a warm-up and then nine times timed, keeping the median and the median absolute deviation. Nine and not three, because the spread rule of [Project 1](01-the-price-list.md) publishes a cell only when its median absolute deviation is under 5 percent of its median, a median of three cannot support that rule, and the two chapters’ numbers are multiplied together by every later cost claim, so they must be taken under one rule. The warm-up is two and not eight because at these sizes one repeat already fills the caches that eight repeats fill at [Project 1](01-the-price-list.md)'s single-operation sizes. Print both the median and the deviation on the `zk11` line.
 3. Before timing, transform a vector, apply the inverse transform (the same code with $`\omega^{-1}`$ and a final division by $`n`$) and compare with the input; a mismatch voids the run.
-4. After each size, print one `zk11` line; on the Pi 3B+ stop when the running total passes 200 s, so that the run ends inside the four-minute window with margin.
+4. After each size, read the elapsed total first and print one `zk11` line second: if the total has passed 200 s the line carries `msm_ms=not_measured ntt_ms=not_measured reason=thermal` with the elapsed seconds and the run stops, and otherwise it carries the two medians, the two deviations and the elapsed seconds. The order matters: a line printed before the budget is tested publishes a figure taken across the boundary, and the acceptance test refuses exactly that. The run therefore ends inside the four-minute window with margin.
 5. Read the throttle register again; discard the whole run if it changed.
 
 ## The code
@@ -178,9 +178,11 @@ The harness builds against `blst`'s C++ header for the group and its C functions
 #include <algorithm>
 #include <array>
 #include <chrono>
+#include <cmath>
 #include <cstdint>
 #include <cstdio>
 #include <random>
+#include <utility>
 #include <vector>
 using clk = std::chrono::steady_clock;
 using Scalar = std::array<uint64_t, 4>;
@@ -241,11 +243,18 @@ static blst::P1 msm(const std::vector<blst::P1>& P, const std::vector<Scalar>& a
   }
   return q;
 }
-template <class F> static double median_ms(unsigned reps, F f) {
+// the median and the median absolute deviation, after a warm-up that is not timed;
+// Z1's spread rule publishes a cell only when the deviation is under 5 percent of the median
+template <class F>
+static std::pair<double, double> median_mad_ms(unsigned warmup, unsigned reps, F f) {
+  for (unsigned r = 0; r < warmup; ++r) f();
   std::vector<double> t;
   for (unsigned r = 0; r < reps; ++r) { auto t0 = clk::now(); f();
     t.push_back(std::chrono::duration<double, std::milli>(clk::now() - t0).count()); }
-  std::sort(t.begin(), t.end()); return t[t.size() / 2];
+  std::sort(t.begin(), t.end()); double med = t[t.size() / 2];
+  std::vector<double> d(t.size());
+  for (size_t i = 0; i < t.size(); ++i) d[i] = std::fabs(t[i] - med);
+  std::sort(d.begin(), d.end()); return { med, d[d.size() / 2] };
 }
 int main() {
   std::mt19937_64 rng(11); auto t_start = clk::now();
@@ -257,17 +266,27 @@ int main() {
       P[i] = blst::P1::generator().mult((const blst::byte*)a[i].data(), 255);
       v[i] = fr_from(rng());
     }
-    unsigned c = k > 4 ? k - 4 : 1; double tm = median_ms(3, [&] { msm(P, a, c); });
-    blst_fr omega = root_of_unity(k); double tn = median_ms(8, [&] { ntt(v, omega); });
-    std::printf("zk11 n=%zu c=%u msm_ms=%.2f ntt_ms=%.3f\n", n, c, tm, tn);
-    if (std::chrono::duration<double>(clk::now() - t_start).count() > 200) break;
+    unsigned c = k > 4 ? k - 4 : 1;
+    auto [tm, dm] = median_mad_ms(2, 9, [&] { msm(P, a, c); });
+    blst_fr omega = root_of_unity(k);
+    auto [tn, dn] = median_mad_ms(2, 9, [&] { ntt(v, omega); });
+    double el = std::chrono::duration<double>(clk::now() - t_start).count();
+    if (el > 200) {                      // the budget was crossed inside this size
+      std::printf("zk11 n=%zu c=%u msm_ms=not_measured ntt_ms=not_measured "
+                  "reason=thermal elapsed_s=%.1f\n", n, c, el);
+      break;
+    }
+    std::printf("zk11 n=%zu c=%u msm_ms=%.2f msm_mad=%.2f ntt_ms=%.3f ntt_mad=%.3f "
+                "elapsed_s=%.1f\n", n, c, tm, dm, tn, dn, el);
   }
 }
 ```
 
 ```bash
 # build laptop WSL, with an aarch64 cross compiler; blst builds its own static lib
-git clone https://github.com/supranational/blst && (cd blst && CC=aarch64-linux-gnu-gcc ./build.sh)
+git clone --branch v0.3.17 --depth 1 https://github.com/supranational/blst
+(cd blst && git rev-parse HEAD && CC=aarch64-linux-gnu-gcc ./build.sh)
+aarch64-linux-gnu-g++ --version
 aarch64-linux-gnu-g++ -std=c++17 -O2 -I blst/bindings z11.cc blst/libblst.a -o zk11
 scp zk11 <user>@<pi4b>:~/zk11
 ```
@@ -317,9 +336,9 @@ sequenceDiagram
   B->>T: read get_throttled
   T-->>B: 0x0, else refuse
   loop k = 8 to 14
-    B->>B: msm median of 3, ntt median of 8
+    B->>B: msm and ntt, 2 warm-up then 9 timed, median and deviation
     B->>S: one zk11 line per size
-    B->>B: Pi 3B+ only: stop past 200 s total
+    B->>B: elapsed read before the print; past 200 s a thermal line
   end
   B->>T: read get_throttled again
   T-->>B: unchanged, or the run is discarded
@@ -354,15 +373,17 @@ stateDiagram-v2
 
 *Figure 11.4. Expected cost per size, log scale in milliseconds, drawn as dashed bars because nothing has been measured on this bench; from left to right the seven sizes $`2^8`$ to $`2^{14}`$, each with three bars for the multi-scalar multiplication on the Pi 4B, the same on the Pi 3B+, and the transform on the Pi 4B; the Pi 3B+ bar is missing from $`2^{12}`$ upwards and the word thermal stands in its place, which is where the 200 s budget is expected to stop the run. A solid bar replaces a dashed one when the run has happened and the caption of the replacing figure names the record.*
 
+Every cell of the table below carries a reason as well as a verdict, because a cell that reads only **not measured** does not say whether the run has not happened, the board cannot hold it or the instrument cannot see it, and those are three different findings. **No run** means the harness has not been executed on that board and nothing else prevents it; **thermal** and **memory** name a bench limit that a run would not remove; **not built** means the target does not exist in this chapter's build.
+
 | **$`n`$** | **msm, Pi 4B** | **msm, Pi 3B+** | **ntt, Pi 4B** | **ntt, Pi 3B+** | **Instrument** |
 | --- | --- | --- | --- | --- | --- |
-| $`2^8`$ | not measured | not measured | not measured | not measured | steady\_clock, median of 3 and of 8 |
-| $`2^9`$ | not measured | not measured | not measured | not measured | same |
-| $`2^{10}`$ | not measured | not measured | not measured | not measured | same |
-| $`2^{11}`$ | not measured | not measured | not measured | not measured | same |
-| $`2^{12}`$ | not measured | not measured, thermal | not measured | not measured, thermal | same; the 3B+ budget is expected to stop here |
-| $`2^{13}`$ | not measured | not measured, thermal | not measured | not measured, thermal | same |
-| $`2^{14}`$ | not measured | not measured, thermal | not measured | not measured, thermal | same |
+| $`2^8`$ | not measured, no run | not measured, no run | not measured, no run | not measured, no run | steady\_clock, median and median absolute deviation over 9 timed repeats after 2 warm-up repeats |
+| $`2^9`$ | not measured, no run | not measured, no run | not measured, no run | not measured, no run | same |
+| $`2^{10}`$ | not measured, no run | not measured, no run | not measured, no run | not measured, no run | same |
+| $`2^{11}`$ | not measured, no run | not measured, no run | not measured, no run | not measured, no run | same |
+| $`2^{12}`$ | not measured, no run | not measured, thermal | not measured, no run | not measured, thermal | same; the 3B+ budget is expected to stop here |
+| $`2^{13}`$ | not measured, no run | not measured, thermal | not measured, no run | not measured, thermal | same |
+| $`2^{14}`$ | not measured, no run | not measured, thermal | not measured, no run | not measured, thermal | same |
 
 The split of the Pi 3B+ column at $`2^{12}`$ is the harness's budget rule applied to the expected bars, not a measurement; the run moves the split to wherever the 200 s total is actually passed, and the cells above it keep reading **not measured, thermal** until a heatsink is bought. For scale, the only measured numbers in this chapter are the paper's: its explicit-state prover took 2 s for `exb_i4a3` with $`\sum |E_\star| = 2^{13.8}`$ on its AWS `c6g.8xlarge` with 32 cores \[[1](#references)\]; that size is one multi-scalar multiplication of about the chapter's largest row, on a machine that is not on this bench.
 
@@ -370,7 +391,7 @@ The split of the Pi 3B+ column at $`2^{12}`$ is the harness's budget rule applie
 
 **Step 1.** On the authoring laptop, write `z11.cc` and the build line; commit.
 
-**Step 2.** On the build laptop in WSL, `git pull --ff-only`, clone `blst` at v0.3.17, build `libblst.a` with the aarch64 cross compiler, build `zk11`, and copy it to both Pis.
+**Step 2.** On the build laptop in WSL, `git pull --ff-only`, clone `blst` at the tag v0.3.17 and read the resolved commit with `git rev-parse HEAD`, read `aarch64-linux-gnu-g++ --version`, write both readings into the record beside this chapter's lines, build `libblst.a` with the aarch64 cross compiler, build `zk11`, and copy it to both Pis. No timing figure in this chapter may be compared with a figure from another machine until these two readings are recorded, because a cost claim attached to an unnamed compiler is not attached to anything.
 
 **Step 3.** On the Pi 4B over ssh, read `vcgencmd get_throttled`, run the inverse transform check, run `zk11`, read the register again, keep the seven lines.
 
@@ -382,7 +403,7 @@ The split of the Pi 3B+ column at $`2^{12}`$ is the harness's budget rule applie
 
 ## Acceptance test
 
-The chapter passes when the Pi 4B has seven `zk11` lines with the throttle word `0x0` before and after, the inverse-transform check returned the input bit for bit, the medians are non-decreasing in $`n`$ for both operations (a decrease is a timing fault, not a result), and the Pi 3B+ has its lines up to the budget with the same two throttle reads. It fails if any Pi 3B+ line was printed after the 200 s total, if the register changed on either board, if a multi-scalar multiplication at $`2^{14}`$ is reported faster than at $`2^{13}`$, or if a cell is filled from a laptop.
+The chapter passes when the Pi 4B has seven `zk11` lines with the throttle word `0x0` before and after, the inverse-transform check returned the input bit for bit, the medians are non-decreasing in $`n`$ for both operations (a decrease is a timing fault, not a result), every published cell has a median absolute deviation under 5 percent of its median, the second-day repeat of step 6 agrees with the first day within 15 percent cell by cell, the resolved `blst` commit and the `aarch64-linux-gnu-g++` version of step 2 are recorded beside the lines, and the Pi 3B+ has its lines up to the budget with the same two throttle reads. It fails if any Pi 3B+ line carrying a figure was printed after the 200 s total, the reason-bearing refusal line the harness prints at the boundary being the pass and not the failure, if the register changed on either board, if a multi-scalar multiplication at $`2^{14}`$ is reported faster than at $`2^{13}`$, or if a cell is filled from a laptop.
 
 ## Variants
 
@@ -390,7 +411,7 @@ The chapter passes when the Pi 4B has seven `zk11` lines with the throttle word 
 
 ## Pitfalls
 
-- A bucket vector of $`2^{10}`$ Jacobian points is 144 kB per window and is reallocated $`26`$ times per multiplication; that is fine on the Pi 4B and visible in the Pi 3B+'s 905 MB only through its cache, but a bucket width above $`c = 16`$ would not fit and the harness never asks for one.
+- A bucket vector of $`2^{10}`$ Jacobian points is 144 kB per window and is reallocated $`26`$ times per multiplication: a `blst_p1` is three $`\mathbb{F}_p`$ elements of 48 bytes, so $`2^{10} \times 144 = 147456`$ bytes, and a 255-bit scalar at $`c = 10`$ needs $`\lceil 255 / 10 \rceil = 26`$ windows (both computed). Neither board runs out of DRAM over that: at $`c = 16`$ the vector is $`2^{16} \times 144 = 9437184`$ bytes, 9.0 MiB, which is 1.0 percent of the Pi 3B+'s 905 MB (computed). What a wider window does not fit is cache. The Pi 3B+'s shared L2 is 512 kB, so the vector already leaves it at $`c = 12`$ ($`2^{12} \times 144 = 589824`$ bytes) and at $`c = 16`$ it is eighteen times the cache (computed), which is why the time curve turns upward long before memory is the constraint. The harness never asks above $`c = 16`$ and the cost of each width is to be measured, not predicted from these ratios.
 - The shift `<< (64 - k)` in `root_of_unity` is undefined for $`k = 0`$; the harness only calls it for $`k`$ from 8 to 14.
 - `get_throttled` is sticky: a bit set in an earlier session stays set until a reboot, so a non-zero read before the run means reboot, not retry.
 - The Pi 3B+'s serial console is dead; a run that drops its ssh session there loses its lines, which is why the harness prints after every size and not at the end.
@@ -419,8 +440,8 @@ The chapter passes when the Pi 4B has seven `zk11` lines with the throttle word 
 3. Torben P. Pedersen. Non-interactive and information-theoretic secure verifiable secret sharing. In CRYPTO 1991, LNCS 576, pages 129 to 140. Springer, 1991. [doi:10.1007/3-540-46766-1\_9](https://doi.org/10.1007/3-540-46766-1_9) (to verify).
 4. Julius Farkas. Theorie der einfachen Ungleichungen. Journal fur die reine und angewandte Mathematik, 124, pages 1 to 27, 1902. [doi:10.1515/crll.1902.124.1](https://doi.org/10.1515/crll.1902.124.1) (to verify).
 5. Jianqiao Mo, Alhad Daftardar, Barath GaneshKumar, Kaiyue Guo, Hong Wang, Benedikt Bunz, Siddharth Garg and Brandon Reagen. When proofs meet hardware: comparing NTT and SumCheck in zero-knowledge systems. arXiv:2606.16146, submitted Monday 15 June 2026. [arxiv.org/abs/2606.16146](https://arxiv.org/abs/2606.16146) (verified Friday 6 November 2026).
-6. arkworks contributors. arkworks: a Rust ecosystem for zkSNARK programming. The ark-bls12-381 crate is at version 0.6.0, updated Sunday 26 April 2026, 25.3 million downloads. [crates.io, ark-bls12-381](https://crates.io/api/v1/crates/ark-bls12-381) (verified Friday 6 November 2026).
-7. Supranational. blst: a BLS12-381 signature and pairing library in C and assembly. Release v0.3.17, Friday 24 July 2026. [github.com/supranational/blst, latest release](https://api.github.com/repos/supranational/blst/releases/latest) (verified Friday 6 November 2026).
+6. arkworks contributors. arkworks: a Rust ecosystem for zkSNARK programming. The ark-bls12-381 crate is at version 0.6.0, updated Sunday 26 April 2026, 25.3 million downloads. The licence is not recorded here because it has not been read; read it from the crate's own licence field and from the repository's LICENSE file (to verify). [crates.io, ark-bls12-381](https://crates.io/api/v1/crates/ark-bls12-381) (verified Friday 6 November 2026).
+7. Supranational. blst: a BLS12-381 signature and pairing library in C and assembly. Release v0.3.17, Friday 24 July 2026. The licence is not recorded here because it has not been read; read it from the repository's LICENSE file (to verify). [github.com/supranational/blst, latest release](https://api.github.com/repos/supranational/blst/releases/latest) (verified Friday 6 November 2026).
 8. Advanced hardware-software architectures for edge artificial intelligence and zero-knowledge model checking. A design brief of twenty project sketches, read on Friday 6 November 2026 and held locally at `a local design brief`. It is the input to this second edition and is not a published source; where its hardware claims disagree with the bench, the bench is followed and the disagreement is stated.
 9. Leo Breiman. Random forests. Machine Learning, 45(1), pages 5 to 32, 2001. [doi:10.1023/A:1010933404324](https://doi.org/10.1023/A:1010933404324) (to verify).
 

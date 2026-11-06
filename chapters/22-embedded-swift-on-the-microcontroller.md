@@ -10,7 +10,7 @@
 
 > **Key facts**
 >
-> - **Board:** NUCLEO-H7A3ZI-Q (STM32H7A3ZI, Cortex-M7 at 280 MHz, 1312 kB SRAM, 2 MB flash) as the prover; Raspberry Pi 4 Model B Rev 1.4 (8 GB), address \<pi4b\>, as the verifier and as the display driver
+> - **Board:** NUCLEO-H7A3ZI-Q (STM32H7A3ZI, Cortex-M7 at 280 MHz, 2 MB flash, 1312 kB of SRAM) as the prover, where the 1312 kB is a sum over four separate regions, DTCM, the AXI SRAM, the AHB SRAM of domain D2 and the SRD SRAM, and not one contiguous arena, with the region sizes and addresses to be read from RM0455 \[[10](#references)\]; Raspberry Pi 4 Model B Rev 1.4 (8 GB), address \<pi4b\>, as the verifier and as the display driver
 > - **Parts:** one X-NUCLEO-IKS4A1 on the Nucleo's Arduino header with the LSM6DSV16X at 0x6b, seated alone because the three X-NUCLEO shields fit that header one at a time; the Waveshare 3.5 inch RPi LCD (A) on the Pi's header, ili9486 on SPI0 CE0 and ads7846 touch on CE1; four Joy-it LEDs
 > - **Interface:** I2C1 at 400 kHz from the Nucleo to the shield; USB CDC from the Nucleo's user USB to the Pi 4B; the ST-LINK drive `NOD_H7A3ZIQ` for the image; the display on the Pi's SPI0 and the LEDs on BCM 17, 27 and 22, with a fourth on BCM 24 (to verify)
 > - **Language and library:** Embedded Swift, the bare-metal subset, with SVD2Swift generating one typed accessor per non-reserved register field \[[5](#references)\]; the ristretto255 arithmetic is a C module imported into Swift, following RFC 9496 \[[7](#references)\]. Every generated name in the listing is marked (to verify) against the tool's own output
@@ -308,7 +308,7 @@ The two vertical arrows are the whole honesty of the figure. One carries 64 samp
 | I2C1 SCL | Nucleo Arduino header, D15 | X-NUCLEO-IKS4A1 SCL | 400 kHz; the shield's own pull-ups are fitted, so none is added |
 | I2C1 SDA | Nucleo Arduino header, D14 | X-NUCLEO-IKS4A1 SDA | the LSM6DSV16X answers at 0x6b, measured on Wednesday 30 September 2026 |
 | shield supply | Nucleo 3V3 and GND on the Arduino header | X-NUCLEO-IKS4A1 | one shield on this header at a time, which is the whole reason no second sensor appears here |
-| USB CDC | Nucleo CN1 user USB | Pi 4B USB host port | 36 bytes per window: 4 for the sequence number and 32 for the point |
+| USB CDC | Nucleo user USB, CN13 | Pi 4B USB host port | 36 bytes per window: 4 for the sequence number and 32 for the point. This is the STM32's own USB device, as in [Project 1](01-the-price-list.md) and [Project 2](02-a-sensor-reading-committed-on-the-microcontroller.md), and not the ST-LINK virtual COM port on CN1, which is a UART bridge and would need a different firmware path |
 | image | build laptop | ST-LINK drive `NOD_H7A3ZIQ` | the board is shared between volumes, so it is reflashed immediately before every capture |
 | display | Pi 4B SPI0 | ili9486 panel on CE0, ads7846 touch on CE1 | the carrier covers header pins 27 to 40, so the LED pins are chosen below that range |
 | LEDs | Pi 4B BCM 17, 27, 22 and 24 | four Joy-it LEDs | header pins 11, 13, 15 and 18; the first three were measured on Saturday 3 October 2026, the fourth is to verify |
@@ -359,7 +359,7 @@ stateDiagram-v2
 
 ![Figure 22.4. The memory arithmetic of this chapter, log scale in bytes with the axis beginning at 1 MB, every bar dashed because every height is computed or read from a datasheet and nothing here has been measured on this bench.](../figures/z22_data.svg)
 
-*Figure 22.4. The memory arithmetic of this chapter, log scale in bytes with the axis beginning at 1 MB, every bar dashed because every height is computed or read from a datasheet and nothing here has been measured on this bench. From left to right: the Nucleo's 2 MB of flash and 1312 kB of SRAM, the NanoPi NEO Air's 512 MB of DRAM, the weight floor of SmolLM2-360M and of Qwen2.5-0.5B at 4 bits, and the weight floor of an 8B model at 4 bits, which stands above the board's whole memory by the factor of Lemma Z22.4. A dashed bar becomes solid only when a run exists and the acceptance test has passed.*
+*Figure 22.4. The memory arithmetic of this chapter, log scale in bytes with the axis beginning at 1 MB, every bar dashed because every height is computed or read from a datasheet and nothing here has been measured on this bench. From left to right: the Nucleo's 2 MB of flash and its 1312 kB of SRAM, which is a sum over four separate regions and not one contiguous arena, with the region sizes to be read from RM0455, the NanoPi NEO Air's 512 MB of DRAM, the weight floor of SmolLM2-360M and of Qwen2.5-0.5B at 4 bits, and the weight floor of an 8B model at 4 bits, which stands above the board's whole memory by the factor of Lemma Z22.4. A dashed bar becomes solid only when a run exists and the acceptance test has passed.*
 
 | **Quantity** | **Nucleo** | **Pi 4B** | **Instrument or reason** |
 | --- | --- | --- | --- |
@@ -368,7 +368,7 @@ stateDiagram-v2
 | window period | not measured | not measured | 64 samples at 10 ms is 640 ms per window, computed; the achieved period is unmeasured |
 | bytes per window | computed | computed | 4 plus 32 is 36 bytes by the protocol above |
 | weight floor, 8B at 4 bits | not applicable | not applicable | $`4.0 \times 10^{9}`$ bytes, computed in Lemma **Lemma Z22.4** |
-| NanoPi DRAM | not applicable | not applicable | $`5.37 \times 10^{8}`$ bytes from the board's own specification \[[10](#references)\] |
+| NanoPi DRAM | not applicable | not applicable | $`5.37 \times 10^{8}`$ bytes from the board's own specification \[[11](#references)\] |
 | energy per commitment | not measured | no, the PPK2 cannot meter a Pi | the PPK2 can meter the Nucleo; no run exists |
 
 ## Steps
@@ -436,7 +436,8 @@ The chapter passes when, on one recorded day: the script over the description fi
 7. Henry de Valence, Jack Grigg, Mike Hamburg, Isis Lovecruft, George Tankersley and Filippo Valsorda. The ristretto255 and decaf448 groups. RFC 9496, 2023. [rfc-editor.org/info/rfc9496](https://www.rfc-editor.org/info/rfc9496) (verified Friday 6 November 2026).
 8. stm32h7xx-hal contributors. stm32h7xx-hal: a hardware abstraction layer for the STM32H7 series. Version 0.16.0, updated Tuesday 12 March 2024. [crates.io, stm32h7xx-hal](https://crates.io/api/v1/crates/stm32h7xx-hal) (verified Friday 6 November 2026).
 9. rust-embedded. cortex-m-rt: the minimal runtime for Cortex-M microcontrollers. Version 0.7.7, updated Thursday 24 September 2026. [crates.io, cortex-m-rt](https://crates.io/api/v1/crates/cortex-m-rt) (verified Friday 6 November 2026).
-10. FriendlyElec. NanoPi NEO Air wiki. [wiki.friendlyelec.com, NanoPi NEO Air](https://wiki.friendlyelec.com/wiki/index.php/NanoPi_NEO_Air) (to verify).
+10. STMicroelectronics. RM0455, STM32H7A3/7B3 and STM32H7B0 advanced Arm-based 32-bit MCUs, reference manual. (to verify)
+11. FriendlyElec. NanoPi NEO Air wiki. [wiki.friendlyelec.com, NanoPi NEO Air](https://wiki.friendlyelec.com/wiki/index.php/NanoPi_NEO_Air) (to verify).
 
 ---
 
