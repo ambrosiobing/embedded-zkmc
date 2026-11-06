@@ -16,7 +16,7 @@
 > - **Language and library:** C17 for the decision path, which holds the ternary layer, the control rule and the certifier's guard check, with `libgpiod` v2.3.2 \[[5](#references)\] for the LEDs; Python only as the harness, with the standard library's `urllib`
 > - **Primitive:** a ternary linear layer, as in the one-bit model of \[[2](#references)\], in front of the certification relation of [Project 16](16-the-model-proposes-a-ranking-function-the-certifier.md); the certifier decides and the model proposes
 > - **Secret:** none in this chapter's own proof; the replayed log, the features, every proposal and every verdict are public, and the point is what the quantisation costs
-> - **Public:** the four class names, the four public guards as closed bands on one feature, the grammar, every proposal, every verdict, the $2 \times 2$ agreement table
+> - **Public:** the four class names, the four public guards as closed bands on one feature, the grammar, every proposal, every verdict, the $`2 \times 2`$ agreement table
 > - **Model:** BitNet b1.58, whose every weight is in the set with the three values minus one, zero and one \[[2](#references)\], run by its own inference framework \[[3](#references)\]; beside it the volume's existing ladder, Qwen2.5-0.5B, as the small rung; the file size of each is read from its model card
 > - **Acceptance:** at least 100 windows per proposer, every line parsed by the grammar, every proposal certified or refused by the C guard check, the agreement table printed with both marginal rates, and the ternary layer's printed operation count equal to the count Lemma **Lemma Z24.2** predicts for the same weights, on every window
 > - **Difficulty:** 3 of 5
@@ -40,14 +40,14 @@ The design brief builds this project as a portable medical triage tool that a pe
 
 ## The secret, the statement and the relation
 
-Nothing is hidden in this chapter, so its relation is the certification relation of [Project 16](16-the-model-proposes-a-ranking-function-the-certifier.md) with a different proposer in front of it. Let $\mathcal{W} = \lbrace \thinspace -1, 0, 1 \thinspace \rbrace$ be the weight alphabet, let a window of the replayed log be $v \in \mathbb{R}^{256}$, and let the feature map be
+Nothing is hidden in this chapter, so its relation is the certification relation of [Project 16](16-the-model-proposes-a-ranking-function-the-certifier.md) with a different proposer in front of it. Let $`\mathcal{W} = \lbrace \thinspace -1, 0, 1 \thinspace \rbrace`$ be the weight alphabet, let a window of the replayed log be $`v \in \mathbb{R}^{256}`$, and let the feature map be
 
 $$
 \phi(v) = \big(\max_i v_i - \min_i v_i,\thickspace  \tfrac{1}{256}\textstyle\sum_i |v_i - \bar v|,\thickspace 
     |\lbrace \thinspace  i \mid |v_i| > 1 \thinspace \rbrace | / 256,\thickspace  \max_i |v_i| \big) \in \mathbb{R}^4, \tag{24.1}
 $$
 
-with $\bar v$ the mean of the window. The four classes are $C = \lbrace \thinspace \mathsf{nominal}, \mathsf{watch}, \mathsf{service}, \mathsf{withdraw} \thinspace \rbrace$, indexed $0$ to $3$, and each carries a public guard written as a closed band on the first feature,
+with $`\bar v`$ the mean of the window. The four classes are $`C = \lbrace \thinspace \mathsf{nominal}, \mathsf{watch}, \mathsf{service}, \mathsf{withdraw} \thinspace \rbrace`$, indexed $`0`$ to $`3`$, and each carries a public guard written as a closed band on the first feature,
 
 $$
 G_0 = [0.0,\thinspace  3.0], \quad G_1 = [2.0,\thinspace  5.0], \quad G_2 = [4.0,\thinspace  8.0], \quad
@@ -60,54 +60,54 @@ $$
 \mathcal{R}_{\mathrm{cls}} = \lbrace \thinspace  (c, v) \in C \times \mathbb{R}^{256} \mid \phi(v)_1 \in G_c \thinspace \rbrace , \tag{24.3}
 $$
 
-and the two proposers are functions into $C$: the model $P_{\mathrm{llm}}$, bounded by the grammar below, and the control rule $P_{\mathrm{rule}}$, which returns the smallest index whose guard admits the window. The statement a later run would prove in zero knowledge is $(c, v) \in \mathcal{R}_{\mathrm{cls}}$ for a committed $v$; this chapter establishes, as [Project 16](16-the-model-proposes-a-ranking-function-the-certifier.md) does for ranking functions, that the right-hand side does not depend on which proposer produced $c$.
+and the two proposers are functions into $`C`$: the model $`P_{\mathrm{llm}}`$, bounded by the grammar below, and the control rule $`P_{\mathrm{rule}}`$, which returns the smallest index whose guard admits the window. The statement a later run would prove in zero knowledge is $`(c, v) \in \mathcal{R}_{\mathrm{cls}}`$ for a committed $`v`$; this chapter establishes, as [Project 16](16-the-model-proposes-a-ranking-function-the-certifier.md) does for ranking functions, that the right-hand side does not depend on which proposer produced $`c`$.
 
 ## The mathematics
 
-**Definition Z24.1 (Ternary linear layer).** Let $m, n \ge 1$. A *ternary linear layer* is a pair $(W, \beta)$ with $W \in \lbrace -1, 0, 1\rbrace ^{m \times n}$ and $\beta \in \mathbb{R}_{>0}^{m}$, acting on $x \in \mathbb{R}^n$ by
+**Definition Z24.1 (Ternary linear layer).** Let $`m, n \ge 1`$. A *ternary linear layer* is a pair $`(W, \beta)`$ with $`W \in \lbrace -1, 0, 1\rbrace ^{m \times n}`$ and $`\beta \in \mathbb{R}_{>0}^{m}`$, acting on $`x \in \mathbb{R}^n`$ by
 
 $$
 L(x)_i = \beta_i \sum_{j=1}^{n} w_{ij}\thinspace  x_j, \qquad i = 1, \dots, m. \tag{24.4}
 $$
 
-It is obtained from a real matrix $A \in \mathbb{R}^{m \times n}$ by the mean-magnitude quantiser of \[[2](#references)\]: with $\beta_i = \frac{1}{n}\sum_{j} |a_{ij}|$ assumed positive,
+It is obtained from a real matrix $`A \in \mathbb{R}^{m \times n}`$ by the mean-magnitude quantiser of \[[2](#references)\]: with $`\beta_i = \frac{1}{n}\sum_{j} |a_{ij}|`$ assumed positive,
 
 $$
 w_{ij} = \mathrm{clip}\Big(\Big\lfloor \frac{a_{ij}}{\beta_i} \Big\rceil, -1, 1\Big), \tag{24.5}
 $$
 
-where $\lfloor \cdot \rceil$ is rounding to the nearest integer, ties away from zero, and $\mathrm{clip}(t, -1, 1) = \max(-1, \min(1, t))$. The *cost model* counts one addition and one subtraction alike as one *additive operation*, counts one real multiplication as one *multiplication*, and counts a sign change as free, it being a flip of one bit of a floating-point word.
+where $`\lfloor \cdot \rceil`$ is rounding to the nearest integer, ties away from zero, and $`\mathrm{clip}(t, -1, 1) = \max(-1, \min(1, t))`$. The *cost model* counts one addition and one subtraction alike as one *additive operation*, counts one real multiplication as one *multiplication*, and counts a sign change as free, it being a flip of one bit of a floating-point word.
 
-**Lemma Z24.2 (A ternary product needs only additions and subtractions).** Let $(W, \beta)$ be a ternary linear layer and $x \in \mathbb{R}^n$. For each row $i$ put $p_i = |\lbrace \thinspace j \mid w_{ij} = 1 \thinspace \rbrace |$ and $q_i = |\lbrace \thinspace j \mid w_{ij} = -1 \thinspace \rbrace |$, and $k_i = p_i + q_i$. Then $L(x)$ is computed with
+**Lemma Z24.2 (A ternary product needs only additions and subtractions).** Let $`(W, \beta)`$ be a ternary linear layer and $`x \in \mathbb{R}^n`$. For each row $`i`$ put $`p_i = |\lbrace \thinspace j \mid w_{ij} = 1 \thinspace \rbrace |`$ and $`q_i = |\lbrace \thinspace j \mid w_{ij} = -1 \thinspace \rbrace |`$, and $`k_i = p_i + q_i`$. Then $`L(x)`$ is computed with
 
 $$
 \sum_{i=1}^{m} \max(k_i - 1,\thinspace  0) \thickspace \le\thickspace  mn - m \quad \text{additive operations and} \quad
   m \quad \text{multiplications}, \tag{24.6}
 $$
 
-and with no multiplication by any entry of $W$. The dense layer $x \mapsto A x$ over the same shape costs $mn$ multiplications and $m(n-1)$ additive operations. Hence the ternary layer performs a fraction $1/n$ of the multiplications of the dense layer, and no more additive operations than it.
+and with no multiplication by any entry of $`W`$. The dense layer $`x \mapsto A x`$ over the same shape costs $`mn`$ multiplications and $`m(n-1)`$ additive operations. Hence the ternary layer performs a fraction $`1/n`$ of the multiplications of the dense layer, and no more additive operations than it.
 
-*Proof.* Fix a row $i$ and let $P_i$ and $N_i$ be the index sets of the entries equal to $1$ and to $-1$. By (24.4), and because the entries of $W$ outside $P_i \cup N_i$ are zero,
+*Proof.* Fix a row $`i`$ and let $`P_i`$ and $`N_i`$ be the index sets of the entries equal to $`1`$ and to $`-1`$. By (24.4), and because the entries of $`W`$ outside $`P_i \cup N_i`$ are zero,
 
 $$
 L(x)_i = \beta_i \Big( \sum_{j \in P_i} x_j - \sum_{j \in N_i} x_j \Big).
 $$
 
-Consider the inner expression. If $k_i = 0$ both sums are empty and the value is $0$; no operation is performed. If $k_i \ge 1$, evaluate it by taking the term of the smallest index as the initial accumulator, which is $x_j$ if that index lies in $P_i$ and $-x_j$ if it lies in $N_i$, a sign change and therefore free by the cost model, and then adding or subtracting the remaining $k_i - 1$ terms one at a time. Each such step is one additive operation, so $k_i - 1$ of them are performed. This is also the least possible number: each binary additive operation takes two values and leaves one, so it lowers the number of values still to be combined by exactly one, and reducing $k_i$ values to one value needs $k_i - 1$ of them. No entry of $W$ was multiplied by anything: the entries equal to $0$ caused a term to be omitted, the entries equal to $1$ an addition, and the entries equal to $-1$ a subtraction. Multiplying by $\beta_i$ is one multiplication per row, hence $m$ in total.
+Consider the inner expression. If $`k_i = 0`$ both sums are empty and the value is $`0`$; no operation is performed. If $`k_i \ge 1`$, evaluate it by taking the term of the smallest index as the initial accumulator, which is $`x_j`$ if that index lies in $`P_i`$ and $`-x_j`$ if it lies in $`N_i`$, a sign change and therefore free by the cost model, and then adding or subtracting the remaining $`k_i - 1`$ terms one at a time. Each such step is one additive operation, so $`k_i - 1`$ of them are performed. This is also the least possible number: each binary additive operation takes two values and leaves one, so it lowers the number of values still to be combined by exactly one, and reducing $`k_i`$ values to one value needs $`k_i - 1`$ of them. No entry of $`W`$ was multiplied by anything: the entries equal to $`0`$ caused a term to be omitted, the entries equal to $`1`$ an addition, and the entries equal to $`-1`$ a subtraction. Multiplying by $`\beta_i`$ is one multiplication per row, hence $`m`$ in total.
 
-Summing over the rows gives $\sum_i \max(k_i - 1, 0)$ additive operations. Since $k_i \le n$ for every row, $\max(k_i - 1, 0) \le n - 1$, and summing the bound over the $m$ rows gives $m(n-1) = mn - m$.
+Summing over the rows gives $`\sum_i \max(k_i - 1, 0)`$ additive operations. Since $`k_i \le n`$ for every row, $`\max(k_i - 1, 0) \le n - 1`$, and summing the bound over the $`m`$ rows gives $`m(n-1) = mn - m`$.
 
-For the dense layer, $(Ax)_i = \sum_{j=1}^n a_{ij} x_j$ is $n$ products and the sum of $n$ values, which by the counting argument above is $n - 1$ additive operations; over $m$ rows that is $mn$ multiplications and $m(n-1)$ additive operations. The ratio of multiplications is $m / (mn) = 1/n$, and the ternary count of additive operations is at most $m(n-1)$, which is the dense count. &#9632;
+For the dense layer, $`(Ax)_i = \sum_{j=1}^n a_{ij} x_j`$ is $`n`$ products and the sum of $`n`$ values, which by the counting argument above is $`n - 1`$ additive operations; over $`m`$ rows that is $`mn`$ multiplications and $`m(n-1)`$ additive operations. The ratio of multiplications is $`m / (mn) = 1/n`$, and the ternary count of additive operations is at most $`m(n-1)`$, which is the dense count. &#9632;
 
-**Example Z24.3 (The two instances this chapter uses, computed).** For the decision path's own layer, $m = n = 4$: the dense form costs $16$ multiplications and $12$ additive operations, the ternary form at most $12$ additive operations and $4$ multiplications, a ratio of multiplications of $1/4$ (computed). For one square layer of the model at $m = n = 2048$: the dense form costs $2048^2 = 4194304$ multiplications and $2048 \times 2047 = 4192256$ additive operations, the ternary form $2048$ multiplications and at most $4192256$ additive operations, a ratio of multiplications of $1/2048$ (computed). Neither figure is a time: a multiplication and an addition do not cost the same on a Cortex-A72 and nothing here has been timed, so the benchmark table reads not measured for every duration.
+**Example Z24.3 (The two instances this chapter uses, computed).** For the decision path's own layer, $`m = n = 4`$: the dense form costs $`16`$ multiplications and $`12`$ additive operations, the ternary form at most $`12`$ additive operations and $`4`$ multiplications, a ratio of multiplications of $`1/4`$ (computed). For one square layer of the model at $`m = n = 2048`$: the dense form costs $`2048^2 = 4194304`$ multiplications and $`2048 \times 2047 = 4192256`$ additive operations, the ternary form $`2048`$ multiplications and at most $`4192256`$ additive operations, a ratio of multiplications of $`1/2048`$ (computed). Neither figure is a time: a multiplication and an addition do not cost the same on a Cortex-A72 and nothing here has been timed, so the benchmark table reads not measured for every duration.
 
-**Proposition Z24.4 (A margin smaller than the quantisation error is not preserved).** Let $a \in \mathbb{R}^n$ be one row of a dense layer, let $(w, \beta)$ be its ternary quantisation by (24.5), and write $e = \beta w - a$ for the coefficient error. For $x \in \mathbb{R}^n$ let $s(x) = \langle a, x \rangle$ and $\hat s(x) = \beta \langle w, x \rangle$ be the dense and the quantised scores. Then:
+**Proposition Z24.4 (A margin smaller than the quantisation error is not preserved).** Let $`a \in \mathbb{R}^n`$ be one row of a dense layer, let $`(w, \beta)`$ be its ternary quantisation by (24.5), and write $`e = \beta w - a`$ for the coefficient error. For $`x \in \mathbb{R}^n`$ let $`s(x) = \langle a, x \rangle`$ and $`\hat s(x) = \beta \langle w, x \rangle`$ be the dense and the quantised scores. Then:
 
-1. if $|s(x)| > \Vert e\Vert _2 \Vert x\Vert _2$ then $\hat s(x)$ has the same sign as $s(x)$, so the decision $\mathrm{sign}(s)$ is preserved;
-2. the bound is not vacuous and cannot be improved to zero: for every $\varepsilon \in (0, 2/3)$ and every $\delta \in (0, \varepsilon)$ there are $a$ and $x$ in $\mathbb{R}^2$ with $s(x) > 0$ and $\hat s(x) < 0$, and with $s(x) \to 0$ as $\delta \to \varepsilon$;
-3. each coordinate of the error of an unclipped entry satisfies $|e_j| \le \beta/2$, so $\Vert e\Vert _2 \le (\beta/2)\sqrt{n}$ and a margin above $(\beta/2)\sqrt{n}\thinspace \Vert x\Vert _2$ is safe.
+1. if $`|s(x)| > \Vert e\Vert _2 \Vert x\Vert _2`$ then $`\hat s(x)`$ has the same sign as $`s(x)`$, so the decision $`\mathrm{sign}(s)`$ is preserved;
+2. the bound is not vacuous and cannot be improved to zero: for every $`\varepsilon \in (0, 2/3)`$ and every $`\delta \in (0, \varepsilon)`$ there are $`a`$ and $`x`$ in $`\mathbb{R}^2`$ with $`s(x) > 0`$ and $`\hat s(x) < 0`$, and with $`s(x) \to 0`$ as $`\delta \to \varepsilon`$;
+3. each coordinate of the error of an unclipped entry satisfies $`|e_j| \le \beta/2`$, so $`\Vert e\Vert _2 \le (\beta/2)\sqrt{n}`$ and a margin above $`(\beta/2)\sqrt{n}\thinspace \Vert x\Vert _2`$ is safe.
 
-*Proof.* (i) By the definition of $e$, $\hat s(x) = \langle \beta w, x \rangle = \langle a + e, x \rangle = s(x) + \langle e, x \rangle$, and by the Cauchy-Schwarz inequality $|\langle e, x \rangle| \le \Vert e\Vert _2 \Vert x\Vert _2$. Suppose $s(x) > \Vert e\Vert _2\Vert x\Vert _2$. Then $\hat s(x) \ge s(x) - |\langle e, x\rangle| \ge s(x) - \Vert e\Vert _2\Vert x\Vert _2 > 0$. If instead $s(x) < -\Vert e\Vert _2\Vert x\Vert _2$ then $\hat s(x) \le s(x) + \Vert e\Vert _2\Vert x\Vert _2 < 0$. In both cases the sign is unchanged.
+*Proof.* (i) By the definition of $`e`$, $`\hat s(x) = \langle \beta w, x \rangle = \langle a + e, x \rangle = s(x) + \langle e, x \rangle`$, and by the Cauchy-Schwarz inequality $`|\langle e, x \rangle| \le \Vert e\Vert _2 \Vert x\Vert _2`$. Suppose $`s(x) > \Vert e\Vert _2\Vert x\Vert _2`$. Then $`\hat s(x) \ge s(x) - |\langle e, x\rangle| \ge s(x) - \Vert e\Vert _2\Vert x\Vert _2 > 0`$. If instead $`s(x) < -\Vert e\Vert _2\Vert x\Vert _2`$ then $`\hat s(x) \le s(x) + \Vert e\Vert _2\Vert x\Vert _2 < 0`$. In both cases the sign is unchanged.
 
 (ii) The construction is two lines. Take
 
@@ -116,7 +116,7 @@ a = (1,\thickspace  1 - \varepsilon), \qquad x = (1,\thickspace  -1 - \delta),
   \qquad 0 < \delta < \varepsilon < 2/3 .
 $$
 
-Then $\beta = \tfrac{1}{2}(|1| + |1 - \varepsilon|) = 1 - \varepsilon/2 > 0$, and the two quantised entries are both $1$: for the first, $a_1/\beta = 1/(1 - \varepsilon/2) > 1$, which clips to $1$; for the second, $a_2/\beta = (1-\varepsilon)/(1-\varepsilon/2)$, which is at most $1$ and is at least $1/2$, because $(1 - \varepsilon) \ge \tfrac{1}{2}(1 - \varepsilon/2)$ is equivalent to $2 - 2\varepsilon \ge 1 - \varepsilon/2$, that is to $1 \ge \tfrac{3}{2}\varepsilon$, that is to $\varepsilon \le 2/3$, which holds; so it rounds to $1$. Hence $w = (1, 1)$. Now
+Then $`\beta = \tfrac{1}{2}(|1| + |1 - \varepsilon|) = 1 - \varepsilon/2 > 0`$, and the two quantised entries are both $`1`$: for the first, $`a_1/\beta = 1/(1 - \varepsilon/2) > 1`$, which clips to $`1`$; for the second, $`a_2/\beta = (1-\varepsilon)/(1-\varepsilon/2)`$, which is at most $`1`$ and is at least $`1/2`$, because $`(1 - \varepsilon) \ge \tfrac{1}{2}(1 - \varepsilon/2)`$ is equivalent to $`2 - 2\varepsilon \ge 1 - \varepsilon/2`$, that is to $`1 \ge \tfrac{3}{2}\varepsilon`$, that is to $`\varepsilon \le 2/3`$, which holds; so it rounds to $`1`$. Hence $`w = (1, 1)`$. Now
 
 $$
 \begin{aligned}
@@ -130,23 +130,23 @@ s(x) &= 1 \cdot 1 + (1 - \varepsilon)(-1 - \delta)
 \end{aligned}
 $$
 
-The signs differ. As $\delta$ rises to $\varepsilon$ the margin $s(x) = \varepsilon - \delta + \varepsilon\delta$ falls to $\varepsilon^2 > 0$ and, taking $\varepsilon$ small as well, to zero; so there is no positive margin below which the sign is guaranteed, and in particular the bound of (i) cannot be replaced by zero. For this pair, $e = \beta w - a = (-\varepsilon/2,\thickspace \varepsilon/2)$ and $\Vert e\Vert _2 = \varepsilon/\sqrt{2}$, which is consistent with (i): the flipped margin $\varepsilon - \delta + \varepsilon\delta$ is below $\Vert e\Vert _2\Vert x\Vert _2$ for the $\delta$ chosen.
+The signs differ. As $`\delta`$ rises to $`\varepsilon`$ the margin $`s(x) = \varepsilon - \delta + \varepsilon\delta`$ falls to $`\varepsilon^2 > 0`$ and, taking $`\varepsilon`$ small as well, to zero; so there is no positive margin below which the sign is guaranteed, and in particular the bound of (i) cannot be replaced by zero. For this pair, $`e = \beta w - a = (-\varepsilon/2,\thickspace \varepsilon/2)`$ and $`\Vert e\Vert _2 = \varepsilon/\sqrt{2}`$, which is consistent with (i): the flipped margin $`\varepsilon - \delta + \varepsilon\delta`$ is below $`\Vert e\Vert _2\Vert x\Vert _2`$ for the $`\delta`$ chosen.
 
-(iii) If the entry is not clipped, $w_j = \lfloor a_j/\beta \rceil$, so $|a_j/\beta - w_j| \le 1/2$ by the definition of rounding to the nearest integer; multiplying by $\beta > 0$ gives $|a_j - \beta w_j| \le \beta/2$, that is $|e_j| \le \beta/2$. Then $\Vert e\Vert _2 = (\sum_j e_j^2)^{1/2} \le (n \beta^2/4)^{1/2} = (\beta/2)\sqrt{n}$, and (i) gives the stated safe margin. &#9632;
+(iii) If the entry is not clipped, $`w_j = \lfloor a_j/\beta \rceil`$, so $`|a_j/\beta - w_j| \le 1/2`$ by the definition of rounding to the nearest integer; multiplying by $`\beta > 0`$ gives $`|a_j - \beta w_j| \le \beta/2`$, that is $`|e_j| \le \beta/2`$. Then $`\Vert e\Vert _2 = (\sum_j e_j^2)^{1/2} \le (n \beta^2/4)^{1/2} = (\beta/2)\sqrt{n}`$, and (i) gives the stated safe margin. &#9632;
 
-**Remark Z24.5 (Why the guards are bands and not a boundary).** Proposition **Proposition Z24.4** is the reason the public guards of (24.2) are overlapping closed bands rather than three cut points. A proposer whose score sits within $\Vert e\Vert _2\Vert x\Vert _2$ of a cut point may name either side of it, and with cut points one of the two answers would be refused, which would make the measured acceptance rate a measurement of the quantisation and not of the proposer. With bands, both answers are admissible in the overlap and the certifier refuses only a class whose band the window is genuinely outside. The width of each overlap, 1.0 V, is a design choice recorded here and not derived from the bound, because the model's own $\Vert e\Vert _2$ is a property of weights this bench has not read.
+**Remark Z24.5 (Why the guards are bands and not a boundary).** Proposition **Proposition Z24.4** is the reason the public guards of (24.2) are overlapping closed bands rather than three cut points. A proposer whose score sits within $`\Vert e\Vert _2\Vert x\Vert _2`$ of a cut point may name either side of it, and with cut points one of the two answers would be refused, which would make the measured acceptance rate a measurement of the quantisation and not of the proposer. With bands, both answers are admissible in the overlap and the certifier refuses only a class whose band the window is genuinely outside. The width of each overlap, 1.0 V, is a design choice recorded here and not derived from the bound, because the model's own $`\Vert e\Vert _2`$ is a property of weights this bench has not read.
 
 **Remark Z24.6 (Soundness is cited, not re-proved).** The theorem that the certifier's acceptance does not depend on which function produced the proposal is Theorem thm:z16\_independent of [Project 16](16-the-model-proposes-a-ranking-function-the-certifier.md), proved there for an arbitrary proposer, including a quantised model and including an adversary. Nothing in this chapter weakens its hypotheses: the certifier here evaluates the public guard of (24.2) on the window and nothing else. What the quantisation can cost is completeness, which Proposition **Proposition Z24.4** bounds and the agreement table counts, and thm:z01\_hiding is the reason a committed window reveals nothing about the features to a verifier that checks only the guard.
 
 ## The protocol
 
-1. The decision path reads the replayed log, builds window $t$ of 256 samples with a stride of 128, and computes $\phi$ by (24.1).
-2. The decision path evaluates its own four by four ternary layer on $\phi$, prints the count of additive operations it performed, and takes the index of the largest output as the tiny layer's proposal.
+1. The decision path reads the replayed log, builds window $`t`$ of 256 samples with a stride of 128, and computes $`\phi`$ by (24.1).
+2. The decision path evaluates its own four by four ternary layer on $`\phi`$, prints the count of additive operations it performed, and takes the index of the largest output as the tiny layer's proposal.
 3. The harness posts the prompt and the grammar to the inference server and receives one line; a line the regular expression does not match is a grammar defect and stops the run.
-4. The control rule returns the smallest index whose guard admits $\phi(v)_1$.
+4. The control rule returns the smallest index whose guard admits $`\phi(v)_1`$.
 5. The decision path checks each proposal against the guard of (24.2) and exits non-zero on a refusal, printing which band was missed and by how much.
 6. The verdict is shown: on the display in one configuration, on the three LEDs in the other, and on the console in both.
-7. After $n \ge 100$ windows the harness prints the $2 \times 2$ table with both marginal rates and the agreement rate, one row per proposer.
+7. After $`n \ge 100`$ windows the harness prints the $`2 \times 2`$ table with both marginal rates and the agreement rate, one row per proposer.
 
 ## The code
 
@@ -313,9 +313,9 @@ name ::= "nominal" | "watch" | "service" | "withdraw"
 
 The grammar pins the whole line to a fixed prefix and four literals. That is deliberate: a free-text slot that pinned only a character class and a length would admit the prompt's own sentence back, and an acceptance rate measured against such a grammar would be a property of the grammar. The control rule is the lowest admissible band, and the theorem that says a wrong proposal cannot cost soundness is Theorem thm:z16\_independent of [Project 16](16-the-model-proposes-a-ranking-function-the-certifier.md). Every cell reads not measured until the 100 windows have run:
 
-| **Proposer** | $n_{11}$ | $n_{10}$ | $n_{01}$ | $n_{00}$ | **rates** | **Instrument** |
+| **Proposer** | $`n_{11}`$ | $`n_{10}`$ | $`n_{01}`$ | $`n_{00}`$ | **rates** | **Instrument** |
 | --- | --- | --- | --- | --- | --- | --- |
-| BitNet b1.58, ternary | not measured | not measured | not measured | not measured | model, rule, agreement: not measured | the harness log, $n \ge 100$ |
+| BitNet b1.58, ternary | not measured | not measured | not measured | not measured | model, rule, agreement: not measured | the harness log, $`n \ge 100`$ |
 | Qwen2.5-0.5B, the small rung | not measured | not measured | not measured | not measured | not measured | the same |
 | the four by four ternary layer in C | not measured | not measured | not measured | not measured | not measured | the `tiny` field of the printed line |
 | the rule alone |  |  |  |  | certified on every window by construction | the harness log |
@@ -409,7 +409,7 @@ stateDiagram-v2
 | multiplications, ternary 2048 by 2048 layer | 2048 | computed | Lemma **Lemma Z24.2**, one scale per row |
 | additive operations, either form | at most 4192256 | computed | Lemma **Lemma Z24.2** |
 | multiplications, the four by four layer in C | 4 against 16 | computed | Example **Example Z24.3**; the binary prints its own count |
-| weights at 1.58 bits, 2.0 thousand million parameters | 0.395 GB | computed | $2.0 \times 10^9 \times 1.58 / 8$ |
+| weights at 1.58 bits, 2.0 thousand million parameters | 0.395 GB | computed | $`2.0 \times 10^9 \times 1.58 / 8`$ |
 | weights at two-bit packing | 0.50 GB | computed, to verify | the framework's packing is read, not assumed \[[3](#references)\] |
 | weights at sixteen-bit floating point | 4.00 GB | computed | the same count at 2 bytes |
 | model file size on the card | read it from the model card |  | the model card of each file |
@@ -437,11 +437,11 @@ stateDiagram-v2
 
 ## Acceptance test
 
-The chapter passes when, for each proposer, 100 windows exist in the log; every line matched the grammar; the printed operation count equals the count Lemma **Lemma Z24.2** predicts, window by window, with no exception; a window deliberately placed in an overlap, with a peak to peak value of 4.5 V, is certified for both watch and service and refused for nominal and withdraw; the two-dimensional construction of Proposition **Proposition Z24.4** is evaluated by the same C arithmetic at $\varepsilon = 0.5$ and $\delta = 0.25$ and prints a dense score of $0.375$ and a quantised score of $-0.1875$, both computed; and the table prints $n_{11}, n_{10}, n_{01}, n_{00}$ with both marginal rates. It fails if any line failed to parse, if the operation count ever differs from the lemma's, if the overlap window is refused for a band it lies in, if a rate is printed without the rule's rate beside it, if the display and the LEDs are reported as seated at the same time, or if any cell of the benchmark table is filled from a computed figure and labelled as measured.
+The chapter passes when, for each proposer, 100 windows exist in the log; every line matched the grammar; the printed operation count equals the count Lemma **Lemma Z24.2** predicts, window by window, with no exception; a window deliberately placed in an overlap, with a peak to peak value of 4.5 V, is certified for both watch and service and refused for nominal and withdraw; the two-dimensional construction of Proposition **Proposition Z24.4** is evaluated by the same C arithmetic at $`\varepsilon = 0.5`$ and $`\delta = 0.25`$ and prints a dense score of $`0.375`$ and a quantised score of $`-0.1875`$, both computed; and the table prints $`n_{11}, n_{10}, n_{01}, n_{00}`$ with both marginal rates. It fails if any line failed to parse, if the operation count ever differs from the lemma's, if the overlap window is refused for a band it lies in, if a rate is printed without the rule's rate beside it, if the display and the LEDs are reported as seated at the same time, or if any cell of the benchmark table is filled from a computed figure and labelled as measured.
 
 ## Variants
 
-- **the ladder model as the proposer.** The ternary model is replaced by Qwen2.5-0.5B from the sibling volume's ladder, served by llama.cpp, with the same grammar, the same guards and the same certifier. What changes is the weight format and nothing else: the arithmetic of Lemma **Lemma Z24.2** no longer applies, because a four-bit quantisation multiplies. What it costs is roughly four and a half bits per weight instead of 1.58, which for five hundred million parameters is $5.0 \times 10^8 \times 4.5 / 8 = 0.281$ GB against $5.0 \times 10^8 \times 1.58 / 8 = 0.099$ GB for the same count ternary (both computed), so the saving is real but the model is also smaller. Choose it when the bench has already served the file and the question is about the certifier rather than about the quantisation, which is most of the time.
+- **the ladder model as the proposer.** The ternary model is replaced by Qwen2.5-0.5B from the sibling volume's ladder, served by llama.cpp, with the same grammar, the same guards and the same certifier. What changes is the weight format and nothing else: the arithmetic of Lemma **Lemma Z24.2** no longer applies, because a four-bit quantisation multiplies. What it costs is roughly four and a half bits per weight instead of 1.58, which for five hundred million parameters is $`5.0 \times 10^8 \times 4.5 / 8 = 0.281`$ GB against $`5.0 \times 10^8 \times 1.58 / 8 = 0.099`$ GB for the same count ternary (both computed), so the saving is real but the model is also smaller. Choose it when the bench has already served the file and the question is about the certifier rather than about the quantisation, which is most of the time.
 - **a decision tree in front of the model.** A small random forest \[[4](#references)\] proposes the class instead of a language model, trained on the same replayed log, with the certifier and the guards unchanged. What changes is that the proposal becomes a path through a tree rather than a line of text, so the grammar is not needed and no sampling temperature enters; the cost is a training step this chapter does not otherwise have, and the gain is a proposer whose decision can itself be committed and proved, which is the brief's own predictive-maintenance sketch \[[1](#references)\]. Choose it when the proposal must later be proved as well as checked.
 
 ## Pitfalls
@@ -449,7 +449,7 @@ The chapter passes when, for each proposer, 100 windows exist in the log; every 
 - The display and the LEDs exclude each other on this bench. The display's connector takes header pins 1 to 26 and its carrier covers pins 27 to 40, and there is no stacking header, so a plan that shows a class on the screen and lights a LED beside it is a plan for hardware this bench does not have.
 - A rate without the rule's rate beside it is the width of the bands. If 62 of 100 windows lie in a single band, a proposer that always names that band scores 62 percent and has learned nothing; the table prints both margins for that reason.
 - A grammar that pins only a length and a character class admits the prompt's own sentence and a fixed constant, and then every line parses and the acceptance rate measures the grammar. The grammar here is a fixed prefix and four literals, and a line outside it stops the run rather than being discarded.
-- The operation count is a check on the lemma and not decoration. If the printed count ever differs from $\sum_i \max(k_i - 1, 0)$ for the packed weights, either the packing or the accumulation is wrong, and no verdict from that build is trusted.
+- The operation count is a check on the lemma and not decoration. If the printed count ever differs from $`\sum_i \max(k_i - 1, 0)`$ for the packed weights, either the packing or the accumulation is wrong, and no verdict from that build is trusted.
 - Two bit patterns, 0 and 3, encode the zero weight in the packing above. A reader who assumes a one-to-one encoding will compute a different count by hand and conclude the lemma failed; the encoding is written in the listing's comment for that reason.
 - The information bound of 1.58 bits per weight is not a file size. A framework stores ternary weights in whole bits, typically two, and carries scales, an embedding table and a vocabulary beside them; the benchmark table therefore marks the two-bit figure to verify and reads the file size from the model card rather than deriving it.
 - Proposition **Proposition Z24.4** is about one layer and one linear score. A model of many layers composes many such errors and the bound of part (i) does not compose into a useful end-to-end statement; the chapter does not claim one, and the guards are what make the verdict safe regardless.

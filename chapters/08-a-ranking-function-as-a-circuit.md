@@ -15,8 +15,8 @@
 > - **Interface:** DSI ribbon for the picture and the touch; the bench LAN for the proof file; SSH from the build laptop
 > - **Language and library:** JavaScript on Node 22 (to verify) with `snarkjs` v0.7.6 \[[6](#references)\] for setup, proving and the browser verifier; `circom` 2.x (to verify the installed minor version) \[[8](#references)\] and `circomlib`'s `Num2Bits` for the circuit
 > - **Primitive:** Groth16 over BN254 \[[2](#references)\] of the ranking condition of the paper's Equation 21 for one guarded update and one automaton transition, with range checks \[[1](#references)\]
-> - **Secret:** the transition $x, x'$ of the modem machine and the row $A_i, b_i$ of the guarded update it belongs to
-> - **Public:** the ranking pieces $w_j, u_j, w_k, u_k$ and the fairness bit $\mathbf{1}_F$
+> - **Secret:** the transition $`x, x'`$ of the modem machine and the row $`A_i, b_i`$ of the guarded update it belongs to
+> - **Public:** the ranking pieces $`w_j, u_j, w_k, u_k`$ and the fairness bit $`\mathbf{1}_F`$
 > - **Model:** none
 > - **Acceptance:** the honest proof shows accept on the touchscreen; the same proof with one public signal changed shows reject; a witness whose transition does not decrease the ranking function fails at witness generation; the verifier's median time over 64 repeats has a spread under 5 percent with the throttle register at 0x0 before and after
 > - **Difficulty:** 3 of 5
@@ -24,7 +24,7 @@
 
 ## Pitch
 
-The paper's Remark on page 13 says that the relation of its Equation 25 is SNARK-friendly and could be instantiated directly with Groth16 or PLONK, trading prover time for a constant-size proof and a cheap verifier \[[1](#references)\]. This chapter and its two siblings, Sections [Project 12](12-a-plonk-gate-for-the-inductive-step.md) and [Project 13](13-the-obligation-in-noir.md), take that sentence literally and build the same statement three times, in three circuit languages under three proof systems, so that the decision tree at the end of each is drawn from the same relation. The statement is one inductive step of the ranking argument: a secret transition $(x, x')$ of a secret guarded update satisfies the update's inequalities, and the public ranking function does not increase across it, and strictly decreases if the automaton transition is fair. Here it is written in Circom, compiled to an R1CS, proved on the build laptop with snarkjs under Groth16, and verified in Chromium on the Pi 4B's touchscreen by the same library compiled to WebAssembly. The language is JavaScript because the verifier is a web page, and the mathematics is the one theorem a reader of any SNARK needs first: an R1CS is satisfied if and only if a quotient polynomial exists.
+The paper's Remark on page 13 says that the relation of its Equation 25 is SNARK-friendly and could be instantiated directly with Groth16 or PLONK, trading prover time for a constant-size proof and a cheap verifier \[[1](#references)\]. This chapter and its two siblings, Sections [Project 12](12-a-plonk-gate-for-the-inductive-step.md) and [Project 13](13-the-obligation-in-noir.md), take that sentence literally and build the same statement three times, in three circuit languages under three proof systems, so that the decision tree at the end of each is drawn from the same relation. The statement is one inductive step of the ranking argument: a secret transition $`(x, x')`$ of a secret guarded update satisfies the update's inequalities, and the public ranking function does not increase across it, and strictly decreases if the automaton transition is fair. Here it is written in Circom, compiled to an R1CS, proved on the build laptop with snarkjs under Groth16, and verified in Chromium on the Pi 4B's touchscreen by the same library compiled to WebAssembly. The language is JavaScript because the verifier is a web page, and the mathematics is the one theorem a reader of any SNARK needs first: an R1CS is satisfied if and only if a quotient polynomial exists.
 
 ## Parts and interface
 
@@ -38,7 +38,7 @@ The paper's Remark on page 13 says that the relation of its Equation 25 is SNARK
 
 ## The secret, the statement and the relation
 
-The three circuit chapters share one statement, written here once and repeated word for word in Sections [Project 12](12-a-plonk-gate-for-the-inductive-step.md) and [Project 13](13-the-obligation-in-noir.md). Let $n = 2$ be the number of program variables of the modem machine of Section [Project 3](03-the-modems-backoff-machine.md), $x = (\mathit{delay}, \mathit{done})$, and let $y = (x, x') \in \mathbb{Z}^4$ be a transition. Every integer in the statement is a signed 16-bit integer, $I = [-2^{15}, 2^{15} - 1]$, which is the paper's bounded integer encoding with $M = 2^{15}$ \[[1](#references)\]. The witness is the transition and the row of the guarded update it belongs to, the statement is the ranking function's two pieces and the fairness bit, and the relation is
+The three circuit chapters share one statement, written here once and repeated word for word in Sections [Project 12](12-a-plonk-gate-for-the-inductive-step.md) and [Project 13](13-the-obligation-in-noir.md). Let $`n = 2`$ be the number of program variables of the modem machine of Section [Project 3](03-the-modems-backoff-machine.md), $`x = (\mathit{delay}, \mathit{done})`$, and let $`y = (x, x') \in \mathbb{Z}^4`$ be a transition. Every integer in the statement is a signed 16-bit integer, $`I = [-2^{15}, 2^{15} - 1]`$, which is the paper's bounded integer encoding with $`M = 2^{15}`$ \[[1](#references)\]. The witness is the transition and the row of the guarded update it belongs to, the statement is the ranking function's two pieces and the fairness bit, and the relation is
 
 $$
 \begin{aligned}
@@ -49,9 +49,9 @@ $$
 \end{aligned} \tag{8.1}
 $$
 
-This is the paper's Equation 21 read at one point: the premise $A_i [x\thickspace x']^\top \le b_i$ is membership of the transition in the $i$-th guarded update of Equation 16, and the conclusion is $V(x, q) - V(x', q') > \mathbf{1}_F(q, \sigma, q') - 1$ with $V$ the piecewise-linear function of Equation 18, which over integers is $V(x, q) - V(x', q') \ge f$ with $f = \mathbf{1}_F(q, \sigma, q')$. The case rows $C_j x \le d_j$ and $C_k x' \le d_k$ of Equation 21 have the same shape as rows of $A_i$ and are appended to it in the full build; the printed circuit carries the five rows of the update alone so that it fits on one page.
+This is the paper's Equation 21 read at one point: the premise $`A_i [x\thickspace x']^\top \le b_i`$ is membership of the transition in the $`i`$-th guarded update of Equation 16, and the conclusion is $`V(x, q) - V(x', q') > \mathbf{1}_F(q, \sigma, q') - 1`$ with $`V`$ the piecewise-linear function of Equation 18, which over integers is $`V(x, q) - V(x', q') \ge f`$ with $`f = \mathbf{1}_F(q, \sigma, q')`$. The case rows $`C_j x \le d_j`$ and $`C_k x' \le d_k`$ of Equation 21 have the same shape as rows of $`A_i`$ and are appended to it in the full build; the printed circuit carries the five rows of the update alone so that it fits on one page.
 
-The concrete instance used in all three chapters is the retry loop of the modem machine: state Wait to state Wait, $\mathit{delay}' = 2\thinspace \mathit{delay}$, $\mathit{done}' = \mathit{done} + 1$ under the guard $\mathit{done} \le 2$, which as rows of $A_i y \le b_i$ over $y = (\mathit{delay}, \mathit{done}, \mathit{delay}', \mathit{done}')$ reads
+The concrete instance used in all three chapters is the retry loop of the modem machine: state Wait to state Wait, $`\mathit{delay}' = 2\thinspace \mathit{delay}`$, $`\mathit{done}' = \mathit{done} + 1`$ under the guard $`\mathit{done} \le 2`$, which as rows of $`A_i y \le b_i`$ over $`y = (\mathit{delay}, \mathit{done}, \mathit{delay}', \mathit{done}')`$ reads
 
 $$
 A_i = \begin{bmatrix} -2 & 0 & 1 & 0 \cr  2 & 0 & -1 & 0 \cr  0 & -1 & 0 & 1 \cr  0 & 1 & 0 & -1 \cr 
@@ -60,23 +60,23 @@ A_i = \begin{bmatrix} -2 & 0 & 1 & 0 \cr  2 & 0 & -1 & 0 \cr  0 & -1 & 0 & 1 \cr
   w_j = w_k = (0, -1), \quad u_j = u_k = 3, \quad f = 1, \tag{8.2}
 $$
 
-so that $V(x, \mathrm{Wait}) = 3 - \mathit{done}$ and $V(x, q) - V(x', q') = \mathit{done}' - \mathit{done} = 1 \ge f$. The example witness is $x = (1, 0)$, $x' = (2, 1)$.
+so that $`V(x, \mathrm{Wait}) = 3 - \mathit{done}`$ and $`V(x, q) - V(x', q') = \mathit{done}' - \mathit{done} = 1 \ge f`$. The example witness is $`x = (1, 0)`$, $`x' = (2, 1)`$.
 
-**Remark Z8.1 (One step is not the obligation).** The paper's obligation is universal: for all $y$, the premise implies the conclusion, and the paper discharges it with a Farkas witness, Section [Project 5](05-farkas-witnesses-for-a-joystick-program.md). Relation (8.1) is one point of that universal statement, the natural object for a device that commits to its transitions one at a time; a circuit for the Farkas form is the same arithmetic, a linear combination that must vanish plus range checks, with the multipliers $\lambda, \mu$ as the witness, and the three chapters name it as the next step rather than printing a second circuit.
+**Remark Z8.1 (One step is not the obligation).** The paper's obligation is universal: for all $`y`$, the premise implies the conclusion, and the paper discharges it with a Farkas witness, Section [Project 5](05-farkas-witnesses-for-a-joystick-program.md). Relation (8.1) is one point of that universal statement, the natural object for a device that commits to its transitions one at a time; a circuit for the Farkas form is the same arithmetic, a linear combination that must vanish plus range checks, with the multipliers $`\lambda, \mu`$ as the witness, and the three chapters name it as the next step rather than printing a second circuit.
 
 ## The mathematics
 
-Let $\mathbb{F}$ be the scalar field of BN254, of prime order $p$ with $p > 2^{253}$.
+Let $`\mathbb{F}`$ be the scalar field of BN254, of prime order $`p`$ with $`p > 2^{253}`$.
 
-**Definition Z8.2 (Rank-1 constraint system).** An R1CS over $\mathbb{F}$ with $m$ constraints and $n$ variables is a triple of matrices $A, B, C \in \mathbb{F}^{m \times (n + 1)}$. A vector $z = (1, z_1, \ldots, z_n) \in \mathbb{F}^{n + 1}$ whose first entry is the constant $1$ *satisfies* the system if
+**Definition Z8.2 (Rank-1 constraint system).** An R1CS over $`\mathbb{F}`$ with $`m`$ constraints and $`n`$ variables is a triple of matrices $`A, B, C \in \mathbb{F}^{m \times (n + 1)}`$. A vector $`z = (1, z_1, \ldots, z_n) \in \mathbb{F}^{n + 1}`$ whose first entry is the constant $`1`$ *satisfies* the system if
 
 $$
 (A z) \circ (B z) = C z, \tag{8.3}
 $$
 
-where $\circ$ is the entrywise product, that is, for every row $q \in \lbrace 1, \ldots, m\rbrace$, $\big(\sum_i A_{q,i} z_i\big)\big(\sum_i B_{q,i} z_i\big) = \sum_i C_{q,i} z_i$. The entries of $z$ split into the public statement $u$ and the private witness $w$; the relation of the system is $\lbrace (w ; u) : z = (1, u, w) \text{ satisfies } (\text{8.3})\rbrace$ \[[3](#references)\].
+where $`\circ`$ is the entrywise product, that is, for every row $`q \in \lbrace 1, \ldots, m\rbrace`$, $`\big(\sum_i A_{q,i} z_i\big)\big(\sum_i B_{q,i} z_i\big) = \sum_i C_{q,i} z_i`$. The entries of $`z`$ split into the public statement $`u`$ and the private witness $`w`$; the relation of the system is $`\lbrace (w ; u) : z = (1, u, w) \text{ satisfies } (\text{8.3})\rbrace`$ \[[3](#references)\].
 
-**Definition Z8.3 (Quadratic arithmetic program).** Fix $m$ distinct points $r_1, \ldots, r_m \in \mathbb{F}$ and the target polynomial $Z(X) = \prod_{q = 1}^{m} (X - r_q)$. For each column $i \in \lbrace 0, \ldots, n\rbrace$ let $A_i(X), B_i(X), C_i(X) \in \mathbb{F}[X]$ be the unique polynomials of degree less than $m$ with $A_i(r_q) = A_{q,i}$, $B_i(r_q) = B_{q,i}$, $C_i(r_q) = C_{q,i}$ for all $q$. The QAP of the R1CS is the tuple $(Z, \lbrace A_i\rbrace , \lbrace B_i\rbrace , \lbrace C_i\rbrace )$ \[[4](#references)\].
+**Definition Z8.3 (Quadratic arithmetic program).** Fix $`m`$ distinct points $`r_1, \ldots, r_m \in \mathbb{F}`$ and the target polynomial $`Z(X) = \prod_{q = 1}^{m} (X - r_q)`$. For each column $`i \in \lbrace 0, \ldots, n\rbrace`$ let $`A_i(X), B_i(X), C_i(X) \in \mathbb{F}[X]`$ be the unique polynomials of degree less than $`m`$ with $`A_i(r_q) = A_{q,i}`$, $`B_i(r_q) = B_{q,i}`$, $`C_i(r_q) = C_{q,i}`$ for all $`q`$. The QAP of the R1CS is the tuple $`(Z, \lbrace A_i\rbrace , \lbrace B_i\rbrace , \lbrace C_i\rbrace )`$ \[[4](#references)\].
 
 The polynomials exist and are unique by Lagrange interpolation: with the basis
 
@@ -85,40 +85,40 @@ L_q(X) = \prod_{l \ne q} \frac{X - r_l}{r_q - r_l}, \qquad L_q(r_{q'}) =
   \begin{cases} 1 & q' = q \cr  0 & q' \ne q, \end{cases} \tag{8.4}
 $$
 
-$A_i(X) = \sum_q A_{q,i} L_q(X)$ has degree less than $m$ and the required values, and two polynomials of degree less than $m$ that agree on $m$ points differ by a polynomial of degree less than $m$ with $m$ roots, which is zero.
+$`A_i(X) = \sum_q A_{q,i} L_q(X)`$ has degree less than $`m`$ and the required values, and two polynomials of degree less than $`m`$ that agree on $`m`$ points differ by a polynomial of degree less than $`m`$ with $`m`$ roots, which is zero.
 
-**Theorem Z8.4 (Satisfiability is divisibility).** Let $z \in \mathbb{F}^{n+1}$ with $z_0 = 1$ and define
+**Theorem Z8.4 (Satisfiability is divisibility).** Let $`z \in \mathbb{F}^{n+1}`$ with $`z_0 = 1`$ and define
 
 $$
 P_z(X) = \Big(\sum_{i=0}^{n} z_i A_i(X)\Big)\Big(\sum_{i=0}^{n} z_i B_i(X)\Big)
          - \sum_{i=0}^{n} z_i C_i(X). \tag{8.5}
 $$
 
-Then $z$ satisfies the R1CS if and only if $Z(X)$ divides $P_z(X)$ in $\mathbb{F}[X]$, that is, if and only if there is $H(X) \in \mathbb{F}[X]$ with $P_z(X) = H(X) Z(X)$.
+Then $`z`$ satisfies the R1CS if and only if $`Z(X)`$ divides $`P_z(X)`$ in $`\mathbb{F}[X]`$, that is, if and only if there is $`H(X) \in \mathbb{F}[X]`$ with $`P_z(X) = H(X) Z(X)`$.
 
-*Proof.* First evaluate $P_z$ at a point $r_q$. By the interpolation property, $\sum_i z_i A_i(r_q) = \sum_i z_i A_{q,i} = (Az)_q$, and likewise $\sum_i z_i B_i(r_q) = (Bz)_q$ and $\sum_i z_i C_i(r_q) = (Cz)_q$, so
+*Proof.* First evaluate $`P_z`$ at a point $`r_q`$. By the interpolation property, $`\sum_i z_i A_i(r_q) = \sum_i z_i A_{q,i} = (Az)_q`$, and likewise $`\sum_i z_i B_i(r_q) = (Bz)_q`$ and $`\sum_i z_i C_i(r_q) = (Cz)_q`$, so
 
 $$
 P_z(r_q) = (Az)_q (Bz)_q - (Cz)_q \qquad \text{for every } q \in \lbrace 1, \ldots, m\rbrace . \tag{8.6}
 $$
 
-($\Rightarrow$) Suppose $z$ satisfies the system. Then by (8.3) the right-hand side of (8.6) is $0$ for every $q$, so each $r_q$ is a root of $P_z$. By the factor theorem, $(X - r_1)$ divides $P_z$: write $P_z = (X - r_1) P^{(1)}$. Evaluating at $r_2 \ne r_1$ gives $0 = (r_2 - r_1) P^{(1)}(r_2)$, and since $r_2 - r_1 \ne 0$ in a field, $P^{(1)}(r_2) = 0$, so $(X - r_2)$ divides $P^{(1)}$ and $P_z = (X - r_1)(X - r_2) P^{(2)}$. Repeating the step for $r_3, \ldots, r_m$, each time using that the remaining points are distinct from the ones already divided out, gives $P_z = Z(X) \thinspace P^{(m)}$ with $H = P^{(m)} \in \mathbb{F}[X]$.
+($`\Rightarrow`$) Suppose $`z`$ satisfies the system. Then by (8.3) the right-hand side of (8.6) is $`0`$ for every $`q`$, so each $`r_q`$ is a root of $`P_z`$. By the factor theorem, $`(X - r_1)`$ divides $`P_z`$: write $`P_z = (X - r_1) P^{(1)}`$. Evaluating at $`r_2 \ne r_1`$ gives $`0 = (r_2 - r_1) P^{(1)}(r_2)`$, and since $`r_2 - r_1 \ne 0`$ in a field, $`P^{(1)}(r_2) = 0`$, so $`(X - r_2)`$ divides $`P^{(1)}`$ and $`P_z = (X - r_1)(X - r_2) P^{(2)}`$. Repeating the step for $`r_3, \ldots, r_m`$, each time using that the remaining points are distinct from the ones already divided out, gives $`P_z = Z(X) \thinspace P^{(m)}`$ with $`H = P^{(m)} \in \mathbb{F}[X]`$.
 
-($\Leftarrow$) Suppose $P_z = H Z$ for some $H$. Evaluating at $r_q$, $P_z(r_q) = H(r_q) Z(r_q) = H(r_q) \cdot 0 = 0$ because $r_q$ is a root of its own factor $(X - r_q)$ of $Z$. By (8.6), $(Az)_q (Bz)_q - (Cz)_q = 0$ for every $q$, which is (8.3).
+($`\Leftarrow`$) Suppose $`P_z = H Z`$ for some $`H`$. Evaluating at $`r_q`$, $`P_z(r_q) = H(r_q) Z(r_q) = H(r_q) \cdot 0 = 0`$ because $`r_q`$ is a root of its own factor $`(X - r_q)`$ of $`Z`$. By (8.6), $`(Az)_q (Bz)_q - (Cz)_q = 0`$ for every $`q`$, which is (8.3).
 
-The degree of $P_z$ is at most $2(m - 1)$ and that of $Z$ is $m$, so $H$ has degree at most $m - 2$; this is the polynomial the prover commits to. &#9632;
+The degree of $`P_z`$ is at most $`2(m - 1)`$ and that of $`Z`$ is $`m`$, so $`H`$ has degree at most $`m - 2`$; this is the polynomial the prover commits to. &#9632;
 
-**Lemma Z8.5 (Comparison by bit decomposition).** Let $k \ge 1$ with $2^{k+1} < p$, and let $a, b \in \mathbb{Z}$ with $|b - a| < 2^k$. Then $a \le b$ as integers if and only if the residue $(b - a) \bmod p$ lies in $\lbrace 0, 1, \ldots, 2^k - 1\rbrace$, that is, if and only if it has a $k$-bit binary decomposition $(b - a) \bmod p = \sum_{t=0}^{k-1} \beta_t 2^t$ with every $\beta_t \in \lbrace 0, 1\rbrace$.
+**Lemma Z8.5 (Comparison by bit decomposition).** Let $`k \ge 1`$ with $`2^{k+1} < p`$, and let $`a, b \in \mathbb{Z}`$ with $`|b - a| < 2^k`$. Then $`a \le b`$ as integers if and only if the residue $`(b - a) \bmod p`$ lies in $`\lbrace 0, 1, \ldots, 2^k - 1\rbrace`$, that is, if and only if it has a $`k`$-bit binary decomposition $`(b - a) \bmod p = \sum_{t=0}^{k-1} \beta_t 2^t`$ with every $`\beta_t \in \lbrace 0, 1\rbrace`$.
 
-*Proof.* ($\Rightarrow$) If $a \le b$ then $0 \le b - a < 2^k < p$, so $b - a$ is its own residue modulo $p$ and lies in $[0, 2^k)$; its binary digits are the $\beta_t$.
+*Proof.* ($`\Rightarrow`$) If $`a \le b`$ then $`0 \le b - a < 2^k < p`$, so $`b - a`$ is its own residue modulo $`p`$ and lies in $`[0, 2^k)`$; its binary digits are the $`\beta_t`$.
 
-($\Leftarrow$) Suppose $(b - a) \bmod p \in [0, 2^k)$ and, for contradiction, $b < a$. Then $-2^k < b - a < 0$, so the residue is $p + (b - a) > p - 2^k$. From $2^{k+1} < p$ we get $p - 2^k > 2^k$, so the residue exceeds $2^k$, which contradicts the assumption. Hence $a \le b$.
+($`\Leftarrow`$) Suppose $`(b - a) \bmod p \in [0, 2^k)`$ and, for contradiction, $`b < a`$. Then $`-2^k < b - a < 0`$, so the residue is $`p + (b - a) > p - 2^k`$. From $`2^{k+1} < p`$ we get $`p - 2^k > 2^k`$, so the residue exceeds $`2^k`$, which contradicts the assumption. Hence $`a \le b`$.
 
-The decomposition is what `Num2Bits`$(k)$ constrains: $k$ signals $\beta_t$ with $\beta_t(\beta_t - 1) = 0$ and one linear equation $\mathit{in} = \sum_t \beta_t 2^t$, that is, $k + 1$ constraints of the form (8.3). &#9632;
+The decomposition is what `Num2Bits`$`(k)`$ constrains: $`k`$ signals $`\beta_t`$ with $`\beta_t(\beta_t - 1) = 0`$ and one linear equation $`\mathit{in} = \sum_t \beta_t 2^t`$, that is, $`k + 1`$ constraints of the form (8.3). &#9632;
 
-The circuit applies the lemma three times with different $k$: every entry $e$ of the witness is checked as $e + 2^{15} \in [0, 2^{16})$, which is exactly $e \in I$ ($k = 16$); each row $A_{i,r} \cdot y \le b_{i,r}$ is checked with $k = 34$, since $|b_{i,r} - A_{i,r} \cdot y| \le 2^{15} + 4 \cdot 2^{15} \cdot 2^{15} < 2^{34}$; and the ranking inequality with $k = 34$, since $|(w_j \cdot x + u_j) - (w_k \cdot x' + u_k) - f| \le 2 \cdot 2^{31} + 2 \cdot 2^{15} + 1 < 2^{34}$. In every case $2^{35} < p$ holds with room to spare.
+The circuit applies the lemma three times with different $`k`$: every entry $`e`$ of the witness is checked as $`e + 2^{15} \in [0, 2^{16})`$, which is exactly $`e \in I`$ ($`k = 16`$); each row $`A_{i,r} \cdot y \le b_{i,r}`$ is checked with $`k = 34`$, since $`|b_{i,r} - A_{i,r} \cdot y| \le 2^{15} + 4 \cdot 2^{15} \cdot 2^{15} < 2^{34}`$; and the ranking inequality with $`k = 34`$, since $`|(w_j \cdot x + u_j) - (w_k \cdot x' + u_k) - f| \le 2 \cdot 2^{31} + 2 \cdot 2^{15} + 1 < 2^{34}`$. In every case $`2^{35} < p`$ holds with room to spare.
 
-**Remark Z8.6 (The setup and the three elements).** Groth16 \[[2](#references)\] evaluates the QAP at a secret point $\tau$ inside the exponent: the setup publishes $g_1^{\tau^t}$, $g_2^{\tau^t}$ and the circuit-specific terms $g_1^{(\beta A_i(\tau) + \alpha B_i(\tau) + C_i(\tau))/\delta}$ for the witness columns and the same with $\gamma$ for the public columns, and then $\tau, \alpha, \beta, \gamma, \delta$ must be forgotten. The proof is $\pi = (A, B, C) \in \mathbb{G}_1 \times \mathbb{G}_2 \times \mathbb{G}_1$ with $A = g_1^{\alpha + \sum_i z_i A_i(\tau) + r\delta}$, $B = g_2^{\beta + \sum_i z_i B_i(\tau) + s\delta}$, and $C$ carrying the witness terms, the quotient $H(\tau) Z(\tau)/\delta$ and the blinding $r, s$; the verifier checks
+**Remark Z8.6 (The setup and the three elements).** Groth16 \[[2](#references)\] evaluates the QAP at a secret point $`\tau`$ inside the exponent: the setup publishes $`g_1^{\tau^t}`$, $`g_2^{\tau^t}`$ and the circuit-specific terms $`g_1^{(\beta A_i(\tau) + \alpha B_i(\tau) + C_i(\tau))/\delta}`$ for the witness columns and the same with $`\gamma`$ for the public columns, and then $`\tau, \alpha, \beta, \gamma, \delta`$ must be forgotten. The proof is $`\pi = (A, B, C) \in \mathbb{G}_1 \times \mathbb{G}_2 \times \mathbb{G}_1`$ with $`A = g_1^{\alpha + \sum_i z_i A_i(\tau) + r\delta}`$, $`B = g_2^{\beta + \sum_i z_i B_i(\tau) + s\delta}`$, and $`C`$ carrying the witness terms, the quotient $`H(\tau) Z(\tau)/\delta`$ and the blinding $`r, s`$; the verifier checks
 
 $$
 e(A, B) = e(g_1^{\alpha}, g_2^{\beta}) \cdot
@@ -126,14 +126,14 @@ e(A, B) = e(g_1^{\alpha}, g_2^{\beta}) \cdot
   \thinspace  g_2^{\gamma}\Big) \cdot e(C, g_2^{\delta}), \tag{8.7}
 $$
 
-three pairings after the public-input multi-scalar multiplication, because $e(g_1^{\alpha}, g_2^{\beta})$ is precomputed in the verification key. Theorem **Theorem Z8.4** is what the equation checks in the exponent: the $H(\tau)$ term in $C$ exists only if $Z$ divides $P_z$. On the bench the setup is a one-party ceremony on the build laptop, a software stand-in for the multi-party one a product would need; the chapter draws it dashed and says so. In snarkjs the universal part is the powers-of-tau file (`pot12_final.ptau`, to verify the name for $2^{12}$ constraints) and the circuit-specific part the `zkey`.
+three pairings after the public-input multi-scalar multiplication, because $`e(g_1^{\alpha}, g_2^{\beta})`$ is precomputed in the verification key. Theorem **Theorem Z8.4** is what the equation checks in the exponent: the $`H(\tau)`$ term in $`C`$ exists only if $`Z`$ divides $`P_z`$. On the bench the setup is a one-party ceremony on the build laptop, a software stand-in for the multi-party one a product would need; the chapter draws it dashed and says so. In snarkjs the universal part is the powers-of-tau file (`pot12_final.ptau`, to verify the name for $`2^{12}`$ constraints) and the circuit-specific part the `zkey`.
 
 ## The protocol
 
 | **Prover, build laptop (Node 22, snarkjs)** | **Verifier, Pi 4B (Chromium, snarkjs WebAssembly)** |
 | --- | --- |
-| Once: compile `step.circom` to `step.r1cs` and `step.wasm`; run the powers-of-tau phase for $2^{12}$ and the Groth16 phase 2; export `verification_key.json`. | Once: copy `verification_key.json`, `snarkjs.min.js` and the kiosk page to `~/zk08`; start Chromium in kiosk mode on the page. |
-| Per proof: write the input (the witness and the public signals, negative entries reduced modulo $p$); `groth16.fullProve` computes the witness in WebAssembly and the proof. | Per proof: fetch `proof.json` and `public.json`; call `groth16.verify` with the key; time it with `performance.now()`. |
+| Once: compile `step.circom` to `step.r1cs` and `step.wasm`; run the powers-of-tau phase for $`2^{12}`$ and the Groth16 phase 2; export `verification_key.json`. | Once: copy `verification_key.json`, `snarkjs.min.js` and the kiosk page to `~/zk08`; start Chromium in kiosk mode on the page. |
+| Per proof: write the input (the witness and the public signals, negative entries reduced modulo $`p`$); `groth16.fullProve` computes the witness in WebAssembly and the proof. | Per proof: fetch `proof.json` and `public.json`; call `groth16.verify` with the key; time it with `performance.now()`. |
 | Copy `proof.json` and `public.json` to the Pi. | Show accept or reject on the touchscreen in a colour and a word; a touch repeats the check 64 times and shows the median. |
 
 ## The code
@@ -195,7 +195,7 @@ template Step(m) {
 component main {public [wj, uj, wk, uk, f]} = Step(5);
 ```
 
-The prover script on the build laptop and the verifier page on the Pi share one module; `fe` reduces a signed integer into the field, which is how a negative entry of $A_i$ or $b_i$ is handed to the witness calculator.
+The prover script on the build laptop and the verifier page on the Pi share one module; `fe` reduces a signed integer into the field, which is how a negative entry of $`A_i`$ or $`b_i`$ is handed to the witness calculator.
 
 ```javascript
 // zk08.mjs: prove on the build laptop (node), verify in the kiosk page (snarkjs.min.js, wasm)
@@ -337,9 +337,9 @@ stateDiagram-v2
 
 | **Quantity** | **Value** | **Status** | **Instrument** |
 | --- | --- | --- | --- |
-| constraints of `Step(5)` | 727 | computed: $29 \cdot 17 + 5 \cdot (4 + 35) + 4 + 35$ | none; to confirm with `snarkjs r1cs info` |
-| proof size | 128 bytes | computed: $2 \cdot 32 + 64$ for BN254 compressed $\mathbb{G}_1, \mathbb{G}_2$ | none; `proof.json` is larger because it is decimal text |
-| public signals | 7 field elements | computed: $2 + 1 + 2 + 1 + 1$ | none |
+| constraints of `Step(5)` | 727 | computed: $`29 \cdot 17 + 5 \cdot (4 + 35) + 4 + 35`$ | none; to confirm with `snarkjs r1cs info` |
+| proof size | 128 bytes | computed: $`2 \cdot 32 + 64`$ for BN254 compressed $`\mathbb{G}_1, \mathbb{G}_2`$ | none; `proof.json` is larger because it is decimal text |
+| public signals | 7 field elements | computed: $`2 + 1 + 2 + 1 + 1`$ | none |
 | pairings per verification | 3 | computed from (8.7) | none |
 | ceremony time, build laptop | not measured |  | `time` around the two snarkjs phases |
 | prove time, build laptop | not measured |  | `performance.now()` around `fullProve`, 64 repeats |
@@ -360,23 +360,23 @@ For scale, the paper's own figures are for its tailored protocols and not for a 
 
 **Step 5.** On the Pi, touch to run the 64 repeats; read the median from the screen and from the console line; read the throttle register again.
 
-**Step 6.** On the build laptop, change one public signal in a copy of `public.json`, copy it to the Pi, and confirm reject on the screen; then change the witness to $x' = (2, 0)$ and confirm that `fullProve` fails at witness generation.
+**Step 6.** On the build laptop, change one public signal in a copy of `public.json`, copy it to the Pi, and confirm reject on the screen; then change the witness to $`x' = (2, 0)`$ and confirm that `fullProve` fails at witness generation.
 
 **Step 7.** Repeat the 64 repeats on a second day; a median that moved by more than 15 percent is withdrawn and both figures are printed.
 
 ## Acceptance test
 
-The chapter passes when the honest proof shows accept on the touchscreen, the proof with one public signal changed shows reject, the witness $x' = (2, 0)$ (no progress of $\mathit{done}$) is refused by the witness calculator with an assertion in `Num2Bits`, the circuit's reported constraint count is within 10 of the computed 727, the median `verify_ms` over 64 repeats has a median absolute deviation under 5 percent, and the throttle register reads 0x0 on both reads. It fails if any of those does not hold, or if the page is served from the build laptop rather than from the Pi, because then the WebAssembly might be fetched but the verifier would still run on the Pi while the measurement claims otherwise in the console line.
+The chapter passes when the honest proof shows accept on the touchscreen, the proof with one public signal changed shows reject, the witness $`x' = (2, 0)`$ (no progress of $`\mathit{done}`$) is refused by the witness calculator with an assertion in `Num2Bits`, the circuit's reported constraint count is within 10 of the computed 727, the median `verify_ms` over 64 repeats has a median absolute deviation under 5 percent, and the throttle register reads 0x0 on both reads. It fails if any of those does not hold, or if the page is served from the build laptop rather than from the Pi, because then the WebAssembly might be fetched but the verifier would still run on the Pi while the measurement claims otherwise in the console line.
 
 ## Variants
 
-**A distance in range rather than a ranking step.** The circuit proves that the squared Euclidean distance between a live embedding and a registered one lies inside a public bound, which is the brief's e-exam kiosk, instead of proving that a ranking function did not increase \[[7](#references)\]. The Pi 4B, the touchscreen and the keyboard stay, and so do Groth16, circom and snarkjs; what changes is the relation and with it the circuit, which becomes 128 squared differences and one comparison in place of five guarded-command rows and one ranking inequality \[[5](#references)\]. For a 128-dimensional embedding with signed 16-bit entries the squared distance is at most $128 \cdot 2^{32} = 2^{39}$, so the comparison needs $k = 40$ bits and the circuit counts $256 \cdot 17 + 128 + 41 = 4521$ constraints against this chapter's 727, a factor of 6.2 (both computed). That is the cost of the swap at the circuit level only: the per-entry Pedersen opening the brief commits the registered template under is not counted here and would be the larger term, so 4521 is a floor and is written as one. Choose it when the statement is the proximity of two vectors rather than the progress of a machine, since a ranking argument has nothing to say about a distance. No camera is on the bench, so the live embedding is replayed from a logged file and drawn dashed, and what the absence costs is stated plainly: nothing is authenticated here, only compared. The brief then submits the exam answers to a ledger, and nothing in this volume goes outward, so the verdict stops at the touchscreen the chapter already drives.
+**A distance in range rather than a ranking step.** The circuit proves that the squared Euclidean distance between a live embedding and a registered one lies inside a public bound, which is the brief's e-exam kiosk, instead of proving that a ranking function did not increase \[[7](#references)\]. The Pi 4B, the touchscreen and the keyboard stay, and so do Groth16, circom and snarkjs; what changes is the relation and with it the circuit, which becomes 128 squared differences and one comparison in place of five guarded-command rows and one ranking inequality \[[5](#references)\]. For a 128-dimensional embedding with signed 16-bit entries the squared distance is at most $`128 \cdot 2^{32} = 2^{39}`$, so the comparison needs $`k = 40`$ bits and the circuit counts $`256 \cdot 17 + 128 + 41 = 4521`$ constraints against this chapter's 727, a factor of 6.2 (both computed). That is the cost of the swap at the circuit level only: the per-entry Pedersen opening the brief commits the registered template under is not counted here and would be the larger term, so 4521 is a floor and is written as one. Choose it when the statement is the proximity of two vectors rather than the progress of a machine, since a ranking argument has nothing to say about a distance. No camera is on the bench, so the live embedding is replayed from a logged file and drawn dashed, and what the absence costs is stated plainly: nothing is authenticated here, only compared. The brief then submits the exam answers to a ledger, and nothing in this volume goes outward, so the verdict stops at the touchscreen the chapter already drives.
 
 ## Pitfalls
 
 - A negative integer written as `-1` in the input JSON reaches the witness calculator as a JavaScript number; `fe` reduces it into the field first so that the lemma's residue is the one the circuit sees.
 - A dot product written as one expression is refused by circom as non-quadratic; each product gets its own signal, which is why `Step(5)` has 24 product signals.
-- The range checks are the soundness of the comparison: without the $k = 16$ checks on the entries, a witness could use $A_i$ entries near $p$ and make every row hold modulo $p$ while failing over the integers; Lemma **Lemma Z8.5** needs its hypothesis.
+- The range checks are the soundness of the comparison: without the $`k = 16`$ checks on the entries, a witness could use $`A_i`$ entries near $`p`$ and make every row hold modulo $`p`$ while failing over the integers; Lemma **Lemma Z8.5** needs its hypothesis.
 - The one-party ceremony is a stand-in; a proof system whose toxic waste is held by the prover proves nothing to anyone else. The chapter draws the artefacts dashed for that reason.
 - Chromium's `performance.now()` is coarsened on purpose as a timing side channel defence; a single verification is therefore timed over 64 repeats and reported as a median, never as one reading.
 - The official display's touch needs the KMS overlay on trixie; if the panel lights but touch is dead, the `config.txt` overlay is the first check, not the ribbon.

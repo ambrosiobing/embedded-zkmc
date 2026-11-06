@@ -6,7 +6,7 @@
 > [!IMPORTANT]
 > **The question, instanced**
 >
-> What can a verifier learn from a device without the device revealing itself, and what does it cost on this board? This is the volume's demonstration. A time-of-flight sensor at a doorway counts crossings; the count $n$ is the secret of the room. The device commits to $n$ and proves, with a Bulletproofs range proof, that $n$ lies below the limit of 16 without saying whether it was 3 or 15. A verifier on the same board checks the proof, lights a green or a red LED, writes the verdict to the LCD, and lets a small language model phrase one sentence it cannot change. The cost is a proof of a few hundred bytes and two scalar multiplications per bit, priced here by count and by the price list of [Project 1](01-the-price-list.md).
+> What can a verifier learn from a device without the device revealing itself, and what does it cost on this board? This is the volume's demonstration. A time-of-flight sensor at a doorway counts crossings; the count $`n`$ is the secret of the room. The device commits to $`n`$ and proves, with a Bulletproofs range proof, that $`n`$ lies below the limit of 16 without saying whether it was 3 or 15. A verifier on the same board checks the proof, lights a green or a red LED, writes the verdict to the LCD, and lets a small language model phrase one sentence it cannot change. The cost is a proof of a few hundred bytes and two scalar multiplications per bit, priced here by count and by the price list of [Project 1](01-the-price-list.md).
 
 > **Key facts**
 >
@@ -15,8 +15,8 @@
 > - **Interface:** I2C at 0x29 on header pins 1, 3, 5, 6; the LCD's ili9486 on SPI0 CE0 and its ads7846 touch on CE1, its carrier covering header pins 27 to 40; LEDs on BCM 17, 27, 22 at header pins 11, 13, 15 with ground on pin 9; the model over HTTP as in [Project 16](16-the-model-proposes-a-ranking-function-the-certifier.md)
 > - **Language and library:** Rust with `bulletproofs` 5.0.0 \[[7](#references)\], `curve25519-dalek` at the version `bulletproofs` 5.0.0 depends on (to verify against 5.0.0 \[[8](#references)\]), `merlin` for the transcript, `rppal` (version to verify) for I2C and GPIO, `embedded-graphics` for the LCD frame (to verify)
 > - **Primitive:** the Bulletproofs range proof \[[4](#references)\] on the inner-product argument \[[5](#references)\], the paper's `zkrp` of Figure 4 \[[1](#references)\]
-> - **Secret:** the count $n$ and the blinding $r \in \mathbb{Z}_p$
-> - **Public:** $c = g^n h^r$, the bound 16, the proof bytes, the verdict
+> - **Secret:** the count $`n`$ and the blinding $`r \in \mathbb{Z}_p`$
+> - **Public:** $`c = g^n h^r`$, the bound 16, the proof bytes, the verdict
 > - **Model:** SmolLM2-360M or LFM3-1.7B \[[11](#references), [10](#references)\] writes the one-sentence explanation of the verdict under a grammar whose verdict literal the verifier fixed; the model never decides
 > - **Acceptance:** the model id register reads 0xEBAA; ten runs with staged crossings of 0, 5, 15 and 16 produce accept, accept, accept, reject with the matching LED; the proof bytes equal the computed count; prove and verify times on the Pi 4B with a repeat spread under 5 percent over 64 repeats and `vcgencmd get_throttled` at 0x0 before and after
 > - **Difficulty:** 4 of 5
@@ -24,7 +24,7 @@
 
 ## Pitch
 
-Every earlier chapter proves one piece; this one puts a piece in front of a person. The secret is a number that a building manager wants to keep private (how many people are in the room) and that a safety rule wants bounded (no more than 15). A Pedersen commitment hides the number by Theorem thm:z01\_hiding and binds the device to it by Theorem thm:z01\_binding; a range proof shows that the committed number lies in $[0, 2^m)$ without opening the commitment, and the paper uses exactly this primitive for the bound checks of its Equation 25 \[[1](#references)\]. The chapter proves the lemma that turns "$n$ is in range" into three vector equations over the bits of $n$, and the theorem that turns those three equations into one inner product whose proof has $2 \log_2 m + 9$ elements, and then counts the bytes: 480 for one 8-bit proof, 544 for one 16-bit proof, 672 for one 64-bit proof, all computed from the count, none measured. The limit 16 is not a bit size the crate accepts, so the device proves two 8-bit statements, about $n$ and about $15 - n$, whose commitments the verifier ties together by the homomorphism; the corollary says why that suffices. The sentence on the LCD comes from a model that is handed the verdict as a literal in its grammar and can only choose the phrasing; Theorem thm:z16\_independent is the reason that is safe.
+Every earlier chapter proves one piece; this one puts a piece in front of a person. The secret is a number that a building manager wants to keep private (how many people are in the room) and that a safety rule wants bounded (no more than 15). A Pedersen commitment hides the number by Theorem thm:z01\_hiding and binds the device to it by Theorem thm:z01\_binding; a range proof shows that the committed number lies in $`[0, 2^m)`$ without opening the commitment, and the paper uses exactly this primitive for the bound checks of its Equation 25 \[[1](#references)\]. The chapter proves the lemma that turns "$`n`$ is in range" into three vector equations over the bits of $`n`$, and the theorem that turns those three equations into one inner product whose proof has $`2 \log_2 m + 9`$ elements, and then counts the bytes: 480 for one 8-bit proof, 544 for one 16-bit proof, 672 for one 64-bit proof, all computed from the count, none measured. The limit 16 is not a bit size the crate accepts, so the device proves two 8-bit statements, about $`n`$ and about $`15 - n`$, whose commitments the verifier ties together by the homomorphism; the corollary says why that suffices. The sentence on the LCD comes from a model that is handed the verdict as a literal in its grammar and can only choose the phrasing; Theorem thm:z16\_independent is the reason that is safe.
 
 ## Parts and interface
 
@@ -41,29 +41,29 @@ Every earlier chapter proves one piece; this one puts a piece in front of a pers
 
 ## The secret, the statement and the relation
 
-The witness is $(n, r)$ and the statement is $(c, m)$:
+The witness is $`(n, r)`$ and the statement is $`(c, m)`$:
 
 $$
 \mathcal{R}_{\mathrm{range}} = \lbrace \thinspace  ((n, r), (c, m)) \thickspace :\thickspace  n \in \mathbb{Z},\thickspace  r \in \mathbb{Z}_p,\thickspace 
   c = g^n h^r \in \mathbb{G},\thickspace  0 \le n < 2^m \thinspace \rbrace , \tag{20.1}
 $$
 
-over ristretto255 with $g, h$ the generators of the crate's `PedersenGens` \[[7](#references)\]. The paper's `zkrp` relation, its $\mathcal{R}_{\mathrm{zkrp}}$ of Section 5.1, is the same relation taken over every entry of a committed matrix with the bound $M$ in place of $2^m$ \[[1](#references)\]; here there is one entry and the bound is the room's limit. The limit itself, $B = 16$, is not of the form $2^m$ for a bit size the crate accepts, so the statement the device actually proves is the conjunction
+over ristretto255 with $`g, h`$ the generators of the crate's `PedersenGens` \[[7](#references)\]. The paper's `zkrp` relation, its $`\mathcal{R}_{\mathrm{zkrp}}`$ of Section 5.1, is the same relation taken over every entry of a committed matrix with the bound $`M`$ in place of $`2^m`$ \[[1](#references)\]; here there is one entry and the bound is the room's limit. The limit itself, $`B = 16`$, is not of the form $`2^m`$ for a bit size the crate accepts, so the statement the device actually proves is the conjunction
 
 $$
 ((n, r), (c, 8)) \in \mathcal{R}_{\mathrm{range}} \thickspace \wedge\thickspace 
   ((B - 1 - n, -r), (c', 8)) \in \mathcal{R}_{\mathrm{range}} \thickspace \wedge\thickspace  c \cdot c' = g^{B-1}, \tag{20.2}
 $$
 
-and Corollary **Corollary Z20.4** says this is equivalent to $0 \le n \le B - 1$.
+and Corollary **Corollary Z20.4** says this is equivalent to $`0 \le n \le B - 1`$.
 
 ## The mathematics
 
-Throughout, $m$ is a power of two, $p$ is the prime order of ristretto255 (about $2^{252}$, so $2^m < p$ for every $m$ used), vectors are in $\mathbb{Z}_p^m$, $\mathbf{1}^m = (1, \ldots, 1)$, $\mathbf{2}^m = (1, 2, 4, \ldots, 2^{m-1})$, $\mathbf{y}^m = (1, y, \ldots, y^{m-1})$, $\circ$ is the entrywise product and $\langle \cdot, \cdot \rangle$ the inner product.
+Throughout, $`m`$ is a power of two, $`p`$ is the prime order of ristretto255 (about $`2^{252}`$, so $`2^m < p`$ for every $`m`$ used), vectors are in $`\mathbb{Z}_p^m`$, $`\mathbf{1}^m = (1, \ldots, 1)`$, $`\mathbf{2}^m = (1, 2, 4, \ldots, 2^{m-1})`$, $`\mathbf{y}^m = (1, y, \ldots, y^{m-1})`$, $`\circ`$ is the entrywise product and $`\langle \cdot, \cdot \rangle`$ the inner product.
 
-**Definition Z20.1 (Range relation and bit vectors).** For $n \in \mathbb{Z}_p$ and $m \ge 1$, a *bit decomposition* of $n$ is a vector $\mathbf{a}_L \in \lbrace 0, 1\rbrace ^m \subset \mathbb{Z}_p^m$ with $\langle \mathbf{a}_L, \mathbf{2}^m \rangle = n$. The range relation is (20.1); a witness for it is $(n, r)$ together with any bit decomposition of $n$.
+**Definition Z20.1 (Range relation and bit vectors).** For $`n \in \mathbb{Z}_p`$ and $`m \ge 1`$, a *bit decomposition* of $`n`$ is a vector $`\mathbf{a}_L \in \lbrace 0, 1\rbrace ^m \subset \mathbb{Z}_p^m`$ with $`\langle \mathbf{a}_L, \mathbf{2}^m \rangle = n`$. The range relation is (20.1); a witness for it is $`(n, r)`$ together with any bit decomposition of $`n`$.
 
-**Lemma Z20.2 (Bit decomposition in both directions).** Let $\mathbf{a}_L, \mathbf{a}_R \in \mathbb{Z}_p^m$ and $n \in \mathbb{Z}_p$. The three conditions
+**Lemma Z20.2 (Bit decomposition in both directions).** Let $`\mathbf{a}_L, \mathbf{a}_R \in \mathbb{Z}_p^m`$ and $`n \in \mathbb{Z}_p`$. The three conditions
 
 $$
 \mathbf{a}_L \circ \mathbf{a}_R = \mathbf{0}^m, \qquad
@@ -71,13 +71,13 @@ $$
   \langle \mathbf{a}_L, \mathbf{2}^m \rangle = n \tag{20.3}
 $$
 
-hold if and only if $\mathbf{a}_L$ is the binary representation of an integer $n$ with $0 \le n < 2^m$ (and then $\mathbf{a}_R = \mathbf{a}_L - \mathbf{1}^m$).
+hold if and only if $`\mathbf{a}_L`$ is the binary representation of an integer $`n`$ with $`0 \le n < 2^m`$ (and then $`\mathbf{a}_R = \mathbf{a}_L - \mathbf{1}^m`$).
 
-*Proof.* ($\Rightarrow$) From the second condition, $a_{R,i} = a_{L,i} - 1$ for every $i$. Substituting into the first, $a_{L,i} (a_{L,i} - 1) = 0$ in $\mathbb{Z}_p$ for every $i$. Since $p$ is prime, $\mathbb{Z}_p$ is a field and has no zero divisors, so $a_{L,i} = 0$ or $a_{L,i} = 1$. Hence $\mathbf{a}_L \in \lbrace 0, 1\rbrace ^m$, and the third condition reads $n = \sum_{i=0}^{m-1} a_{L,i} 2^i$ in $\mathbb{Z}_p$. The integer $N = \sum_{i} a_{L,i} 2^i$ satisfies $0 \le N \le \sum_i 2^i = 2^m - 1 < p$, so $N$ is the canonical representative of the residue $n$, and $0 \le n < 2^m$ as an integer. Finally, the binary representation of an integer in $[0, 2^m)$ with $m$ digits is unique (two distinct digit vectors differ first at some position $j$, and the difference of their values is then $\pm 2^j + \sum_{i < j} \epsilon_i 2^i$ with $\epsilon_i \in \lbrace -1, 0, 1\rbrace$, which is non-zero because $\sum_{i<j} 2^i = 2^j - 1 < 2^j$), so $\mathbf{a}_L$ is that representation.
+*Proof.* ($`\Rightarrow`$) From the second condition, $`a_{R,i} = a_{L,i} - 1`$ for every $`i`$. Substituting into the first, $`a_{L,i} (a_{L,i} - 1) = 0`$ in $`\mathbb{Z}_p`$ for every $`i`$. Since $`p`$ is prime, $`\mathbb{Z}_p`$ is a field and has no zero divisors, so $`a_{L,i} = 0`$ or $`a_{L,i} = 1`$. Hence $`\mathbf{a}_L \in \lbrace 0, 1\rbrace ^m`$, and the third condition reads $`n = \sum_{i=0}^{m-1} a_{L,i} 2^i`$ in $`\mathbb{Z}_p`$. The integer $`N = \sum_{i} a_{L,i} 2^i`$ satisfies $`0 \le N \le \sum_i 2^i = 2^m - 1 < p`$, so $`N`$ is the canonical representative of the residue $`n`$, and $`0 \le n < 2^m`$ as an integer. Finally, the binary representation of an integer in $`[0, 2^m)`$ with $`m`$ digits is unique (two distinct digit vectors differ first at some position $`j`$, and the difference of their values is then $`\pm 2^j + \sum_{i < j} \epsilon_i 2^i`$ with $`\epsilon_i \in \lbrace -1, 0, 1\rbrace`$, which is non-zero because $`\sum_{i<j} 2^i = 2^j - 1 < 2^j`$), so $`\mathbf{a}_L`$ is that representation.
 
-($\Leftarrow$) Let $\mathbf{a}_L$ be the binary representation of $n \in [0, 2^m)$ and set $\mathbf{a}_R = \mathbf{a}_L - \mathbf{1}^m$. The second condition holds by construction. For the first, $a_{L,i} \in \lbrace 0, 1\rbrace$ gives $a_{L,i} a_{R,i} = a_{L,i}(a_{L,i} - 1) = 0$ for each $i$. For the third, $\langle \mathbf{a}_L, \mathbf{2}^m \rangle = \sum_i a_{L,i} 2^i = n$ by the definition of the binary representation, and the equation holds in $\mathbb{Z}_p$ because it holds in $\mathbb{Z}$ and $n < p$. &#9632;
+($`\Leftarrow`$) Let $`\mathbf{a}_L`$ be the binary representation of $`n \in [0, 2^m)`$ and set $`\mathbf{a}_R = \mathbf{a}_L - \mathbf{1}^m`$. The second condition holds by construction. For the first, $`a_{L,i} \in \lbrace 0, 1\rbrace`$ gives $`a_{L,i} a_{R,i} = a_{L,i}(a_{L,i} - 1) = 0`$ for each $`i`$. For the third, $`\langle \mathbf{a}_L, \mathbf{2}^m \rangle = \sum_i a_{L,i} 2^i = n`$ by the definition of the binary representation, and the equation holds in $`\mathbb{Z}_p`$ because it holds in $`\mathbb{Z}`$ and $`n < p`$. &#9632;
 
-**Theorem Z20.3 (Structure of the range proof).** Let $m$ be a power of two. (a) For $\mathbf{a}_L, \mathbf{a}_R \in \mathbb{Z}_p^m$ and $n \in \mathbb{Z}_p$, the three conditions (20.3) hold if and only if, for all $y, z \in \mathbb{Z}_p$,
+**Theorem Z20.3 (Structure of the range proof).** Let $`m`$ be a power of two. (a) For $`\mathbf{a}_L, \mathbf{a}_R \in \mathbb{Z}_p^m`$ and $`n \in \mathbb{Z}_p`$, the three conditions (20.3) hold if and only if, for all $`y, z \in \mathbb{Z}_p`$,
 
 $$
 \big\langle \mathbf{a}_L - z \mathbf{1}^m,\thickspace 
@@ -87,7 +87,7 @@ $$
   - z^3 \langle \mathbf{1}^m, \mathbf{2}^m \rangle . \tag{20.4}
 $$
 
-(b) A claim $P = \mathbf{g}^{\mathbf{a}} \mathbf{h}^{\mathbf{b}} u^{\langle \mathbf{a}, \mathbf{b} \rangle}$ about vectors of length $m$ reduces, in one round that sends two group elements $L, R$ and receives a challenge $x$, to a claim of the same shape about vectors of length $m / 2$; after $\log_2 m$ rounds the claim is about scalars $a, b$, which are sent. (c) Hence the range proof for $m$ bits consists of $2 \log_2 m + 4$ group elements ($A$, $S$, $T_1$, $T_2$, and $L_j, R_j$ for $j = 1, \ldots, \log_2 m$) and $5$ scalars ($t_x$, $\tau_x$, $\mu$, $a$, $b$): $2 \log_2 m + 9$ elements, each $32$ bytes on ristretto255.
+(b) A claim $`P = \mathbf{g}^{\mathbf{a}} \mathbf{h}^{\mathbf{b}} u^{\langle \mathbf{a}, \mathbf{b} \rangle}`$ about vectors of length $`m`$ reduces, in one round that sends two group elements $`L, R`$ and receives a challenge $`x`$, to a claim of the same shape about vectors of length $`m / 2`$; after $`\log_2 m`$ rounds the claim is about scalars $`a, b`$, which are sent. (c) Hence the range proof for $`m`$ bits consists of $`2 \log_2 m + 4`$ group elements ($`A`$, $`S`$, $`T_1`$, $`T_2`$, and $`L_j, R_j`$ for $`j = 1, \ldots, \log_2 m`$) and $`5`$ scalars ($`t_x`$, $`\tau_x`$, $`\mu`$, $`a`$, $`b`$): $`2 \log_2 m + 9`$ elements, each $`32`$ bytes on ristretto255.
 
 *Proof.* (a) Expand the left-hand side of (20.4) by bilinearity of the inner product:
 
@@ -104,7 +104,7 @@ $$
 \end{aligned}
 $$
 
-Two identities hold for every $\mathbf{u}, \mathbf{v}, \mathbf{w}$: $\langle \mathbf{u}, \mathbf{w} \circ \mathbf{v} \rangle = \sum_i u_i w_i v_i = \langle \mathbf{u} \circ \mathbf{v}, \mathbf{w} \rangle$ and $\langle \mathbf{1}, \mathbf{w} \circ \mathbf{v} \rangle = \langle \mathbf{v}, \mathbf{w} \rangle$. Applying them to the first and fourth terms of (20.5) and collecting the $z$ terms,
+Two identities hold for every $`\mathbf{u}, \mathbf{v}, \mathbf{w}`$: $`\langle \mathbf{u}, \mathbf{w} \circ \mathbf{v} \rangle = \sum_i u_i w_i v_i = \langle \mathbf{u} \circ \mathbf{v}, \mathbf{w} \rangle`$ and $`\langle \mathbf{1}, \mathbf{w} \circ \mathbf{v} \rangle = \langle \mathbf{v}, \mathbf{w} \rangle`$. Applying them to the first and fourth terms of (20.5) and collecting the $`z`$ terms,
 
 $$
 \text{LHS} = \langle \mathbf{a}_L \circ \mathbf{a}_R, \mathbf{y}^m \rangle
@@ -113,7 +113,7 @@ $$
   - z^2 \langle \mathbf{1}, \mathbf{y}^m \rangle - z^3 \langle \mathbf{1}, \mathbf{2}^m \rangle . \tag{20.6}
 $$
 
-If the three conditions hold, the first term is $\langle \mathbf{0}, \mathbf{y}^m \rangle = 0$, the second is $z \langle \mathbf{1}, \mathbf{y}^m \rangle$ and the third is $z^2 n$, so the right-hand side of (20.6) is $z^2 n + (z - z^2) \langle \mathbf{1}, \mathbf{y}^m \rangle - z^3 \langle \mathbf{1}, \mathbf{2}^m \rangle = z^2 n + \delta(y, z)$, which is (20.4). Conversely, if (20.4) holds for all $y, z$, subtract $z^2 n + \delta(y, z)$ from (20.6): the polynomial
+If the three conditions hold, the first term is $`\langle \mathbf{0}, \mathbf{y}^m \rangle = 0`$, the second is $`z \langle \mathbf{1}, \mathbf{y}^m \rangle`$ and the third is $`z^2 n`$, so the right-hand side of (20.6) is $`z^2 n + (z - z^2) \langle \mathbf{1}, \mathbf{y}^m \rangle - z^3 \langle \mathbf{1}, \mathbf{2}^m \rangle = z^2 n + \delta(y, z)`$, which is (20.4). Conversely, if (20.4) holds for all $`y, z`$, subtract $`z^2 n + \delta(y, z)`$ from (20.6): the polynomial
 
 $$
 F(y, z) = \sum_{i=0}^{m-1} a_{L,i} a_{R,i} \thinspace  y^i
@@ -121,9 +121,9 @@ F(y, z) = \sum_{i=0}^{m-1} a_{L,i} a_{R,i} \thinspace  y^i
   + z^2 \big( \langle \mathbf{a}_L, \mathbf{2}^m \rangle - n \big)
 $$
 
-vanishes at every point of $\mathbb{Z}_p^2$. Its degree is at most $m - 1 < p$ in $y$ and $2 < p$ in $z$, so by the Schwartz-Zippel lemma \[[6](#references)\] a non-zero $F$ would be non-zero at some point; hence $F$ is the zero polynomial and every coefficient is zero: the $z^2$ coefficient gives the third condition, the $z^1$ coefficients give $a_{L,i} - a_{R,i} = 1$ for every $i$, and the $z^0$ coefficients give $a_{L,i} a_{R,i} = 0$ for every $i$.
+vanishes at every point of $`\mathbb{Z}_p^2`$. Its degree is at most $`m - 1 < p`$ in $`y`$ and $`2 < p`$ in $`z`$, so by the Schwartz-Zippel lemma \[[6](#references)\] a non-zero $`F`$ would be non-zero at some point; hence $`F`$ is the zero polynomial and every coefficient is zero: the $`z^2`$ coefficient gives the third condition, the $`z^1`$ coefficients give $`a_{L,i} - a_{R,i} = 1`$ for every $`i`$, and the $`z^0`$ coefficients give $`a_{L,i} a_{R,i} = 0`$ for every $`i`$.
 
-(b) Write $\mathbf{a} = (\mathbf{a}_1, \mathbf{a}_2)$ for the two halves of length $m / 2$, and likewise $\mathbf{b}$, $\mathbf{g}$, $\mathbf{h}$. The prover sends
+(b) Write $`\mathbf{a} = (\mathbf{a}_1, \mathbf{a}_2)`$ for the two halves of length $`m / 2`$, and likewise $`\mathbf{b}`$, $`\mathbf{g}`$, $`\mathbf{h}`$. The prover sends
 
 $$
 L = \mathbf{g}_2^{\mathbf{a}_1} \mathbf{h}_1^{\mathbf{b}_2}
@@ -132,7 +132,7 @@ L = \mathbf{g}_2^{\mathbf{a}_1} \mathbf{h}_1^{\mathbf{b}_2}
       u^{\langle \mathbf{a}_2, \mathbf{b}_1 \rangle},
 $$
 
-the verifier returns $x \ne 0$, and both sides form $\mathbf{g}' = \mathbf{g}_1^{x^{-1}} \circ \mathbf{g}_2^{x}$, $\mathbf{h}' = \mathbf{h}_1^{x} \circ \mathbf{h}_2^{x^{-1}}$, $P' = L^{x^2} P R^{x^{-2}}$, while the prover forms $\mathbf{a}' = x \mathbf{a}_1 + x^{-1} \mathbf{a}_2$ and $\mathbf{b}' = x^{-1} \mathbf{b}_1 + x \mathbf{b}_2$. We check that $P' = \mathbf{g}'^{\mathbf{a}'} \mathbf{h}'^{\mathbf{b}'} u^{\langle \mathbf{a}', \mathbf{b}' \rangle}$ term by term. First,
+the verifier returns $`x \ne 0`$, and both sides form $`\mathbf{g}' = \mathbf{g}_1^{x^{-1}} \circ \mathbf{g}_2^{x}`$, $`\mathbf{h}' = \mathbf{h}_1^{x} \circ \mathbf{h}_2^{x^{-1}}`$, $`P' = L^{x^2} P R^{x^{-2}}`$, while the prover forms $`\mathbf{a}' = x \mathbf{a}_1 + x^{-1} \mathbf{a}_2`$ and $`\mathbf{b}' = x^{-1} \mathbf{b}_1 + x \mathbf{b}_2`$. We check that $`P' = \mathbf{g}'^{\mathbf{a}'} \mathbf{h}'^{\mathbf{b}'} u^{\langle \mathbf{a}', \mathbf{b}' \rangle}`$ term by term. First,
 
 $$
 \mathbf{g}'^{\mathbf{a}'}
@@ -141,7 +141,7 @@ $$
     \mathbf{g}_2^{x^{2} \mathbf{a}_1} \thinspace  \mathbf{g}_2^{\mathbf{a}_2},
 $$
 
-and in the same way $\mathbf{h}'^{\mathbf{b}'} = \mathbf{h}_1^{\mathbf{b}_1} \thinspace \mathbf{h}_1^{x^{2} \mathbf{b}_2} \thinspace \mathbf{h}_2^{x^{-2} \mathbf{b}_1} \thinspace \mathbf{h}_2^{\mathbf{b}_2}$. Second,
+and in the same way $`\mathbf{h}'^{\mathbf{b}'} = \mathbf{h}_1^{\mathbf{b}_1} \thinspace \mathbf{h}_1^{x^{2} \mathbf{b}_2} \thinspace \mathbf{h}_2^{x^{-2} \mathbf{b}_1} \thinspace \mathbf{h}_2^{\mathbf{b}_2}`$. Second,
 
 $$
 \langle \mathbf{a}', \mathbf{b}' \rangle
@@ -151,22 +151,22 @@ $$
   + x^{-2} \langle \mathbf{a}_2, \mathbf{b}_1 \rangle .
 $$
 
-Third, expanding $L^{x^2} P R^{x^{-2}}$ with $P = \mathbf{g}_1^{\mathbf{a}_1} \mathbf{g}_2^{\mathbf{a}_2} \mathbf{h}_1^{\mathbf{b}_1} \mathbf{h}_2^{\mathbf{b}_2} u^{\langle \mathbf{a}, \mathbf{b} \rangle}$ gives exponent $\mathbf{a}_1 + x^{-2} \mathbf{a}_2$ on $\mathbf{g}_1$, $x^2 \mathbf{a}_1 + \mathbf{a}_2$ on $\mathbf{g}_2$, $\mathbf{b}_1 + x^2 \mathbf{b}_2$ on $\mathbf{h}_1$, $x^{-2} \mathbf{b}_1 + \mathbf{b}_2$ on $\mathbf{h}_2$, and $\langle \mathbf{a}, \mathbf{b} \rangle + x^2 \langle \mathbf{a}_1, \mathbf{b}_2 \rangle + x^{-2} \langle \mathbf{a}_2, \mathbf{b}_1 \rangle$ on $u$; these are exactly the exponents found in the first two steps, so the identity holds and the new claim has the same shape with length $m / 2$ \[[5](#references), [4](#references)\]. By induction on $j$, after $j$ rounds the length is $m / 2^j$, and after $\log_2 m$ rounds it is $1$: the prover sends the scalars $a, b$ and the verifier checks $P' = g'^{a} h'^{b} u^{ab}$ directly.
+Third, expanding $`L^{x^2} P R^{x^{-2}}`$ with $`P = \mathbf{g}_1^{\mathbf{a}_1} \mathbf{g}_2^{\mathbf{a}_2} \mathbf{h}_1^{\mathbf{b}_1} \mathbf{h}_2^{\mathbf{b}_2} u^{\langle \mathbf{a}, \mathbf{b} \rangle}`$ gives exponent $`\mathbf{a}_1 + x^{-2} \mathbf{a}_2`$ on $`\mathbf{g}_1`$, $`x^2 \mathbf{a}_1 + \mathbf{a}_2`$ on $`\mathbf{g}_2`$, $`\mathbf{b}_1 + x^2 \mathbf{b}_2`$ on $`\mathbf{h}_1`$, $`x^{-2} \mathbf{b}_1 + \mathbf{b}_2`$ on $`\mathbf{h}_2`$, and $`\langle \mathbf{a}, \mathbf{b} \rangle + x^2 \langle \mathbf{a}_1, \mathbf{b}_2 \rangle + x^{-2} \langle \mathbf{a}_2, \mathbf{b}_1 \rangle`$ on $`u`$; these are exactly the exponents found in the first two steps, so the identity holds and the new claim has the same shape with length $`m / 2`$ \[[5](#references), [4](#references)\]. By induction on $`j`$, after $`j`$ rounds the length is $`m / 2^j`$, and after $`\log_2 m`$ rounds it is $`1`$: the prover sends the scalars $`a, b`$ and the verifier checks $`P' = g'^{a} h'^{b} u^{ab}`$ directly.
 
-(c) Before the inner-product argument the prover commits to $\mathbf{a}_L, \mathbf{a}_R$ in $A$ and to the blinding vectors in $S$ (two elements), then to the two non-constant coefficients $t_1, t_2$ of $t(x) = \langle \mathbf{l}(x), \mathbf{r}(x) \rangle$ in $T_1, T_2$ (two elements), then sends $t_x = t(x)$, its blinding $\tau_x$ and the blinding $\mu$ of the combined vector commitment (three scalars) \[[4](#references)\]. Part (b) contributes $2 \log_2 m$ group elements and the final $2$ scalars. Adding, $4 + 2 \log_2 m$ group elements and $3 + 2 = 5$ scalars, that is $2 \log_2 m + 9$ elements, and a ristretto255 point and a scalar both encode in $32$ bytes \[[8](#references)\]. &#9632;
+(c) Before the inner-product argument the prover commits to $`\mathbf{a}_L, \mathbf{a}_R`$ in $`A`$ and to the blinding vectors in $`S`$ (two elements), then to the two non-constant coefficients $`t_1, t_2`$ of $`t(x) = \langle \mathbf{l}(x), \mathbf{r}(x) \rangle`$ in $`T_1, T_2`$ (two elements), then sends $`t_x = t(x)`$, its blinding $`\tau_x`$ and the blinding $`\mu`$ of the combined vector commitment (three scalars) \[[4](#references)\]. Part (b) contributes $`2 \log_2 m`$ group elements and the final $`2`$ scalars. Adding, $`4 + 2 \log_2 m`$ group elements and $`3 + 2 = 5`$ scalars, that is $`2 \log_2 m + 9`$ elements, and a ristretto255 point and a scalar both encode in $`32`$ bytes \[[8](#references)\]. &#9632;
 
-**Corollary Z20.4 (The limit 16 from two 8-bit proofs).** Let $B = 16$ and let $c = g^n h^r$ and $c' = g^{n'} h^{r'}$ be commitments with $c \cdot c' = g^{B - 1}$. If both $((n, r), (c, 8))$ and $((n', r'), (c', 8))$ are in $\mathcal{R}_{\mathrm{range}}$, then $0 \le n \le B - 1$ as integers, under the discrete logarithm assumption of Theorem thm:z01\_binding. Conversely, for every integer $0 \le n \le B - 1$ and every $r$, the prover can set $n' = B - 1 - n$ and $r' = -r$ and both memberships hold with $c \cdot c' = g^{B-1}$. The two proofs together are $2 \cdot 15 = 30$ elements, $960$ bytes, plus the $32$ bytes of $c$ ($c'$ is computed by the verifier).
+**Corollary Z20.4 (The limit 16 from two 8-bit proofs).** Let $`B = 16`$ and let $`c = g^n h^r`$ and $`c' = g^{n'} h^{r'}`$ be commitments with $`c \cdot c' = g^{B - 1}`$. If both $`((n, r), (c, 8))`$ and $`((n', r'), (c', 8))`$ are in $`\mathcal{R}_{\mathrm{range}}`$, then $`0 \le n \le B - 1`$ as integers, under the discrete logarithm assumption of Theorem thm:z01\_binding. Conversely, for every integer $`0 \le n \le B - 1`$ and every $`r`$, the prover can set $`n' = B - 1 - n`$ and $`r' = -r`$ and both memberships hold with $`c \cdot c' = g^{B-1}`$. The two proofs together are $`2 \cdot 15 = 30`$ elements, $`960`$ bytes, plus the $`32`$ bytes of $`c`$ ($`c'`$ is computed by the verifier).
 
-*Proof.* From $c \cdot c' = g^{n + n'} h^{r + r'} = g^{B-1} h^{0}$ and Theorem thm:z01\_binding, $n + n' = B - 1$ in $\mathbb{Z}_p$ (an adversary who produced the two openings with $n + n' \ne B - 1$ would have computed $\log_g h$). Both $n$ and $n'$ lie in $[0, 2^8)$ as integers by Lemma **Lemma Z20.2**, so $n + n' \in [0, 2^9 - 2]$ as an integer, and since $2^9 < p$ the equation $n + n' = B - 1$ holds over the integers. Hence $n = B - 1 - n' \le B - 1$, and $n \ge 0$ from its own range. For the converse, $n' = B - 1 - n \in [0, B - 1] \subset [0, 2^8)$ when $n \in [0, B - 1]$, the ranges hold, and $c \cdot c' = g^{n + n'} h^{r - r} = g^{B-1}$. The count is twice the $2 \log_2 8 + 9 = 15$ elements of Theorem **Theorem Z20.3**(c). &#9632;
+*Proof.* From $`c \cdot c' = g^{n + n'} h^{r + r'} = g^{B-1} h^{0}`$ and Theorem thm:z01\_binding, $`n + n' = B - 1`$ in $`\mathbb{Z}_p`$ (an adversary who produced the two openings with $`n + n' \ne B - 1`$ would have computed $`\log_g h`$). Both $`n`$ and $`n'`$ lie in $`[0, 2^8)`$ as integers by Lemma **Lemma Z20.2**, so $`n + n' \in [0, 2^9 - 2]`$ as an integer, and since $`2^9 < p`$ the equation $`n + n' = B - 1`$ holds over the integers. Hence $`n = B - 1 - n' \le B - 1`$, and $`n \ge 0`$ from its own range. For the converse, $`n' = B - 1 - n \in [0, B - 1] \subset [0, 2^8)`$ when $`n \in [0, B - 1]`$, the ranges hold, and $`c \cdot c' = g^{n + n'} h^{r - r} = g^{B-1}`$. The count is twice the $`2 \log_2 8 + 9 = 15`$ elements of Theorem **Theorem Z20.3**(c). &#9632;
 
-**Remark Z20.6.** The computed sizes, each from Theorem **Theorem Z20.3**(c): $m = 8$ gives $15$ elements, $480$ bytes; $m = 16$ gives $17$ elements, $544$ bytes; $m = 32$ gives $19$, $608$ bytes; $m = 64$ gives $21$, $672$ bytes. An aggregated proof of $k$ values of $m$ bits replaces $m$ by $k m$ in the logarithm \[[4](#references)\], so the pair of 8-bit statements in one `prove_multiple` call would be $2 \log_2 16 + 9 = 17$ elements, $544$ bytes, against $960$ for the two single proofs the code below produces. Every one of these is a count, not a measurement.
+**Remark Z20.6.** The computed sizes, each from Theorem **Theorem Z20.3**(c): $`m = 8`$ gives $`15`$ elements, $`480`$ bytes; $`m = 16`$ gives $`17`$ elements, $`544`$ bytes; $`m = 32`$ gives $`19`$, $`608`$ bytes; $`m = 64`$ gives $`21`$, $`672`$ bytes. An aggregated proof of $`k`$ values of $`m`$ bits replaces $`m`$ by $`k m`$ in the logarithm \[[4](#references)\], so the pair of 8-bit statements in one `prove_multiple` call would be $`2 \log_2 16 + 9 = 17`$ elements, $`544`$ bytes, against $`960`$ for the two single proofs the code below produces. Every one of these is a count, not a measurement.
 
 ## The protocol
 
-1. The prover reads the sensor's model id register (0xEBAA expected, to verify), starts continuous ranging, and counts crossings of the near zone for the window; the count is $n$.
-2. The prover draws $r$ uniformly, forms the transcript with a fixed domain label, and calls `prove_single` for $n$ at 8 bits, obtaining $(\pi_n, c)$; then for $n' = 15 - n$ with blinding $-r$, obtaining $(\pi_{n'}, c')$. It lights the blue LED: a commitment exists.
-3. The prover hands $(c, \pi_n, \pi_{n'})$ to the verifier process; $n$ and $r$ stay in the prover.
-4. The verifier computes $c' = g^{15} \cdot c^{-1}$ itself, replays both transcripts, calls `verify_single` twice, and accepts if both succeed and its own $c'$ equals the one the proofs were made for.
+1. The prover reads the sensor's model id register (0xEBAA expected, to verify), starts continuous ranging, and counts crossings of the near zone for the window; the count is $`n`$.
+2. The prover draws $`r`$ uniformly, forms the transcript with a fixed domain label, and calls `prove_single` for $`n`$ at 8 bits, obtaining $`(\pi_n, c)`$; then for $`n' = 15 - n`$ with blinding $`-r`$, obtaining $`(\pi_{n'}, c')`$. It lights the blue LED: a commitment exists.
+3. The prover hands $`(c, \pi_n, \pi_{n'})`$ to the verifier process; $`n`$ and $`r`$ stay in the prover.
+4. The verifier computes $`c' = g^{15} \cdot c^{-1}`$ itself, replays both transcripts, calls `verify_single` twice, and accepts if both succeed and its own $`c'`$ equals the one the proofs were made for.
 5. On accept the green LED is lit, on reject the red; the verdict line goes to the LCD.
 6. The verifier writes the grammar with its verdict literal and asks the model for one sentence; the sentence goes to the LCD under the verdict line.
 
@@ -262,7 +262,7 @@ i2cdetect -y 1
 ./zk20
 ```
 
-A count of 16 or more makes `n2` wrap to a value far above $2^8$; the crate still returns a proof, and that proof fails `verify_single`, so the red LED is the verdict and no panic is needed. That the value is not checked by the prover is the point: the verifier does not trust the prover's code.
+A count of 16 or more makes `n2` wrap to a value far above $`2^8`$; the crate still returns a proof, and that proof fails `verify_single`, so the red LED is the verdict and no panic is needed. That the value is not checked by the prover is the point: the verifier does not trust the prover's code.
 
 ## The model, if any
 
@@ -274,13 +274,13 @@ verdict ::= "stayed under"
 tail    ::= "" | " for the whole window" | " while the sensor watched" | ", as the proof shows"
 ```
 
-On reject the verifier writes `verdict ::= "could not be shown to be under"` in place of the second rule. The control rule is the verdict line itself, printed before the model is asked; the sentence is checked by the harness to contain the verdict literal, which the grammar guarantees, and the agreement between the two is $100$ percent by construction, not by measurement. Theorem thm:z16\_independent applies with the model as a proposer whose proposal enters no decision: the verdict is a function of $(c, \pi_n, \pi_{n'})$ computed before the grammar exists, so no output of the model can change it. The phrasing count per model is "not measured" until the demonstration has run.
+On reject the verifier writes `verdict ::= "could not be shown to be under"` in place of the second rule. The control rule is the verdict line itself, printed before the model is asked; the sentence is checked by the harness to contain the verdict literal, which the grammar guarantees, and the agreement between the two is $`100`$ percent by construction, not by measurement. Theorem thm:z16\_independent applies with the model as a proposer whose proposal enters no decision: the verdict is a function of $`(c, \pi_n, \pi_{n'})`$ computed before the grammar exists, so no output of the model can change it. The phrasing count per model is "not measured" until the demonstration has run.
 
 ## Real, modelled, absent
 
 - **have:** real: the Pi 4B, the VL53L4CD on the bench at 0x29, the LCD, the three LEDs measured on BCM 17, 27 and 22 on Saturday 3 October 2026, the two crates at the versions read on Friday 6 November 2026, the proof sizes as computed counts
 - **learn:** modelled: the sensor's register map and data-ready polarity are from the ST ULD and are to verify on the bench with `i2cget`; the ranging rate that makes 3000 samples a one-minute window is to verify; the LCD's framebuffer path for the verdict line (the console mapped to the LCD's fb device by the vendor script) is to verify; the `curve25519-dalek` version the crate pulls is to verify against 5.0.0; the timing bars are absent from the figure because no order of magnitude is claimed before the price list of [Project 1](01-the-price-list.md) exists
-- **absent:** absent: a second sensor or the licence-gated 8 by 8 part, so the counter sees crossings and not direction, and $n$ is the number of entries into the near zone, an upper bound on the occupancy if nobody leaves and re-enters; a stacking header, so every jumper must reach its pin beside the LCD's carrier, to confirm on the bench
+- **absent:** absent: a second sensor or the licence-gated 8 by 8 part, so the counter sees crossings and not direction, and $`n`$ is the number of entries into the near zone, an upper bound on the occupancy if nobody leaves and re-enters; a stacking header, so every jumper must reach its pin beside the LCD's carrier, to confirm on the bench
 
 ## System architecture
 
@@ -362,30 +362,30 @@ stateDiagram-v2
 
 | **Quantity** | **Pi 4B** | **Kind** | **Instrument** |
 | --- | --- | --- | --- |
-| proof bytes, one 8-bit proof | 480 | computed | $32 (2 \log_2 8 + 9)$ |
-| proof bytes, one 16-bit proof | 544 | computed | $32 (2 \log_2 16 + 9)$ |
-| proof bytes, one 64-bit proof | 672 | computed | $32 (2 \log_2 64 + 9)$ |
-| proof bytes, this chapter's pair | 960 plus 32 for $c$ | computed | twice the first row; checked against `to_bytes().len()` at run time |
-| proof bytes, aggregated pair | 544 | computed | $32 (2 \log_2 16 + 9)$ |
+| proof bytes, one 8-bit proof | 480 | computed | $`32 (2 \log_2 8 + 9)`$ |
+| proof bytes, one 16-bit proof | 544 | computed | $`32 (2 \log_2 16 + 9)`$ |
+| proof bytes, one 64-bit proof | 672 | computed | $`32 (2 \log_2 64 + 9)`$ |
+| proof bytes, this chapter's pair | 960 plus 32 for $`c`$ | computed | twice the first row; checked against `to_bytes().len()` at run time |
+| proof bytes, aggregated pair | 544 | computed | $`32 (2 \log_2 16 + 9)`$ |
 | prove, two calls | not measured |  | `Instant`, 64 repeats, throttle word 0x0 before and after |
 | verify, two calls | not measured |  | the same |
 | crossings counted vs staged | not measured |  | ten staged runs, the log |
 | sensor ranging rate | not measured |  | `Instant` over 1000 data-ready events |
 | sentence per model | not measured |  | the harness log of [Project 16](16-the-model-proposes-a-ranking-function-the-certifier.md) |
 
-The paper's Table 1 gives the symbolic prover at 1 to 4700 s and the verifier at 10 to 1300 s on its AWS `c6g.8xlarge` for whole tasks of up to $2^{13.7}$ obligations \[[1](#references)\]; one range proof is a small part of one obligation there, and none of those figures is copied into a cell above.
+The paper's Table 1 gives the symbolic prover at 1 to 4700 s and the verifier at 10 to 1300 s on its AWS `c6g.8xlarge` for whole tasks of up to $`2^{13.7}`$ obligations \[[1](#references)\]; one range proof is a small part of one obligation there, and none of those figures is copied into a cell above.
 
 ## Steps
 
 **Step 1.** On the authoring laptop, write the crate with the manifest pinning `bulletproofs` 5.0.0, `merlin`, `rppal` and `rand`; commit. Nothing is compiled here.
 
-**Step 2.** On the build laptop in WSL, `git pull --ff-only`, cross build for aarch64, run the proof part once on the host with a fixed $n$ to confirm the byte counts, and copy the binary to the Pi 4B.
+**Step 2.** On the build laptop in WSL, `git pull --ff-only`, cross build for aarch64, run the proof part once on the host with a fixed $`n`$ to confirm the byte counts, and copy the binary to the Pi 4B.
 
 **Step 3.** With the Pi 4B off, seat the LCD, wire the sensor to pins 1, 3, 5, 6 and the three LEDs to pins 11, 13, 15 with ground on pin 9; power on and run `i2cdetect -y 1` to see 0x29.
 
 **Step 4.** On the Pi 4B over ssh, read the model id register with `i2cget` and record 0xEBAA or the value found; enable the LCD overlay per the wiki and confirm the console appears on it.
 
-**Step 5.** Run the binary with no one in the doorway: expect $n = 0$, blue then green. Stage 5 crossings, then 15, then 16: expect green, green, red.
+**Step 5.** Run the binary with no one in the doorway: expect $`n = 0`$, blue then green. Stage 5 crossings, then 15, then 16: expect green, green, red.
 
 **Step 6.** Read `vcgencmd get_throttled`, run the prove and verify loop 64 times, read it again, and keep the medians and spreads.
 
@@ -393,15 +393,15 @@ The paper's Table 1 gives the symbolic prover at 1 to 4700 s and the verifier at
 
 ## Acceptance test
 
-The chapter passes when the model id reads 0xEBAA, the four staged runs give accept, accept, accept, reject with the matching LED, `to_bytes().len()` prints 480 for each proof, the 64-repeat timings have a spread under 5 percent with the throttle word at 0x0 on both reads, and the LCD shows the verdict line with a sentence whose verdict literal is the verifier's. It fails if a run with 16 staged crossings is accepted, if the verifier process reads $n$ or $r$ from anywhere, if a timing cell is filled from a laptop run, or if the sentence's verdict literal ever differs from the verdict line.
+The chapter passes when the model id reads 0xEBAA, the four staged runs give accept, accept, accept, reject with the matching LED, `to_bytes().len()` prints 480 for each proof, the 64-repeat timings have a spread under 5 percent with the throttle word at 0x0 on both reads, and the LCD shows the verdict line with a sentence whose verdict literal is the verifier's. It fails if a run with 16 staged crossings is accepted, if the verifier process reads $`n`$ or $`r`$ from anywhere, if a timing cell is filled from a laptop run, or if the sentence's verdict literal ever differs from the verdict line.
 
 ## Variants
 
-**The multizone sensor and an explicit-state proof.** The single-zone VL53L4CD is replaced by the X-NUCLEO-53L8A1's 8 by 8 array on flying leads to the Pi's I2C bus, so the doorway becomes a room of 64 zones and the secret becomes the occupancy those zones imply rather than a crossing count; the bound is then proved the way the brief's thirteenth sketch proves it \[[9](#references)\], by committing the observed state set as a polynomial and opening a batch vanishing proof \[[3](#references)\] in the paper's explicit-state scheme \[[1](#references)\], instead of by a Bulletproofs range proof. The arithmetic favours the swap once the statement is about a whole run rather than one number: this chapter's route pays 480 bytes for each of its two 8-bit statements, 960 bytes in all, while a batch vanishing proof is two compressed $\mathbb{G}_1$ elements of 48 bytes, 96 bytes, whatever the number of observed states, a factor of 10.0 (computed from the element counts, none of it measured on this bench). Choose this variant when what must be bounded is every state of the run, as in the brief's $\mathrm{G}(\mathsf{Occupancy} \le 10)$, and keep this chapter's own route when a single committed number is bounded once, because a range proof needs no commitment to a trace at all. Two bench corrections apply, and both land in the parts list rather than in the mathematics: the 8 by 8 part's ultra lite driver is licence gated and reaches the device as a 90 kilobyte firmware upload, so it is marked learn with that cost and no frame rate is claimed as achieved; and the brief's cloud leg is dropped, because nothing in this volume goes outward and the verifier is the second process on the same Pi 4B.
+**The multizone sensor and an explicit-state proof.** The single-zone VL53L4CD is replaced by the X-NUCLEO-53L8A1's 8 by 8 array on flying leads to the Pi's I2C bus, so the doorway becomes a room of 64 zones and the secret becomes the occupancy those zones imply rather than a crossing count; the bound is then proved the way the brief's thirteenth sketch proves it \[[9](#references)\], by committing the observed state set as a polynomial and opening a batch vanishing proof \[[3](#references)\] in the paper's explicit-state scheme \[[1](#references)\], instead of by a Bulletproofs range proof. The arithmetic favours the swap once the statement is about a whole run rather than one number: this chapter's route pays 480 bytes for each of its two 8-bit statements, 960 bytes in all, while a batch vanishing proof is two compressed $`\mathbb{G}_1`$ elements of 48 bytes, 96 bytes, whatever the number of observed states, a factor of 10.0 (computed from the element counts, none of it measured on this bench). Choose this variant when what must be bounded is every state of the run, as in the brief's $`\mathrm{G}(\mathsf{Occupancy} \le 10)`$, and keep this chapter's own route when a single committed number is bounded once, because a range proof needs no commitment to a trace at all. Two bench corrections apply, and both land in the parts list rather than in the mathematics: the 8 by 8 part's ultra lite driver is licence gated and reaches the device as a 90 kilobyte firmware upload, so it is marked learn with that cost and no frame rate is claimed as achieved; and the brief's cloud leg is dropped, because nothing in this volume goes outward and the verifier is the second process on the same Pi 4B.
 
 ## Pitfalls
 
-- The crate takes bit sizes 8, 16, 32 and 64 only; asking for 4 returns an error, which is why the limit 16 is proved as two 8-bit statements, and why the verifier must compute $c'$ itself rather than accept one from the prover.
+- The crate takes bit sizes 8, 16, 32 and 64 only; asking for 4 returns an error, which is why the limit 16 is proved as two 8-bit statements, and why the verifier must compute $`c'`$ itself rather than accept one from the prover.
 - Two different `curve25519-dalek` versions in one build give two `Scalar` types that do not unify; the error is at compile time on the build laptop, never on the Pi, and the fix is to import the group from the version the proof crate uses.
 - A transcript label that differs between prover and verifier by one byte makes every proof fail; both labels are constants in one source file for that reason.
 - The sensor's data-ready bit polarity follows a register the ULD sets at init; a loop that waits for the wrong level waits forever, and the first run is watched with a timeout.

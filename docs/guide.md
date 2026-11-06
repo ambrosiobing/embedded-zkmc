@@ -44,7 +44,7 @@ Four groupings cut across the table and are worth knowing before choosing. Z1 an
 - **Assumes** the price of a ristretto multiplication from [Project 1](../chapters/01-the-price-list.md) and the definition of a Pedersen commitment given there; it is the first chapter with a secret.
 - **The idea** is that a microcontroller can bind itself to a reading it does not disclose, in 32 bytes, and that the binding is additive so a window can be summed without opening a single sample.
 - **Read first** the hiding and binding theorems of [Project 1](../chapters/01-the-price-list.md), because the whole chapter is those two statements running at 10 Hz.
-- **The trap** is reusing the randomness: two commitments under one $r$ give the difference of the samples to anyone who divides them, recoverable in at most 131071 trial exponentiations.
+- **The trap** is reusing the randomness: two commitments under one $`r`$ give the difference of the samples to anyone who divides them, recoverable in at most 131071 trial exponentiations.
 - **Acceptance** 100 consecutive commitments decode as ristretto points on the Pi 4B with no gap over 150 ms, ten requested openings verify and ten altered openings are refused.
 
 ### Z3. The modem's backoff machine, proved live-free in zero knowledge

@@ -14,9 +14,9 @@
 > - **Parts:** the SIM7070G Cat-M, NB-IoT and GPRS HAT with its antenna, the nRF PPK2 in ampere-meter mode on the HAT's module supply (position to verify from the wiki), build laptop as the PPK2 host over USB, jumpers; no SIM card
 > - **Interface:** AT commands over the PL011 at 115200 on header pins 8 and 10, reached as `/dev/serial0`; PWRKEY on BCM4, header pin 7 (to verify); the PPK2 over USB to the build laptop
 > - **Language and library:** C17 with POSIX `termios` for the UART and `libsodium` (version to verify) for the ristretto255 commitment; no other library
-> - **Primitive:** commitment transport, the paper's $c_\mathcal{M}$ leaving the device \[[1](#references)\], priced by the energy per payload byte on a narrowband radio
-> - **Secret:** the committed value $v \in [0, 2^{16})$, here the board's own temperature sample, and its randomness $r \in \mathbb{Z}_p$
-> - **Public:** $c = g^v h^r$ on ristretto255, the AT dialogue, the byte counts, and later the proof of [Project 4](04-two-group-elements.md) or [Project 20](20-the-occupancy-counter-that-proves-it-stayed-under.md)
+> - **Primitive:** commitment transport, the paper's $`c_\mathcal{M}`$ leaving the device \[[1](#references)\], priced by the energy per payload byte on a narrowband radio
+> - **Secret:** the committed value $`v \in [0, 2^{16})`$, here the board's own temperature sample, and its randomness $`r \in \mathbb{Z}_p`$
+> - **Public:** $`c = g^v h^r`$ on ristretto255, the AT dialogue, the byte counts, and later the proof of [Project 4](04-two-group-elements.md) or [Project 20](20-the-occupancy-counter-that-proves-it-stayed-under.md)
 > - **Model:** none
 > - **Acceptance:** with a SIM: the attach, PDP, socket and send sequence completes with `OK` on every step and the PPK2 trace shows the four windows, each energy figure with a repeat spread under 10 percent over five sends; without a SIM: the driver reaches `AT+CPIN?` on the live modem, stops with the reason "no SIM", and replays the whole sequence from the log with the same parser, byte for byte
 > - **Difficulty:** 3 of 5
@@ -24,7 +24,7 @@
 
 ## Pitch
 
-The paper's prover sends one commitment and one proof; the paper's Table 1 prices them in seconds on a 32-core machine \[[1](#references)\]. On a device that lives on a battery and talks over NB-IoT, the price that matters is joules, and the shape of that price is a fixed cost per transmission (power on, attach, activate a PDP context, open a socket) plus a cost per byte. This chapter writes the cost model down as a definition, proves the lemma that says when a proof sent once per $k$ samples is cheaper than sending the samples themselves, and proves the proposition that says what the verifier sees in each case: the sample, or a group element that is uniformly distributed whatever the sample was. Then it builds the smallest honest C driver for the SIM7070G that can run the sequence: one AT query open at a time, the parser design of the sibling volume, a replay mode that reads the modem's lines from a log so the sequence is exercised with no SIM, and a PPK2 in series with the module's supply as the instrument that will, one day, turn "not measured, no SIM" into a number.
+The paper's prover sends one commitment and one proof; the paper's Table 1 prices them in seconds on a 32-core machine \[[1](#references)\]. On a device that lives on a battery and talks over NB-IoT, the price that matters is joules, and the shape of that price is a fixed cost per transmission (power on, attach, activate a PDP context, open a socket) plus a cost per byte. This chapter writes the cost model down as a definition, proves the lemma that says when a proof sent once per $`k`$ samples is cheaper than sending the samples themselves, and proves the proposition that says what the verifier sees in each case: the sample, or a group element that is uniformly distributed whatever the sample was. Then it builds the smallest honest C driver for the SIM7070G that can run the sequence: one AT query open at a time, the parser design of the sibling volume, a replay mode that reads the modem's lines from a log so the sequence is exercised with no SIM, and a PPK2 in series with the module's supply as the instrument that will, one day, turn "not measured, no SIM" into a number.
 
 ## Parts and interface
 
@@ -47,19 +47,19 @@ $$
   c = g^v h^r \thinspace \rbrace , \tag{19.1}
 $$
 
-with $g$ the ristretto255 base point and $h$ derived by hashing to the group so that $\log_g h$ is unknown to the device \[[3](#references), [4](#references)\]. What this chapter adds to the relation is the channel: the device's output is a byte string, and the verifier's view is a function of that string and of the time it arrived. Write $\mathrm{View}_{\mathrm{clear}}(v) = \lbrace v\rbrace$ for the strategy that sends the sample, and $\mathrm{View}_{\mathrm{com}}(v, r) = \lbrace c\rbrace$ with $c = g^v h^r$ for the strategy that sends the commitment. The quantity the chapter prices is the energy of producing each view on the SIM7070G, as a function of the payload length in bytes.
+with $`g`$ the ristretto255 base point and $`h`$ derived by hashing to the group so that $`\log_g h`$ is unknown to the device \[[3](#references), [4](#references)\]. What this chapter adds to the relation is the channel: the device's output is a byte string, and the verifier's view is a function of that string and of the time it arrived. Write $`\mathrm{View}_{\mathrm{clear}}(v) = \lbrace v\rbrace`$ for the strategy that sends the sample, and $`\mathrm{View}_{\mathrm{com}}(v, r) = \lbrace c\rbrace`$ with $`c = g^v h^r`$ for the strategy that sends the commitment. The quantity the chapter prices is the energy of producing each view on the SIM7070G, as a function of the payload length in bytes.
 
 ## The mathematics
 
-**Definition Z19.1 (Energy per transmission).** Let a transmission of $n$ payload bytes on the module consist of a fixed sequence (power key, attach, PDP activation, socket open, socket close) and the transfer of the payload. Its energy is modelled as
+**Definition Z19.1 (Energy per transmission).** Let a transmission of $`n`$ payload bytes on the module consist of a fixed sequence (power key, attach, PDP activation, socket open, socket close) and the transfer of the payload. Its energy is modelled as
 
 $$
 E(n) = E_{\mathrm{attach}} + n \cdot e_{\mathrm{byte}}, \tag{19.2}
 $$
 
-where $E_{\mathrm{attach}}$ is the energy of the fixed sequence and $e_{\mathrm{byte}}$ the marginal energy per payload byte, both measured as $U \int I \thinspace dt$ over the respective window of a PPK2 current trace, with $U$ the module rail voltage read once from the wiki and $I$ the metered current. Both constants are "not measured, no SIM" on this bench; the lemma below is about their ratio, not their values.
+where $`E_{\mathrm{attach}}`$ is the energy of the fixed sequence and $`e_{\mathrm{byte}}`$ the marginal energy per payload byte, both measured as $`U \int I \thinspace dt`$ over the respective window of a PPK2 current trace, with $`U`$ the module rail voltage read once from the wiki and $`I`$ the metered current. Both constants are "not measured, no SIM" on this bench; the lemma below is about their ratio, not their values.
 
-**Lemma Z19.2 (Per-sample energy and the two crossovers).** Let a sample be $s$ bytes in the clear and let a proof that covers $k$ samples be $b$ bytes. Consider three strategies: (A) send every sample in the clear, one transmission per sample; (B) send one proof of $b$ bytes per $k$ samples; (C) send the $k$ samples in the clear in one transmission per $k$ samples. Under (19.2) the energy per sample is
+**Lemma Z19.2 (Per-sample energy and the two crossovers).** Let a sample be $`s`$ bytes in the clear and let a proof that covers $`k`$ samples be $`b`$ bytes. Consider three strategies: (A) send every sample in the clear, one transmission per sample; (B) send one proof of $`b`$ bytes per $`k`$ samples; (C) send the $`k`$ samples in the clear in one transmission per $`k`$ samples. Under (19.2) the energy per sample is
 
 $$
 \begin{aligned}
@@ -69,35 +69,35 @@ E_A &= E_{\mathrm{attach}} + s \thinspace  e_{\mathrm{byte}},  \cr
 \end{aligned}
 $$
 
-and (i) $E_B(k) < E_A$ if and only if $k > k^{*}$ with
+and (i) $`E_B(k) < E_A`$ if and only if $`k > k^{*}`$ with
 
 $$
 k^{*} = \frac{E_{\mathrm{attach}} + b \thinspace  e_{\mathrm{byte}}}{E_{\mathrm{attach}} + s \thinspace  e_{\mathrm{byte}}}, \tag{19.4}
 $$
 
-(ii) $E_B(k) < E_C(k)$ if and only if $k > b / s$, and (iii) for every $k$, $E_B(k) - E_C(k) = (b - k s) \thinspace e_{\mathrm{byte}} / k$.
+(ii) $`E_B(k) < E_C(k)`$ if and only if $`k > b / s`$, and (iii) for every $`k`$, $`E_B(k) - E_C(k) = (b - k s) \thinspace e_{\mathrm{byte}} / k`$.
 
-*Proof.* Strategy (A) makes one transmission of $n = s$ bytes per sample, so (19.2) gives (19.3) directly. Strategy (B) makes one transmission of $n = b$ bytes per $k$ samples, so the energy per $k$ samples is $E_{\mathrm{attach}} + b \thinspace e_{\mathrm{byte}}$, and dividing by $k$ gives (19.3). Strategy (C) makes one transmission of $n = k s$ bytes per $k$ samples, energy $E_{\mathrm{attach}} + k s \thinspace e_{\mathrm{byte}}$, and dividing by $k$ gives (19.3).
+*Proof.* Strategy (A) makes one transmission of $`n = s`$ bytes per sample, so (19.2) gives (19.3) directly. Strategy (B) makes one transmission of $`n = b`$ bytes per $`k`$ samples, so the energy per $`k`$ samples is $`E_{\mathrm{attach}} + b \thinspace e_{\mathrm{byte}}`$, and dividing by $`k`$ gives (19.3). Strategy (C) makes one transmission of $`n = k s`$ bytes per $`k`$ samples, energy $`E_{\mathrm{attach}} + k s \thinspace e_{\mathrm{byte}}`$, and dividing by $`k`$ gives (19.3).
 
-(i) $E_B(k) < E_A$ reads $(E_{\mathrm{attach}} + b \thinspace e_{\mathrm{byte}}) / k < E_{\mathrm{attach}} + s \thinspace e_{\mathrm{byte}}$. Both sides are positive since the energies are positive, so multiplying by $k > 0$ and dividing by the right-hand side preserves the inequality and gives $k > k^{*}$ as in (19.4). If $b \le s$ then $k^{*} \le 1$ and every $k \ge 1$ satisfies it, with equality only when $b = s$ and $k = 1$.
+(i) $`E_B(k) < E_A`$ reads $`(E_{\mathrm{attach}} + b \thinspace e_{\mathrm{byte}}) / k < E_{\mathrm{attach}} + s \thinspace e_{\mathrm{byte}}`$. Both sides are positive since the energies are positive, so multiplying by $`k > 0`$ and dividing by the right-hand side preserves the inequality and gives $`k > k^{*}`$ as in (19.4). If $`b \le s`$ then $`k^{*} \le 1`$ and every $`k \ge 1`$ satisfies it, with equality only when $`b = s`$ and $`k = 1`$.
 
-(ii) and (iii) Subtracting (19.3) from (19.3), the attach terms cancel: $E_B(k) - E_C(k) = b \thinspace e_{\mathrm{byte}} / k - s \thinspace e_{\mathrm{byte}} = (b - k s) \thinspace e_{\mathrm{byte}} / k$, which is (iii). Since $e_{\mathrm{byte}} / k > 0$, the difference is negative exactly when $b - k s < 0$, that is $k > b / s$, which is (ii). &#9632;
+(ii) and (iii) Subtracting (19.3) from (19.3), the attach terms cancel: $`E_B(k) - E_C(k) = b \thinspace e_{\mathrm{byte}} / k - s \thinspace e_{\mathrm{byte}} = (b - k s) \thinspace e_{\mathrm{byte}} / k`$, which is (iii). Since $`e_{\mathrm{byte}} / k > 0`$, the difference is negative exactly when $`b - k s < 0`$, that is $`k > b / s`$, which is (ii). &#9632;
 
-**Remark Z19.7.** Part (iii) is the chapter's price tag. Against batched clear text, the privacy of a batch costs exactly $(b - k s) \thinspace e_{\mathrm{byte}}$ joules, the energy of the proof bytes beyond the sample bytes; the attach cost is paid by both. With the range proofs of [Project 20](20-the-occupancy-counter-that-proves-it-stayed-under.md), counted there as 960 bytes for two single 8-bit proofs or 544 bytes for the aggregated pair, and $s = 2$ bytes per 16-bit sample, the proof route beats batched clear text only past $k = 480$ or $k = 272$ samples per batch. With the KZG proof of [Project 4](04-two-group-elements.md) at two $\mathbb{G}_1$ elements plus two commitments, $b = 192$ bytes, the crossover is $k = 96$.
+**Remark Z19.7.** Part (iii) is the chapter's price tag. Against batched clear text, the privacy of a batch costs exactly $`(b - k s) \thinspace e_{\mathrm{byte}}`$ joules, the energy of the proof bytes beyond the sample bytes; the attach cost is paid by both. With the range proofs of [Project 20](20-the-occupancy-counter-that-proves-it-stayed-under.md), counted there as 960 bytes for two single 8-bit proofs or 544 bytes for the aggregated pair, and $`s = 2`$ bytes per 16-bit sample, the proof route beats batched clear text only past $`k = 480`$ or $`k = 272`$ samples per batch. With the KZG proof of [Project 4](04-two-group-elements.md) at two $`\mathbb{G}_1`$ elements plus two commitments, $`b = 192`$ bytes, the crossover is $`k = 96`$.
 
-**Definition Z19.4 (The verifier's view and its consistent set).** For a view $\omega$ of the channel, the consistent set is $S(\omega) = \lbrace \thinspace v' \in [0, 2^{16}) \mid \exists r' \in \mathbb{Z}_p .\thickspace \omega \text{ is the view produced by } (v', r') \thinspace \rbrace$, the set of samples the verifier cannot rule out after seeing $\omega$.
+**Definition Z19.4 (The verifier's view and its consistent set).** For a view $`\omega`$ of the channel, the consistent set is $`S(\omega) = \lbrace \thinspace v' \in [0, 2^{16}) \mid \exists r' \in \mathbb{Z}_p .\thickspace \omega \text{ is the view produced by } (v', r') \thinspace \rbrace`$, the set of samples the verifier cannot rule out after seeing $`\omega`$.
 
-**Proposition Z19.5 (What each strategy reveals).** (a) $S(\mathrm{View}_{\mathrm{clear}}(v)) = \lbrace v\rbrace$. (b) For every $v$ and every $r$, $S(\mathrm{View}_{\mathrm{com}}(v, r)) = [0, 2^{16})$, the whole message space. (c) For $r$ uniform in $\mathbb{Z}_p$ the distribution of $\mathrm{View}_{\mathrm{com}}(v, r)$ is the same for every $v$, so no test on the view, however expensive, separates two samples. (d) The byte cost of (b) over (a) is $32 - s$ bytes per sample on the wire, and $b$ bytes per batch when the proof travels too.
+**Proposition Z19.5 (What each strategy reveals).** (a) $`S(\mathrm{View}_{\mathrm{clear}}(v)) = \lbrace v\rbrace`$. (b) For every $`v`$ and every $`r`$, $`S(\mathrm{View}_{\mathrm{com}}(v, r)) = [0, 2^{16})`$, the whole message space. (c) For $`r`$ uniform in $`\mathbb{Z}_p`$ the distribution of $`\mathrm{View}_{\mathrm{com}}(v, r)`$ is the same for every $`v`$, so no test on the view, however expensive, separates two samples. (d) The byte cost of (b) over (a) is $`32 - s`$ bytes per sample on the wire, and $`b`$ bytes per batch when the proof travels too.
 
-*Proof.* (a) The view is the sample itself; a sample $v'$ produces the view $\lbrace v'\rbrace$, which equals $\lbrace v\rbrace$ if and only if $v' = v$.
+*Proof.* (a) The view is the sample itself; a sample $`v'`$ produces the view $`\lbrace v'\rbrace`$, which equals $`\lbrace v\rbrace`$ if and only if $`v' = v`$.
 
-(b) Let $c = g^v h^r$ be the view. For any $v' \in [0, 2^{16})$ we ask for $r'$ with $g^{v'} h^{r'} = c$, that is $h^{r'} = c \thinspace g^{-v'}$. By the proof of Theorem thm:z01\_hiding the map $r' \mapsto h^{r'}$ is a bijection from $\mathbb{Z}_p$ onto $\mathbb{G}$, because $p$ is prime and $h \ne 1$; so the element $c \thinspace g^{-v'} \in \mathbb{G}$ has exactly one preimage $r' = \log_h(c \thinspace g^{-v'})$, and $(v', r')$ produces the same view. Hence every $v'$ lies in $S(c)$.
+(b) Let $`c = g^v h^r`$ be the view. For any $`v' \in [0, 2^{16})`$ we ask for $`r'`$ with $`g^{v'} h^{r'} = c`$, that is $`h^{r'} = c \thinspace g^{-v'}`$. By the proof of Theorem thm:z01\_hiding the map $`r' \mapsto h^{r'}`$ is a bijection from $`\mathbb{Z}_p`$ onto $`\mathbb{G}`$, because $`p`$ is prime and $`h \ne 1`$; so the element $`c \thinspace g^{-v'} \in \mathbb{G}`$ has exactly one preimage $`r' = \log_h(c \thinspace g^{-v'})`$, and $`(v', r')`$ produces the same view. Hence every $`v'`$ lies in $`S(c)`$.
 
-(c) This is Theorem thm:z01\_hiding: for each $v$ the random variable $g^v h^r$ with $r$ uniform is uniform on $\mathbb{G}$, and the uniform distribution on $\mathbb{G}$ does not depend on $v$. Two identical distributions give identical acceptance probabilities to every test.
+(c) This is Theorem thm:z01\_hiding: for each $`v`$ the random variable $`g^v h^r`$ with $`r`$ uniform is uniform on $`\mathbb{G}`$, and the uniform distribution on $`\mathbb{G}`$ does not depend on $`v`$. Two identical distributions give identical acceptance probabilities to every test.
 
-(d) A ristretto255 element encodes in 32 bytes \[[4](#references)\], against $s$ bytes for the sample; a proof adds its own $b$ bytes once per batch, which Lemma **Lemma Z19.2** prices. &#9632;
+(d) A ristretto255 element encodes in 32 bytes \[[4](#references)\], against $`s`$ bytes for the sample; a proof adds its own $`b`$ bytes once per batch, which Lemma **Lemma Z19.2** prices. &#9632;
 
-**Remark Z19.8.** The proposition is about the payload. The verifier, and anyone on the path, still sees when a transmission happens and how long it is; the paper's Remark 2.2 and its paragraph on side channels make the same reservation \[[1](#references)\]. A device that sends only when a threshold is crossed reveals the crossing by the act of sending, whatever the payload hides. The binding half, Theorem thm:z01\_binding, is what makes the later proof mean anything: the device cannot open $c$ to a second sample once the proof has been checked against it.
+**Remark Z19.8.** The proposition is about the payload. The verifier, and anyone on the path, still sees when a transmission happens and how long it is; the paper's Remark 2.2 and its paragraph on side channels make the same reservation \[[1](#references)\]. A device that sends only when a threshold is crossed reveals the crossing by the act of sending, whatever the payload hides. The binding half, Theorem thm:z01\_binding, is what makes the later proof mean anything: the device cannot open $`c`$ to a second sample once the proof has been checked against it.
 
 ## The protocol
 
@@ -108,9 +108,9 @@ The transport protocol, written as the AT dialogue it is, with the PPK2 windows 
 3. `AT+CNMP=38` and `AT+CMNB=2` to prefer LTE and NB-IoT (to verify); `AT+CSQ`; `AT+CGATT?` until `+CGATT: 1`; the window **attach** closes here.
 4. `AT+CNACT=0,1` to activate the PDP context (to verify); `AT+CNACT?` for the address; the window **pdp**.
 5. `AT+CAOPEN=0,0,"UDP","<host>",<port>` (to verify); the window **socket**.
-6. Commit: $v$ is read from `/sys/class/thermal/thermal_zone0/temp` as a 16-bit integer in tenths of a degree; $r$ is 32 random bytes; $c = g^v h^r$ in 32 bytes.
+6. Commit: $`v`$ is read from `/sys/class/thermal/thermal_zone0/temp` as a 16-bit integer in tenths of a degree; $`r`$ is 32 random bytes; $`c = g^v h^r`$ in 32 bytes.
 7. `AT+CASEND=0,32`, the prompt, the 32 bytes, `OK` (to verify); the window **send**; then `AT+CACLOSE=0` and `AT+CNACT=0,0`.
-8. The PPK2 trace is cut at the four window marks the driver prints with its own monotonic clock, and each window's energy is $U \int I \thinspace dt$.
+8. The PPK2 trace is cut at the four window marks the driver prints with its own monotonic clock, and each window's energy is $`U \int I \thinspace dt`$.
 
 ## The code
 
@@ -221,7 +221,7 @@ None. The driver sends exactly the bytes of the commitment; no text is generated
 
 - **have:** real: the Pi 4B, the SIM7070G HAT and its antenna, the PPK2, build laptop as its host; the ristretto255 group of [Project 1](01-the-price-list.md); the parser design of the sibling volume
 - **learn:** modelled: the AT sequence is exercised against a replayed log and is drawn dashed everywhere it appears; the PPK2 series position on the HAT's module supply, the PWRKEY timing, the UART jumper setting and the exact spelling of `AT+CNACT`, `AT+CAOPEN` and `AT+CASEND` are all to verify from the wiki \[[8](#references)\] and the AT manual before the first live run; every bar in the benchmark figure is the shape of Lemma **Lemma Z19.2** with assumed ratios
-- **absent:** absent: a SIM, so every energy and every attach time reads "not measured, no SIM"; a verifier endpoint reachable from a carrier network, so the proof's arrival is not checked here; a multimeter, so the rail voltage $U$ is a wiki figure until the PPK2's own source-meter mode is used to confirm it
+- **absent:** absent: a SIM, so every energy and every attach time reads "not measured, no SIM"; a verifier endpoint reachable from a carrier network, so the proof's arrival is not checked here; a multimeter, so the rail voltage $`U`$ is a wiki figure until the PPK2's own source-meter mode is used to confirm it
 
 ## System architecture
 
@@ -300,14 +300,14 @@ stateDiagram-v2
 
 | **Quantity** | **Pi 4B, SIM7070G** | **Window** | **Instrument** |
 | --- | --- | --- | --- |
-| boot to `AT` `OK`, energy | not measured, no SIM | boot | PPK2 ampere meter, 100 kS/s, $U$ from the wiki |
+| boot to `AT` `OK`, energy | not measured, no SIM | boot | PPK2 ampere meter, 100 kS/s, $`U`$ from the wiki |
 | attach to `+CGATT: 1`, energy and seconds | not measured, no SIM | attach | the same; the driver's clock |
 | PDP activation, energy | not measured, no SIM | pdp | the same |
 | socket open and close, energy | not measured, no SIM | socket | the same |
-| 32 bytes of $c$, energy | not measured, no SIM | send | the same |
+| 32 bytes of $`c`$, energy | not measured, no SIM | send | the same |
 | 960 bytes, the two Z20 proofs, energy | not measured, no SIM | send | the same; the CASEND length limit is to verify |
-| $e_{\mathrm{byte}}$ from the two send windows | not measured, no SIM |  | computed from the two rows above once they exist |
-| $k^{*}$ for the Z20 proof | not measured, no SIM |  | Equation (19.4) |
+| $`e_{\mathrm{byte}}`$ from the two send windows | not measured, no SIM |  | computed from the two rows above once they exist |
+| $`k^{*}`$ for the Z20 proof | not measured, no SIM |  | Equation (19.4) |
 | replay of the sequence, reply lines and unsolicited lines | computed from the log once it is written |  | the driver on the log |
 
 The paper reports no energy; its Table 1 is seconds on an AWS `c6g.8xlarge` \[[1](#references)\], and none of its figures belongs in a cell above.
@@ -334,7 +334,7 @@ Without a SIM the chapter passes when the live driver prints `OK` to `AT`, stops
 
 ## Variants
 
-**A range proof built in WebAssembly.** The C driver keeps the UART, the AT dialogue and the PPK2 loop exactly as this chapter wires them, and what moves is the proof: the engine-speed history of the brief's fourteenth sketch \[[6](#references)\] is written as a system of linear inequalities $A_s y \le b_s$, shifted by a bound $M$ so that every element lies in $[0, M]$, and a Bulletproofs range proof \[[2](#references)\] over the shifted values is generated by a WebAssembly module loaded on the Pi 4B rather than by native code, the nearest reference this volume carries for proof generation behind that boundary being \[[5](#references)\]. Aggregation is where the arithmetic sits: an aggregated Bulletproofs proof over $n$ values of $m$ bits has $2 \log_2(nm) + 9$ elements of 32 bytes, so 64 engine-speed samples of 16 bits aggregate to 29 elements and 928 bytes, against 34816 bytes for 64 separate 16-bit proofs of 544 bytes each, a factor of 37.5 (computed from the element count, none of it measured). What the variant costs on the link cannot be stated: there is no SIM on this bench, so the bytes per Cat-M send, the energy per byte and the number of `AT+CASEND` commands the 928 bytes need all read "not measured, no SIM", and the AT sequence is replayed from the log by this chapter's own parser. Choose this variant when many historical values have to be bounded at once rather than one sample committed per send, because the aggregate proof grows with the logarithm of $nm$ while separate proofs grow with $n$. The brief runs this on a Raspberry Pi 3 over USB behind an OBD-II to UART bridge and reports to a manufacturer's server; no such bridge is on this bench, so the engine-speed history is replayed from a logged file and drawn dashed, the HAT stays on the Pi 4B's PL011 as this chapter wires it, and nothing goes outward.
+**A range proof built in WebAssembly.** The C driver keeps the UART, the AT dialogue and the PPK2 loop exactly as this chapter wires them, and what moves is the proof: the engine-speed history of the brief's fourteenth sketch \[[6](#references)\] is written as a system of linear inequalities $`A_s y \le b_s`$, shifted by a bound $`M`$ so that every element lies in $`[0, M]`$, and a Bulletproofs range proof \[[2](#references)\] over the shifted values is generated by a WebAssembly module loaded on the Pi 4B rather than by native code, the nearest reference this volume carries for proof generation behind that boundary being \[[5](#references)\]. Aggregation is where the arithmetic sits: an aggregated Bulletproofs proof over $`n`$ values of $`m`$ bits has $`2 \log_2(nm) + 9`$ elements of 32 bytes, so 64 engine-speed samples of 16 bits aggregate to 29 elements and 928 bytes, against 34816 bytes for 64 separate 16-bit proofs of 544 bytes each, a factor of 37.5 (computed from the element count, none of it measured). What the variant costs on the link cannot be stated: there is no SIM on this bench, so the bytes per Cat-M send, the energy per byte and the number of `AT+CASEND` commands the 928 bytes need all read "not measured, no SIM", and the AT sequence is replayed from the log by this chapter's own parser. Choose this variant when many historical values have to be bounded at once rather than one sample committed per send, because the aggregate proof grows with the logarithm of $`nm`$ while separate proofs grow with $`n`$. The brief runs this on a Raspberry Pi 3 over USB behind an OBD-II to UART bridge and reports to a manufacturer's server; no such bridge is on this bench, so the engine-speed history is replayed from a logged file and drawn dashed, the HAT stays on the Pi 4B's PL011 as this chapter wires it, and nothing goes outward.
 
 ## Pitfalls
 
@@ -343,7 +343,7 @@ Without a SIM the chapter passes when the live driver prints `OK` to `AT`, stops
 - The PPK2 cannot meter a Raspberry Pi; it meters the module's supply only, and a trace taken on the Pi's 5 V input is a different, wrong, quantity. The PPK2's own limit is about 1 A; NB-IoT transmit peaks are under it, the SIM7600E-H's are not, which is why that HAT is not seated by any project here.
 - The parser matches the awaited answer by prefix; a reply that begins with the same prefix as an unsolicited code (for example `+CA` family lines) is why one query is open at a time and the match is on the exact command's prefix.
 - `AT+CASEND` has a maximum length per command that the manual states; a 544-byte proof may need more than one command, and the energy row for it counts every command.
-- A 16-bit sample in a commitment with no randomness is found in $2^{16}$ group operations; $r$ is 32 random bytes from `libsodium`, never a counter.
+- A 16-bit sample in a commitment with no randomness is found in $`2^{16}`$ group operations; $`r`$ is 32 random bytes from `libsodium`, never a counter.
 
 ## Languages and libraries not chosen
 

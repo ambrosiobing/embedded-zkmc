@@ -14,9 +14,9 @@
 > - **Parts:** one X-NUCLEO-IKS4A1 on the Nucleo's Arduino header with the LSM6DSV16X at 0x6b, seated alone because the three X-NUCLEO shields fit that header one at a time; the Waveshare 3.5 inch RPi LCD (A) on the Pi's header, ili9486 on SPI0 CE0 and ads7846 touch on CE1; four Joy-it LEDs
 > - **Interface:** I2C1 at 400 kHz from the Nucleo to the shield; USB CDC from the Nucleo's user USB to the Pi 4B; the ST-LINK drive `NOD_H7A3ZIQ` for the image; the display on the Pi's SPI0 and the LEDs on BCM 17, 27 and 22, with a fourth on BCM 24 (to verify)
 > - **Language and library:** Embedded Swift, the bare-metal subset, with SVD2Swift generating one typed accessor per non-reserved register field \[[5](#references)\]; the ristretto255 arithmetic is a C module imported into Swift, following RFC 9496 \[[7](#references)\]. Every generated name in the listing is marked (to verify) against the tool's own output
-> - **Primitive:** the Pedersen commitment $\mathsf{Com}(v; r) = g^v h^r$ of the paper's symbolic scheme \[[1](#references)\], exactly as [Project 2](02-a-sensor-reading-committed-on-the-microcontroller.md) uses it, so that the only variable between the two chapters is the language
-> - **Secret:** the window of 64 signed accelerometer samples and the randomness $r \in \mathbb{Z}_p$
-> - **Public:** the commitment $c = g^v h^r$, 32 bytes, one per window, with its sequence number; later $(v, r)$ for the windows the verifier asks about
+> - **Primitive:** the Pedersen commitment $`\mathsf{Com}(v; r) = g^v h^r`$ of the paper's symbolic scheme \[[1](#references)\], exactly as [Project 2](02-a-sensor-reading-committed-on-the-microcontroller.md) uses it, so that the only variable between the two chapters is the language
+> - **Secret:** the window of 64 signed accelerometer samples and the randomness $`r \in \mathbb{Z}_p`$
+> - **Public:** the commitment $`c = g^v h^r`$, 32 bytes, one per window, with its sequence number; later $`(v, r)`$ for the windows the verifier asks about
 > - **Model:** none
 > - **Acceptance:** the generated module contains no accessor whose bit range meets a reserved range, checked by a script over the description file; 100 consecutive windows decode as ristretto points on the Pi 4B with no gap over 7 seconds; ten requested openings verify and ten altered openings are refused; the firmware image fits the 2 MB flash with the figure printed by the build
 > - **Difficulty:** 4 of 5
@@ -39,13 +39,13 @@ The brief proposes this firmware as the flight logic of a small aircraft \[[2](#
 
 ## The secret, the statement and the relation
 
-Let $s_1, \ldots, s_n$ with $n = 64$ be the signed 16-bit samples of one window, and let
+Let $`s_1, \ldots, s_n`$ with $`n = 64`$ be the signed 16-bit samples of one window, and let
 
 $$
 v \thickspace =\thickspace  \Big(\sum_{i=1}^{n} s_i\Big) \bmod p \tag{22.1}
 $$
 
-be the reduction the firmware computes, with $p$ the order of the ristretto255 group \[[7](#references)\]. The relation is the one of [Project 2](02-a-sensor-reading-committed-on-the-microcontroller.md) with the window of this chapter substituted:
+be the reduction the firmware computes, with $`p`$ the order of the ristretto255 group \[[7](#references)\]. The relation is the one of [Project 2](02-a-sensor-reading-committed-on-the-microcontroller.md) with the window of this chapter substituted:
 
 $$
 \mathcal{R}_{\mathrm{win}} = \mathsf{PoK}\Big\lbrace \thinspace  \underbrace{(s_1, \ldots, s_n, r)}_{w} ;\thickspace 
@@ -54,106 +54,106 @@ $$
   v = \Big(\sum_{i=1}^{n} s_i\Big) \bmod p \thinspace \Big\rbrace , \tag{22.2}
 $$
 
-with $t$ the sequence number the verifier uses to order the stream. The witness set is
+with $`t`$ the sequence number the verifier uses to order the stream. The witness set is
 
 $$
 W = \lbrace \thinspace  (s_1, \ldots, s_{64}, r) \in (\lbrace -2^{15}, \ldots, 2^{15} - 1\rbrace )^{64} \times \mathbb{Z}_p \thinspace \rbrace ,
 $$
 
-and the statement set is $U = \lbrace \thinspace (c, t) \in \mathbb{G} \times \mathbb{N} \thinspace \rbrace$. The two properties the relation rests on are proved once in [Project 1](01-the-price-list.md) and are cited here and not reproved: the commitment is perfectly hiding by Theorem thm:z01\_hiding, so the 32 bytes carry no information about the window at all, and it is binding under the discrete logarithm assumption by Theorem thm:z01\_binding, so an opening the Nucleo later supplies is the window it actually held.
+and the statement set is $`U = \lbrace \thinspace (c, t) \in \mathbb{G} \times \mathbb{N} \thinspace \rbrace`$. The two properties the relation rests on are proved once in [Project 1](01-the-price-list.md) and are cited here and not reproved: the commitment is perfectly hiding by Theorem thm:z01\_hiding, so the 32 bytes carry no information about the window at all, and it is binding under the discrete logarithm assumption by Theorem thm:z01\_binding, so an opening the Nucleo later supplies is the window it actually held.
 
 ## The mathematics
 
 The new content of this chapter is not cryptographic. It is a statement about what a generated register interface guarantees, written precisely enough that the boundary of the guarantee is visible.
 
-**Definition Z22.1 (Register layout and its typed view).** Let $\mathcal{A}$ be the set of word addresses of a peripheral block. A *register layout* is a finite set $\mathcal{F}$ of fields, each a tuple $f = (a_f, \ell_f, h_f, \kappa_f)$ with an address $a_f \in \mathcal{A}$, a bit range $0 \le \ell_f \le h_f \le 31$, and a kind $\kappa_f \in \lbrace \mathsf{rw}, \mathsf{ro}, \mathsf{wo}, \mathsf{res}\rbrace$, where $\mathsf{res}$ marks a reserved field. Write
+**Definition Z22.1 (Register layout and its typed view).** Let $`\mathcal{A}`$ be the set of word addresses of a peripheral block. A *register layout* is a finite set $`\mathcal{F}`$ of fields, each a tuple $`f = (a_f, \ell_f, h_f, \kappa_f)`$ with an address $`a_f \in \mathcal{A}`$, a bit range $`0 \le \ell_f \le h_f \le 31`$, and a kind $`\kappa_f \in \lbrace \mathsf{rw}, \mathsf{ro}, \mathsf{wo}, \mathsf{res}\rbrace`$, where $`\mathsf{res}`$ marks a reserved field. Write
 
 $$
 \mathrm{bits}(f) = \lbrace \thinspace  (a_f, j) \mid \ell_f \le j \le h_f \thinspace \rbrace \tag{22.3}
 $$
 
-for the *footprint* of $f$. The layout is *disjoint* when $\mathrm{bits}(f) \cap \mathrm{bits}(g) = \emptyset$ for all $f \ne g$ in $\mathcal{F}$. Write $\mathcal{F}_{\mathrm{acc}} = \lbrace \thinspace f \in \mathcal{F} \mid \kappa_f \ne \mathsf{res} \thinspace \rbrace$ for the accessible fields, and define the *typed view* of the layout as the map
+for the *footprint* of $`f`$. The layout is *disjoint* when $`\mathrm{bits}(f) \cap \mathrm{bits}(g) = \emptyset`$ for all $`f \ne g`$ in $`\mathcal{F}`$. Write $`\mathcal{F}_{\mathrm{acc}} = \lbrace \thinspace f \in \mathcal{F} \mid \kappa_f \ne \mathsf{res} \thinspace \rbrace`$ for the accessible fields, and define the *typed view* of the layout as the map
 
 $$
 T : \mathcal{F}_{\mathrm{acc}} \to 2^{\mathbb{N}}, \qquad
   T(f) = \lbrace \thinspace  0, 1, \ldots, 2^{\thinspace h_f - \ell_f + 1} - 1 \thinspace \rbrace . \tag{22.4}
 $$
 
-A *well-typed read* of $f \in \mathcal{F}_{\mathrm{acc}}$ from a word $W_{a_f} = \sum_{j=0}^{31} b_j 2^j$ is the value
+A *well-typed read* of $`f \in \mathcal{F}_{\mathrm{acc}}`$ from a word $`W_{a_f} = \sum_{j=0}^{31} b_j 2^j`$ is the value
 
 $$
 \mathrm{rd}(f) \thickspace =\thickspace  \big\lfloor W_{a_f} / 2^{\thinspace \ell_f} \big\rfloor
   \thickspace \bmod\thickspace  2^{\thinspace h_f - \ell_f + 1}, \tag{22.5}
 $$
 
-which is the shift and mask the generated accessor emits. A code generator is *faithful* to the layout when it emits an accessor for every $f \in \mathcal{F}_{\mathrm{acc}}$ and for no other field.
+which is the shift and mask the generated accessor emits. A code generator is *faithful* to the layout when it emits an accessor for every $`f \in \mathcal{F}_{\mathrm{acc}}`$ and for no other field.
 
-**Proposition Z22.2 (A well-typed read cannot reach a reserved field).** Let $\mathcal{F}$ be a disjoint layout, let the generator be faithful to it, and let $f \in \mathcal{F}_{\mathrm{acc}}$. Then
+**Proposition Z22.2 (A well-typed read cannot reach a reserved field).** Let $`\mathcal{F}`$ be a disjoint layout, let the generator be faithful to it, and let $`f \in \mathcal{F}_{\mathrm{acc}}`$. Then
 
-1. $\mathrm{bits}(f) \cap \mathrm{bits}(g) = \emptyset$ for every $g \in \mathcal{F}$ with $\kappa_g = \mathsf{res}$;
-2. $\mathrm{rd}(f)$ depends on the bits of $\mathrm{bits}(f)$ and on no other bit of the word $W_{a_f}$;
-3. $\mathrm{rd}(f) \in T(f)$.
+1. $`\mathrm{bits}(f) \cap \mathrm{bits}(g) = \emptyset`$ for every $`g \in \mathcal{F}`$ with $`\kappa_g = \mathsf{res}`$;
+2. $`\mathrm{rd}(f)`$ depends on the bits of $`\mathrm{bits}(f)`$ and on no other bit of the word $`W_{a_f}`$;
+3. $`\mathrm{rd}(f) \in T(f)`$.
 
-*Proof.* (1) Let $g \in \mathcal{F}$ with $\kappa_g = \mathsf{res}$. Since $f \in \mathcal{F}_{\mathrm{acc}}$ we have $\kappa_f \ne \mathsf{res}$, so $\kappa_f \ne \kappa_g$ and therefore $f \ne g$ as tuples. The layout is disjoint, so $\mathrm{bits}(f) \cap \mathrm{bits}(g) = \emptyset$.
+*Proof.* (1) Let $`g \in \mathcal{F}`$ with $`\kappa_g = \mathsf{res}`$. Since $`f \in \mathcal{F}_{\mathrm{acc}}`$ we have $`\kappa_f \ne \mathsf{res}`$, so $`\kappa_f \ne \kappa_g`$ and therefore $`f \ne g`$ as tuples. The layout is disjoint, so $`\mathrm{bits}(f) \cap \mathrm{bits}(g) = \emptyset`$.
 
-(2) Write $\ell = \ell_f$, $h = h_f$ and $m = h - \ell + 1$, and write $W_{a_f} = \sum_{j=0}^{31} b_j 2^j$ with $b_j \in \lbrace 0,1\rbrace$. Split the sum at $\ell$:
+(2) Write $`\ell = \ell_f`$, $`h = h_f`$ and $`m = h - \ell + 1`$, and write $`W_{a_f} = \sum_{j=0}^{31} b_j 2^j`$ with $`b_j \in \lbrace 0,1\rbrace`$. Split the sum at $`\ell`$:
 
 $$
 W_{a_f} \thickspace =\thickspace  \sum_{j=0}^{\ell-1} b_j 2^j \thickspace +\thickspace  2^{\ell}\sum_{j=\ell}^{31} b_j 2^{\thinspace j-\ell}.
 $$
 
-The first sum is at most $2^{\ell} - 1$, so it contributes nothing to the integer quotient and
+The first sum is at most $`2^{\ell} - 1`$, so it contributes nothing to the integer quotient and
 
 $$
 \big\lfloor W_{a_f} / 2^{\ell} \big\rfloor \thickspace =\thickspace  \sum_{j=\ell}^{31} b_j 2^{\thinspace j-\ell}.
 $$
 
-Now split that sum at $j = h$:
+Now split that sum at $`j = h`$:
 
 $$
 \sum_{j=\ell}^{31} b_j 2^{\thinspace j-\ell}
   \thickspace =\thickspace  \sum_{j=\ell}^{h} b_j 2^{\thinspace j-\ell} \thickspace +\thickspace  2^{m}\sum_{j=h+1}^{31} b_j 2^{\thinspace j-h-1}.
 $$
 
-The second term is a multiple of $2^m$ and so vanishes modulo $2^m$; the first term is at most $\sum_{j=\ell}^{h} 2^{\thinspace j-\ell} = 2^{m} - 1 < 2^m$ and so is its own residue. Therefore
+The second term is a multiple of $`2^m`$ and so vanishes modulo $`2^m`$; the first term is at most $`\sum_{j=\ell}^{h} 2^{\thinspace j-\ell} = 2^{m} - 1 < 2^m`$ and so is its own residue. Therefore
 
 $$
 \mathrm{rd}(f) \thickspace =\thickspace  \sum_{j=\ell}^{h} b_j 2^{\thinspace j-\ell}, \tag{22.6}
 $$
 
-whose terms are indexed exactly by $\ell \le j \le h$, that is by $\mathrm{bits}(f)$ of Equation (22.3). No $b_j$ outside that range appears, so by part (1) no bit of any reserved field appears.
+whose terms are indexed exactly by $`\ell \le j \le h`$, that is by $`\mathrm{bits}(f)`$ of Equation (22.3). No $`b_j`$ outside that range appears, so by part (1) no bit of any reserved field appears.
 
-(3) From Equation (22.6), $\mathrm{rd}(f) \ge 0$ and $\mathrm{rd}(f) \le \sum_{j=\ell}^{h} 2^{\thinspace j-\ell} = 2^{m} - 1$, so $\mathrm{rd}(f) \in \lbrace 0, \ldots, 2^m - 1\rbrace = T(f)$ by Equation (22.4). &#9632;
+(3) From Equation (22.6), $`\mathrm{rd}(f) \ge 0`$ and $`\mathrm{rd}(f) \le \sum_{j=\ell}^{h} 2^{\thinspace j-\ell} = 2^{m} - 1`$, so $`\mathrm{rd}(f) \in \lbrace 0, \ldots, 2^m - 1\rbrace = T(f)`$ by Equation (22.4). &#9632;
 
 **Remark Z22.3.** Read the hypotheses and not only the conclusion. The proposition assumes the layout is disjoint and the generator is faithful; both are properties of the description file and of the tool, not of the Swift compiler, so the gate that enforces them is the acceptance test's script over the description file and nothing else. And the conclusion is about firmware. It says a correct accessor reads the bits its field names; it says nothing about whether the sample those bits carry is the right sample, nothing about the commitment, and nothing about the proof. A commitment to a wrongly read window is a perfectly valid commitment to a wrong value, and [Project 16](16-the-model-proposes-a-ranking-function-the-certifier.md) is where that distinction is given its theorem. The language buys a class of firmware defect. It does not buy soundness, and this chapter does not claim it does.
 
-**Lemma Z22.4 (The memory arithmetic that rules the larger model out).** A transformer with $P$ parameters quantised to $b$ bits per parameter needs at least $P b / 8$ bytes of weights resident before any activation, cache or runtime is counted. For $P = 8 \times 10^{9}$ and $b = 4$ that floor is $4.0 \times 10^{9}$ bytes; the NanoPi NEO Air carries $512 \times 2^{20} = 5.37 \times 10^{8}$ bytes of DRAM, so the floor exceeds the whole of memory by a factor of $7.5$. For $b = 2$ the floor is $2.0 \times 10^{9}$ bytes and the factor is $3.7$. In both cases the model does not fit.
+**Lemma Z22.4 (The memory arithmetic that rules the larger model out).** A transformer with $`P`$ parameters quantised to $`b`$ bits per parameter needs at least $`P b / 8`$ bytes of weights resident before any activation, cache or runtime is counted. For $`P = 8 \times 10^{9}`$ and $`b = 4`$ that floor is $`4.0 \times 10^{9}`$ bytes; the NanoPi NEO Air carries $`512 \times 2^{20} = 5.37 \times 10^{8}`$ bytes of DRAM, so the floor exceeds the whole of memory by a factor of $`7.5`$. For $`b = 2`$ the floor is $`2.0 \times 10^{9}`$ bytes and the factor is $`3.7`$. In both cases the model does not fit.
 
-*Proof.* Each parameter occupies $b$ bits, so $P$ parameters occupy $P b$ bits, which is $P b / 8$ bytes; this is a floor and not an estimate because nothing has yet been allocated for the activation buffers, the key and value cache, the runtime or the operating system. For $P = 8 \times 10^{9}$ and $b = 4$:
+*Proof.* Each parameter occupies $`b`$ bits, so $`P`$ parameters occupy $`P b`$ bits, which is $`P b / 8`$ bytes; this is a floor and not an estimate because nothing has yet been allocated for the activation buffers, the key and value cache, the runtime or the operating system. For $`P = 8 \times 10^{9}`$ and $`b = 4`$:
 
 $$
 \frac{P b}{8} \thickspace =\thickspace  \frac{8 \times 10^{9} \times 4}{8} \thickspace =\thickspace  4.0 \times 10^{9}
   \ \text{bytes}.
 $$
 
-The board's DRAM is $512 \times 2^{20} = 512 \times 1048576 = 536870912 \approx 5.37 \times 10^{8}$ bytes. The ratio is
+The board's DRAM is $`512 \times 2^{20} = 512 \times 1048576 = 536870912 \approx 5.37 \times 10^{8}`$ bytes. The ratio is
 
 $$
 \frac{4.0 \times 10^{9}}{5.37 \times 10^{8}} \thickspace =\thickspace  7.45,
 $$
 
-so the weights alone need about seven and a half times the memory the board has. For $b = 2$ the floor halves to $2.0 \times 10^{9}$ bytes and the ratio is $2.0 \times 10^{9} / 5.37 \times 10^{8} = 3.72$. A ratio above one is a refusal, so both cases refuse, and the 8 GB of eMMC does not change this: paging weights from flash changes the latency per token by orders of magnitude and does not change the resident requirement that produced the ratio. &#9632;
+so the weights alone need about seven and a half times the memory the board has. For $`b = 2`$ the floor halves to $`2.0 \times 10^{9}`$ bytes and the ratio is $`2.0 \times 10^{9} / 5.37 \times 10^{8} = 3.72`$. A ratio above one is a refusal, so both cases refuse, and the 8 GB of eMMC does not change this: paging weights from flash changes the latency per token by orders of magnitude and does not change the resident requirement that produced the ratio. &#9632;
 
-**Remark Z22.6.** Lemma **Lemma Z22.4** is why the brief's pairing of an on-device inference runtime \[[3](#references)\] with an 8B model on that board \[[2](#references)\] is corrected rather than followed. The ladder this bench actually runs is the sibling volume's: SmolLM2-360M at 4 bits is $360 \times 10^{6} \times 4 / 8 = 1.8 \times 10^{8}$ bytes, computed, which is about a third of the board's DRAM, and Qwen2.5-0.5B at 4 bits is $2.5 \times 10^{8}$ bytes, computed, which is about half. Neither of those is used in this chapter, which has no model at all; the arithmetic is recorded here because this is the chapter where the brief's claim lands.
+**Remark Z22.6.** Lemma **Lemma Z22.4** is why the brief's pairing of an on-device inference runtime \[[3](#references)\] with an 8B model on that board \[[2](#references)\] is corrected rather than followed. The ladder this bench actually runs is the sibling volume's: SmolLM2-360M at 4 bits is $`360 \times 10^{6} \times 4 / 8 = 1.8 \times 10^{8}`$ bytes, computed, which is about a third of the board's DRAM, and Qwen2.5-0.5B at 4 bits is $`2.5 \times 10^{8}`$ bytes, computed, which is about half. Neither of those is used in this chapter, which has no model at all; the arithmetic is recorded here because this is the chapter where the brief's claim lands.
 
 ## The protocol
 
 1. The Nucleo brings up I2C1 at 400 kHz through the generated accessors and reads the identity register of the LSM6DSV16X at 0x6b, refusing to proceed if it does not answer.
 2. It reads one sample every 10 ms from the first output register at 0x28, two bytes, low byte first, and accumulates the signed sum. No sample is stored.
-3. After 64 samples it reduces the accumulator modulo $p$ by Equation (22.1), draws $r$ from the hardware random generator, and computes $c = g^v h^r$ on ristretto255 in the imported C module.
-4. It writes 36 bytes to the CDC endpoint: a 4-byte sequence number and the 32-byte compressed point. The accumulator and $r$ stay in SRAM and are indexed by the sequence number for a later opening.
+3. After 64 samples it reduces the accumulator modulo $`p`$ by Equation (22.1), draws $`r`$ from the hardware random generator, and computes $`c = g^v h^r`$ on ristretto255 in the imported C module.
+4. It writes 36 bytes to the CDC endpoint: a 4-byte sequence number and the 32-byte compressed point. The accumulator and $`r`$ stay in SRAM and are indexed by the sequence number for a later opening.
 5. The Pi 4B decodes the point, checks that the sequence number is the previous one plus one, and draws the verdict on the display with one of the four LEDs.
-6. For an audit the Pi asks for a sequence number over the same link; the Nucleo returns $(v, r)$; the Pi recomputes $g^v h^r$ and compares it with the stored point. An altered pair is refused by Theorem thm:z01\_binding.
+6. For an audit the Pi asks for a sequence number over the same link; the Nucleo returns $`(v, r)`$; the Pi recomputes $`g^v h^r`$ and compares it with the stored point. An altered pair is refused by Theorem thm:z01\_binding.
 
 ## The code
 
@@ -355,8 +355,8 @@ stateDiagram-v2
 | cycles per commitment | not measured | not applicable | the DWT counter with the MCC 118 as the witness, as in [Project 1](01-the-price-list.md); no capture exists |
 | window period | not measured | not measured | 64 samples at 10 ms is 640 ms per window, computed; the achieved period is unmeasured |
 | bytes per window | computed | computed | 4 plus 32 is 36 bytes by the protocol above |
-| weight floor, 8B at 4 bits | not applicable | not applicable | $4.0 \times 10^{9}$ bytes, computed in Lemma **Lemma Z22.4** |
-| NanoPi DRAM | not applicable | not applicable | $5.37 \times 10^{8}$ bytes from the board's own specification \[[10](#references)\] |
+| weight floor, 8B at 4 bits | not applicable | not applicable | $`4.0 \times 10^{9}`$ bytes, computed in Lemma **Lemma Z22.4** |
+| NanoPi DRAM | not applicable | not applicable | $`5.37 \times 10^{8}`$ bytes from the board's own specification \[[10](#references)\] |
 | energy per commitment | not measured | no, the PPK2 cannot meter a Pi | the PPK2 can meter the Nucleo; no run exists |
 
 ## Steps
@@ -392,7 +392,7 @@ The chapter passes when, on one recorded day: the script over the description fi
 - Proposition **Proposition Z22.2** has two hypotheses and they live outside the compiler. A description file with overlapping fields, or a generator that emits an accessor for a reserved range, breaks the conclusion with no warning from the language, which is why the acceptance test checks the file and not the firmware.
 - The Nucleo is shared between volumes and carries whatever image was flashed last. A capture taken without reflashing first is a capture of another project, and the build stamp beats the application name as evidence of which image is running.
 - Three X-NUCLEO shields exist on this bench and the Arduino header takes one. A plan that needs two sensors at once needs flying leads to a Pi I2C bus, not a stack.
-- An accumulator in `Int32` holds 64 samples of a signed 16-bit range without overflow, because $64 \times 2^{15} = 2^{21}$ is far inside $2^{31}$, computed; a longer window or a wider sample needs the arithmetic redone before the type is chosen.
+- An accumulator in `Int32` holds 64 samples of a signed 16-bit range without overflow, because $`64 \times 2^{15} = 2^{21}`$ is far inside $`2^{31}`$, computed; a longer window or a wider sample needs the arithmetic redone before the type is chosen.
 - The display carrier covers header pins 27 to 40, so an LED assigned inside that range is unreachable while the panel is seated. The three measured pins are below it; the fourth is marked to verify for exactly this reason.
 
 ## Languages and libraries not chosen
