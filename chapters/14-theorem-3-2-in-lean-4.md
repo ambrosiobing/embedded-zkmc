@@ -40,34 +40,34 @@ The paper's certifier accepts a public pair, a Buchi automaton for the negated p
 There is no witness to hide. The relation this chapter instantiates is the one zkPi hides later \[[6](#references)\]: a proof term $\pi$ and a statement $\theta$ are related when the kernel accepts $\pi$ as a proof of $\theta$,
 
 $$
-\mathcal{R}_{\mathrm{kernel}} = \{\, (\pi, \theta) \;:\; \mathsf{Check}(\pi, \theta) = 1 \,\}, \tag{14.1}
+\mathcal{R}_{\mathrm{kernel}} = \lbrace \thinspace  (\pi, \theta) \thickspace :\thickspace  \mathsf{Check}(\pi, \theta) = 1 \thinspace \rbrace , \tag{14.1}
 $$
 
-and the statement of this chapter is $\theta =$ Theorem **Theorem Z14.6** with $\pi$ public. In the volume's relation, Equation 2 of the paper, the chapter sits inside the word $\mathsf{Cert}$: the certifier's verdict $v_\phi$ is trustworthy exactly because $\theta$ holds, and the sets involved are the ones below: a state space $S$, an automaton state space $Q$, the values $\mathbb{N} \cup \{\infty\}$ of $V$, and the index set $\mathbb{N}$ of an execution.
+and the statement of this chapter is $\theta =$ Theorem **Theorem Z14.6** with $\pi$ public. In the volume's relation, Equation 2 of the paper, the chapter sits inside the word $\mathsf{Cert}$: the certifier's verdict $v_\phi$ is trustworthy exactly because $\theta$ holds, and the sets involved are the ones below: a state space $S$, an automaton state space $Q$, the values $\mathbb{N} \cup \lbrace \infty\rbrace$ of $V$, and the index set $\mathbb{N}$ of an execution.
 
 ## The mathematics
 
-**Definition Z14.1 (State transition system, trace, language).** A state transition system over an alphabet $\Sigma$ is $\mathcal{M} = (S, S_0, T, \langle\!\langle \cdot \rangle\!\rangle)$ with $S_0 \subseteq S$, $T \subseteq S \times S$ and an observation function $\langle\!\langle \cdot \rangle\!\rangle : S \to \Sigma$. An execution is a sequence $(s_i)_{i \in \mathbb{N}}$ with $s_0 \in S_0$ and $(s_i, s_{i+1}) \in T$ for all $i$; its trace is $(\langle\!\langle s_i \rangle\!\rangle)_{i \in \mathbb{N}} \in \Sigma^\omega$, and $\mathcal{L}_\mathcal{M}$ is the set of traces of all executions \[[1](#references)\].
+**Definition Z14.1 (State transition system, trace, language).** A state transition system over an alphabet $\Sigma$ is $\mathcal{M} = (S, S_0, T, \langle\negthinspace \langle \cdot \rangle\negthinspace \rangle)$ with $S_0 \subseteq S$, $T \subseteq S \times S$ and an observation function $\langle\negthinspace \langle \cdot \rangle\negthinspace \rangle : S \to \Sigma$. An execution is a sequence $(s_i)_{i \in \mathbb{N}}$ with $s_0 \in S_0$ and $(s_i, s_{i+1}) \in T$ for all $i$; its trace is $(\langle\negthinspace \langle s_i \rangle\negthinspace \rangle)_{i \in \mathbb{N}} \in \Sigma^\omega$, and $\mathcal{L}_\mathcal{M}$ is the set of traces of all executions \[[1](#references)\].
 
-**Definition Z14.2 (Nondeterministic Buchi automaton with fair transitions).** $\mathcal{A} = (Q, Q_0, \delta, F)$ with $Q_0 \subseteq Q$, $\delta \subseteq Q \times \Sigma \times Q$ and $F \subseteq \delta$. A run on $\sigma \in \Sigma^\omega$ is $(q_i)_{i \in \mathbb{N}}$ with $q_0 \in Q_0$ and $(q_i, \sigma_i, q_{i+1}) \in \delta$ for all $i$; it is accepting if $\{\, i \in \mathbb{N} : (q_i, \sigma_i, q_{i+1}) \in F \,\}$ is infinite, and $\mathcal{L}_\mathcal{A}$ is the set of words with an accepting run \[[2](#references)\].
+**Definition Z14.2 (Nondeterministic Buchi automaton with fair transitions).** $\mathcal{A} = (Q, Q_0, \delta, F)$ with $Q_0 \subseteq Q$, $\delta \subseteq Q \times \Sigma \times Q$ and $F \subseteq \delta$. A run on $\sigma \in \Sigma^\omega$ is $(q_i)_{i \in \mathbb{N}}$ with $q_0 \in Q_0$ and $(q_i, \sigma_i, q_{i+1}) \in \delta$ for all $i$; it is accepting if $\lbrace \thinspace i \in \mathbb{N} : (q_i, \sigma_i, q_{i+1}) \in F \thinspace \rbrace$ is infinite, and $\mathcal{L}_\mathcal{A}$ is the set of words with an accepting run \[[2](#references)\].
 
-**Definition Z14.3 (Fair execution of the composition).** A fair execution of the synchronous composition of $\mathcal{M}$ and $\mathcal{A}$ is a sequence $((s_i, q_i))_{i \in \mathbb{N}}$ in $S \times Q$ such that (i) $s_0 \in S_0$ and $q_0 \in Q_0$, (ii) $(s_i, s_{i+1}) \in T$ and $(q_i, \langle\!\langle s_i \rangle\!\rangle, q_{i+1}) \in \delta$ for all $i$, and (iii) the set $\{\, i : (q_i, \langle\!\langle s_i \rangle\!\rangle, q_{i+1}) \in F \,\}$ is infinite.
+**Definition Z14.3 (Fair execution of the composition).** A fair execution of the synchronous composition of $\mathcal{M}$ and $\mathcal{A}$ is a sequence $((s_i, q_i))_{i \in \mathbb{N}}$ in $S \times Q$ such that (i) $s_0 \in S_0$ and $q_0 \in Q_0$, (ii) $(s_i, s_{i+1}) \in T$ and $(q_i, \langle\negthinspace \langle s_i \rangle\negthinspace \rangle, q_{i+1}) \in \delta$ for all $i$, and (iii) the set $\lbrace \thinspace i : (q_i, \langle\negthinspace \langle s_i \rangle\negthinspace \rangle, q_{i+1}) \in F \thinspace \rbrace$ is infinite.
 
-**Definition Z14.4 (Ranking function).** $V : S \times Q \to \mathbb{N} \cup \{\infty\}$ is a ranking function for the fair termination of the composition if, for all $s, s' \in S$ and $q, q' \in Q$,
+**Definition Z14.4 (Ranking function).** $V : S \times Q \to \mathbb{N} \cup \lbrace \infty\rbrace$ is a ranking function for the fair termination of the composition if, for all $s, s' \in S$ and $q, q' \in Q$,
 
 $$
 \begin{aligned}
-s \in S_0 &\implies \big( q \in Q_0 \implies V(s, q) \ne \infty \big),  \\
-  (s, s') \in T &\implies \big( V(s, q) \ne \infty \wedge (q, \langle\!\langle s
-  \rangle\!\rangle, q') \in \delta \implies V(s, q) \ge V(s', q') \big),  \\
-  (s, s') \in T &\implies \big( V(s, q) \ne \infty \wedge (q, \langle\!\langle s
-  \rangle\!\rangle, q') \in F \implies V(s, q) > V(s', q') \big), \tag{14.2}
+s \in S_0 &\implies \big( q \in Q_0 \implies V(s, q) \ne \infty \big),  \cr 
+  (s, s') \in T &\implies \big( V(s, q) \ne \infty \wedge (q, \langle\negthinspace \langle s
+  \rangle\negthinspace \rangle, q') \in \delta \implies V(s, q) \ge V(s', q') \big),  \cr 
+  (s, s') \in T &\implies \big( V(s, q) \ne \infty \wedge (q, \langle\negthinspace \langle s
+  \rangle\negthinspace \rangle, q') \in F \implies V(s, q) > V(s', q') \big), \tag{14.2}
 \end{aligned}
 $$
 
-which are Equations 4, 5 and 6 of the paper \[[1](#references)\]. In Equations (14.2) and (14.2) the premise $V(s, q) \ne \infty$ makes the left side a natural number, and the conclusion is read on $\mathbb{N}$: $V(s', q')$ is finite and the comparison holds between two natural numbers. That is how the Lean code below reads it, with the conclusion naming a finite value $n'$.
+which are Equations 4, 5 and 6 of the paper \[[1](#references)\]. In Equations 14.2 and 14.2 the premise $V(s, q) \ne \infty$ makes the left side a natural number, and the conclusion is read on $\mathbb{N}$: $V(s', q')$ is finite and the comparison holds between two natural numbers. That is how the Lean code below reads it, with the conclusion naming a finite value $n'$.
 
-**Lemma Z14.5 (No infinite descent in $\mathbb{N}$).** There is no sequence $(n_i)_{i \in \mathbb{N}}$ in $\mathbb{N}$ that is non-increasing, $n_{i+1} \le n_i$ for all $i$, and strictly decreases at infinitely many indices, that is, with $D = \{\, i \in \mathbb{N} : n_{i+1} < n_i \,\}$ infinite.
+**Lemma Z14.5 (No infinite descent in $\mathbb{N}$).** There is no sequence $(n_i)_{i \in \mathbb{N}}$ in $\mathbb{N}$ that is non-increasing, $n_{i+1} \le n_i$ for all $i$, and strictly decreases at infinitely many indices, that is, with $D = \lbrace \thinspace i \in \mathbb{N} : n_{i+1} < n_i \thinspace \rbrace$ infinite.
 
 *Proof.* Suppose such a sequence exists. First an auxiliary fact: for $a \le b$, $n_b \le n_a$. By induction on $b$: if $b = 0$ then $a = 0$ and $n_0 \le n_0$; if $a \le b + 1$ then either $a = b + 1$, and $n_{b+1} \le n_{b+1}$, or $a \le b$, and $n_{b+1} \le n_b \le n_a$ by the hypothesis and the induction hypothesis.
 
@@ -77,19 +77,19 @@ $$
 n_{i_k + 1} + (k + 1) \le n_0 . \tag{14.3}
 $$
 
-By induction on $k$. For $k = 0$: $i_0 \in D$ gives $n_{i_0 + 1} + 1 \le n_{i_0}$, and the auxiliary fact with $0 \le i_0$ gives $n_{i_0} \le n_0$; together $n_{i_0 + 1} + 1 \le n_0$. For the step, assume Equation (14.3) at $k$. Since $i_k < i_{k+1}$ we have $i_k + 1 \le i_{k+1}$, so the auxiliary fact gives $n_{i_{k+1}} \le n_{i_k + 1}$; and $i_{k+1} \in D$ gives $n_{i_{k+1} + 1} + 1 \le n_{i_{k+1}}$. Chaining the three inequalities,
+By induction on $k$. For $k = 0$: $i_0 \in D$ gives $n_{i_0 + 1} + 1 \le n_{i_0}$, and the auxiliary fact with $0 \le i_0$ gives $n_{i_0} \le n_0$; together $n_{i_0 + 1} + 1 \le n_0$. For the step, assume Equation 14.3 at $k$. Since $i_k < i_{k+1}$ we have $i_k + 1 \le i_{k+1}$, so the auxiliary fact gives $n_{i_{k+1}} \le n_{i_k + 1}$; and $i_{k+1} \in D$ gives $n_{i_{k+1} + 1} + 1 \le n_{i_{k+1}}$. Chaining the three inequalities,
 
 $$
 n_{i_{k+1} + 1} + (k + 2) \le n_{i_{k+1}} + (k + 1) \le n_{i_k + 1} + (k + 1) \le n_0 ,
 $$
 
-which is Equation (14.3) at $k + 1$. Now take $k = n_0$: Equation (14.3) reads $n_{i_{n_0} + 1} + n_0 + 1 \le n_0$, that is $n_{i_{n_0} + 1} + 1 \le 0$. No natural number satisfies this, because $0$ is the least element of $\mathbb{N}$; this is the well-foundedness of $\mathbb{N}$ in the form the proof needs, and the contradiction proves the lemma. &#9632;
+which is Equation 14.3 at $k + 1$. Now take $k = n_0$: Equation 14.3 reads $n_{i_{n_0} + 1} + n_0 + 1 \le n_0$, that is $n_{i_{n_0} + 1} + 1 \le 0$. No natural number satisfies this, because $0$ is the least element of $\mathbb{N}$; this is the well-foundedness of $\mathbb{N}$ in the form the proof needs, and the contradiction proves the lemma. &#9632;
 
 **Theorem Z14.6 (The ranking-function rule, Theorem 3.2 of the paper).** Let $\mathcal{M}$ and $\mathcal{A}$ be as in Definitions **Definition Z14.1** and **Definition Z14.2**. If a ranking function $V$ in the sense of Definition **Definition Z14.4** exists, then the composition has no fair execution, and therefore $\mathcal{L}_\mathcal{M} \cap \mathcal{L}_\mathcal{A} = \emptyset$.
 
-*Proof.* Suppose $\sigma \in \mathcal{L}_\mathcal{M} \cap \mathcal{L}_\mathcal{A}$. Then there is an execution $(s_i)$ of $\mathcal{M}$ with trace $\sigma$, so $\sigma_i = \langle\!\langle s_i \rangle\!\rangle$, and an accepting run $(q_i)$ of $\mathcal{A}$ on $\sigma$. The pair sequence $((s_i, q_i))$ satisfies (i), (ii) and (iii) of Definition **Definition Z14.3**, so it is a fair execution of the composition; it suffices to show that none exists.
+*Proof.* Suppose $\sigma \in \mathcal{L}_\mathcal{M} \cap \mathcal{L}_\mathcal{A}$. Then there is an execution $(s_i)$ of $\mathcal{M}$ with trace $\sigma$, so $\sigma_i = \langle\negthinspace \langle s_i \rangle\negthinspace \rangle$, and an accepting run $(q_i)$ of $\mathcal{A}$ on $\sigma$. The pair sequence $((s_i, q_i))$ satisfies (i), (ii) and (iii) of Definition **Definition Z14.3**, so it is a fair execution of the composition; it suffices to show that none exists.
 
-Let $((s_i, q_i))$ be a fair execution and put $m_i = V(s_i, q_i) \in \mathbb{N} \cup \{\infty\}$. We show by induction on $i$ that $m_i \ne \infty$. For $i = 0$, (i) gives $s_0 \in S_0$ and $q_0 \in Q_0$, so Equation (14.2) gives $m_0 \ne \infty$. For the step, assume $m_i \ne \infty$; (ii) gives $(s_i, s_{i+1}) \in T$ and $(q_i, \langle\!\langle s_i \rangle\!\rangle, q_{i+1}) \in \delta$, so Equation (14.2) applies and yields a finite $m_{i+1}$ with $m_{i+1} \le m_i$. Hence $(m_i)$ is a sequence in $\mathbb{N}$ and non-increasing. At every index $i$ of the infinite set of (iii), the transition is in $F$, so Equation (14.2) applies and gives $m_{i+1} < m_i$. So $(m_i)$ is non-increasing and strictly decreases at infinitely many indices, which Lemma **Lemma Z14.5** rules out. Hence no fair execution exists and $\mathcal{L}_\mathcal{M} \cap \mathcal{L}_\mathcal{A} = \emptyset$. &#9632;
+Let $((s_i, q_i))$ be a fair execution and put $m_i = V(s_i, q_i) \in \mathbb{N} \cup \lbrace \infty\rbrace$. We show by induction on $i$ that $m_i \ne \infty$. For $i = 0$, (i) gives $s_0 \in S_0$ and $q_0 \in Q_0$, so Equation 14.2 gives $m_0 \ne \infty$. For the step, assume $m_i \ne \infty$; (ii) gives $(s_i, s_{i+1}) \in T$ and $(q_i, \langle\negthinspace \langle s_i \rangle\negthinspace \rangle, q_{i+1}) \in \delta$, so Equation 14.2 applies and yields a finite $m_{i+1}$ with $m_{i+1} \le m_i$. Hence $(m_i)$ is a sequence in $\mathbb{N}$ and non-increasing. At every index $i$ of the infinite set of (iii), the transition is in $F$, so Equation 14.2 applies and gives $m_{i+1} < m_i$. So $(m_i)$ is non-increasing and strictly decreases at infinitely many indices, which Lemma **Lemma Z14.5** rules out. Hence no fair execution exists and $\mathcal{L}_\mathcal{M} \cap \mathcal{L}_\mathcal{A} = \emptyset$. &#9632;
 
 **Remark Z14.8.** The rule is the fair-termination rule of Grumberg, Francez, Makowsky and de Roever \[[3](#references)\] read through the automata-theoretic approach \[[2](#references)\]; the paper's own proof is sketched on its page 17 and written out in [Project 3](03-the-modems-backoff-machine.md). What Lean adds is not a new argument but a kernel that refuses a gap: in the listing below the lemma is closed by `omega` at the two places where the prose says "chaining" and "no natural number satisfies this", and the theorem's assembly is the marked `sorry`.
 

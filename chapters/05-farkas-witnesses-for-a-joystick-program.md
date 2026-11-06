@@ -38,23 +38,23 @@ The program is small enough to read in a minute: a joystick press arms the devic
 
 ## The secret, the statement and the relation
 
-The program's state is $x = (m, c) \in \mathbb{Z}^2$: the mode $m$ (0 idle, 1 armed, 2 beeping) and the counter $c$. Over the stacked vector $y = (x, x') = (m, c, m', c') \in \mathbb{Z}^4$ the five guarded updates are systems $A_i y \le b_i$ in the paper's Equation 16, each written with every equality as a pair of inequalities. In words: $u_1$ arms on a press from idle ($m = 0 \to m' = 1, c' = 1$); $u_2$ counts a press while armed ($m = 1 \wedge c \le 4 \to m' = 1, c' = c + 1$); $u_3$ starts the buzzer at the fifth press ($m = 1 \wedge c \ge 5 \to m' = 2, c' = 5$); $u_4$ counts the buzzer down ($m = 2 \wedge c \ge 1 \to m' = 2, c' = c - 1$); $u_5$ silences it ($m = 2 \wedge c \le 0 \to m' = 0, c' = 0$). The initial condition is $S_0 = \{x \mid A_0 x \le b_0\} = \{(0, 0)\}$, Equation 15.
+The program's state is $x = (m, c) \in \mathbb{Z}^2$: the mode $m$ (0 idle, 1 armed, 2 beeping) and the counter $c$. Over the stacked vector $y = (x, x') = (m, c, m', c') \in \mathbb{Z}^4$ the five guarded updates are systems $A_i y \le b_i$ in the paper's Equation 16, each written with every equality as a pair of inequalities. In words: $u_1$ arms on a press from idle ($m = 0 \to m' = 1, c' = 1$); $u_2$ counts a press while armed ($m = 1 \wedge c \le 4 \to m' = 1, c' = c + 1$); $u_3$ starts the buzzer at the fifth press ($m = 1 \wedge c \ge 5 \to m' = 2, c' = 5$); $u_4$ counts the buzzer down ($m = 2 \wedge c \ge 1 \to m' = 2, c' = c - 1$); $u_5$ silences it ($m = 2 \wedge c \le 0 \to m' = 0, c' = 0$). The initial condition is $S_0 = \lbrace x \mid A_0 x \le b_0\rbrace = \lbrace (0, 0)\rbrace$, Equation 15.
 
 The witness is the family of secret rows, the statement is everything the verifier is given, and the relation is the paper's $\mathcal{R}_{\mathsf{f}}$ restricted to one obligation (its Equation 25, before folding):
 
 $$
 \begin{aligned}
-w &= \big(\, \{A_i, b_i\}_{i=0}^{5},\; \{r_{A_i}, r_{b_i}\}_{i=0}^{5},\;
-       \{\lambda_o, \mu_o, \delta_o\}_{o \in \mathrm{Obl}} \,\big), \\
-  u &= \big(\, V,\; \mathcal{A}_{\neg\phi},\; \{G_o, h_o\}_{o \in \mathrm{Obl}},\; M,\;
-       \{c_{A_i}, c_{b_i}\}_{i=0}^{5} \,\big), \\
-  \mathcal{R}_{05} &= \Big\{\, (w, u) \;\Big|\;
-     \forall o \in \mathrm{Obl}:\;
-     A_{s(o)}^\top \lambda_o = -\,G_o^\top \mu_o \;\wedge\;
-     \delta_o = -\,b_{s(o)}^\top \lambda_o - h_o^\top \mu_o - 1 \notag \\
-   &\qquad\quad \wedge\; \lambda_o, \mu_o, \delta_o \in [0, M] \;\wedge\;
-     A_i, b_i \in [-M, M] \;\wedge\; c_{A_i} = \mathsf{Com}(A_i; r_{A_i}) \;\wedge\;
-     c_{b_i} = \mathsf{Com}(b_i; r_{b_i}) \,\Big\}. \tag{5.1}
+w &= \big(\thinspace  \lbrace A_i, b_i\rbrace _{i=0}^{5},\thickspace  \lbrace r_{A_i}, r_{b_i}\rbrace _{i=0}^{5},\thickspace 
+       \lbrace \lambda_o, \mu_o, \delta_o\rbrace _{o \in \mathrm{Obl}} \thinspace \big), \cr 
+  u &= \big(\thinspace  V,\thickspace  \mathcal{A}_{\neg\phi},\thickspace  \lbrace G_o, h_o\rbrace _{o \in \mathrm{Obl}},\thickspace  M,\thickspace 
+       \lbrace c_{A_i}, c_{b_i}\rbrace _{i=0}^{5} \thinspace \big), \cr 
+  \mathcal{R}_{05} &= \Big\lbrace \thinspace  (w, u) \thickspace \Big|\thickspace 
+     \forall o \in \mathrm{Obl}:\thickspace 
+     A_{s(o)}^\top \lambda_o = -\thinspace G_o^\top \mu_o \thickspace \wedge\thickspace 
+     \delta_o = -\thinspace b_{s(o)}^\top \lambda_o - h_o^\top \mu_o - 1 \notag \cr 
+   &\qquad\quad \wedge\thickspace  \lambda_o, \mu_o, \delta_o \in [0, M] \thickspace \wedge\thickspace 
+     A_i, b_i \in [-M, M] \thickspace \wedge\thickspace  c_{A_i} = \mathsf{Com}(A_i; r_{A_i}) \thickspace \wedge\thickspace 
+     c_{b_i} = \mathsf{Com}(b_i; r_{b_i}) \thinspace \Big\rbrace . \tag{5.1}
 \end{aligned}
 $$
 
@@ -62,31 +62,31 @@ Here $\mathrm{Obl}$ is the set of the 77 obligations enumerated in the next subs
 
 ## The mathematics
 
-**Definition Z5.1 (Linear guarded-command program).** A linear guarded-command program over integer variables $x \in \mathbb{Z}^d$ is a pair $(A_0 x \le b_0,\; \{A_i [x\; x']^\top \le b_i\}_{i=1}^{n})$ with $A_0 \in \mathbb{Z}^{k_0 \times d}$, $A_i \in \mathbb{Z}^{k_i \times 2d}$ and integer bounds; its state transition system has $S = \mathbb{Z}^d$, $S_0 = \{x \mid A_0 x \le b_0\}$ and $T = \bigcup_{i=1}^{n} \{(x, x') \mid A_i [x\; x']^\top \le b_i\}$. This is the paper's Equations 15 and 16 \[[1](#references)\]; the form descends from the guarded commands of \[[7](#references)\]. The joystick program has $d = 2$, $n = 5$, $k_0 = 4$, and $k_i \in \{6, 7, 7, 7, 7\}$.
+**Definition Z5.1 (Linear guarded-command program).** A linear guarded-command program over integer variables $x \in \mathbb{Z}^d$ is a pair $(A_0 x \le b_0,\thickspace \lbrace A_i [x\thickspace x']^\top \le b_i\rbrace _{i=1}^{n})$ with $A_0 \in \mathbb{Z}^{k_0 \times d}$, $A_i \in \mathbb{Z}^{k_i \times 2d}$ and integer bounds; its state transition system has $S = \mathbb{Z}^d$, $S_0 = \lbrace x \mid A_0 x \le b_0\rbrace$ and $T = \bigcup_{i=1}^{n} \lbrace (x, x') \mid A_i [x\thickspace x']^\top \le b_i\rbrace$. This is the paper's Equations 15 and 16 \[[1](#references)\]; the form descends from the guarded commands of \[[7](#references)\]. The joystick program has $d = 2$, $n = 5$, $k_0 = 4$, and $k_i \in \lbrace 6, 7, 7, 7, 7\rbrace$.
 
 **Definition Z5.2 (Piecewise-linear ranking function).** For an automaton state $q$, $V(x, q)$ is given by finitely many polyhedral cases $C^{(q)}_j x \le d^{(q)}_j \Rightarrow V = w^{(q)}_j x + u^{(q)}_j$ (finite cases, $j = 1, \dots, m_q$) and $E^{(q)}_k x \le f^{(q)}_k \Rightarrow V = +\infty$ (infinite cases, $k = 1, \dots, l_q$), the paper's Equation 18, such that the cases are pairwise disjoint, jointly cover $\mathbb{Z}^d$, and every finite case is non-negative on its region.
 
-The property is $\phi = \neg\,\mathrm{FG}\,\mathsf{beeping}$ with the atomic predicate $\mathsf{beeping} \equiv (m = 2)$, i.e. $P^{\mathsf{beeping}} = [\,-1\; 0;\; 1\; 0\,]$ and $r^{\mathsf{beeping}} = (-2, 2)$ in the paper's Equation 17. The automaton for $\neg\phi = \mathrm{FG}\,\mathsf{beeping}$ is the paper's Figure 2b with the label renamed: $Q = \{q_0, q_1\}$, $Q_0 = \{q_0\}$, $\delta = \{(q_0, \mathsf{true}, q_0),\; (q_0, \mathsf{beeping}, q_1),\; (q_1, \mathsf{beeping}, q_1)\}$ and $F = \{(q_1, \mathsf{beeping}, q_1)\}$. The ranking function is
+The property is $\phi = \neg\thinspace \mathrm{FG}\thinspace \mathsf{beeping}$ with the atomic predicate $\mathsf{beeping} \equiv (m = 2)$, i.e. $P^{\mathsf{beeping}} = [\thinspace -1\thickspace 0;\thickspace 1\thickspace 0\thinspace ]$ and $r^{\mathsf{beeping}} = (-2, 2)$ in the paper's Equation 17. The automaton for $\neg\phi = \mathrm{FG}\thinspace \mathsf{beeping}$ is the paper's Figure 2b with the label renamed: $Q = \lbrace q_0, q_1\rbrace$, $Q_0 = \lbrace q_0\rbrace$, $\delta = \lbrace (q_0, \mathsf{true}, q_0),\thickspace (q_0, \mathsf{beeping}, q_1),\thickspace (q_1, \mathsf{beeping}, q_1)\rbrace$ and $F = \lbrace (q_1, \mathsf{beeping}, q_1)\rbrace$. The ranking function is
 
 $$
-V(x, q_0) = \begin{cases} 6 & \text{if } 0 \le c \le 5 \\ +\infty & \text{if } c \ge 6
-    \\ +\infty & \text{if } c \le -1 \end{cases}
+V(x, q_0) = \begin{cases} 6 & \text{if } 0 \le c \le 5 \cr  +\infty & \text{if } c \ge 6
+    \cr  +\infty & \text{if } c \le -1 \end{cases}
   \qquad
-  V(x, q_1) = \begin{cases} c + 1 & \text{if } m \ge 2 \wedge 0 \le c \le 5 \\
-    0 & \text{if } m \le 1 \wedge 0 \le c \le 5 \\ +\infty & \text{if } c \ge 6 \\
+  V(x, q_1) = \begin{cases} c + 1 & \text{if } m \ge 2 \wedge 0 \le c \le 5 \cr 
+    0 & \text{if } m \le 1 \wedge 0 \le c \le 5 \cr  +\infty & \text{if } c \ge 6 \cr 
     +\infty & \text{if } c \le -1 \end{cases} \tag{5.2}
 $$
 
 so $m_{q_0} = 1$, $l_{q_0} = 2$, $m_{q_1} = 2$, $l_{q_1} = 2$. The three well-formedness checks of Definition **Definition Z5.2** are immediate over the integers: $m \ge 2$ and $m \le 1$ are disjoint and cover $\mathbb{Z}$, the three $c$-ranges are disjoint and cover $\mathbb{Z}$, and $c + 1 \ge 1$ on $0 \le c \le 5$.
 
-**Definition Z5.3 (The obligations in uniform form).** The paper's Equations 19 to 21 produce, for this program, $l_{q_0} |Q_0| = 2$ initiation obligations, $\sum_{(q,\sigma,q') \in \delta} n \, m_q \, l_{q'} = 10 + 10 + 20 = 40$ inductive-step obligations and $\sum_{(q,\sigma,q') \in \delta} n \, m_q \, m_{q'} = 5 + 10 + 20 = 35$ ranking obligations, 77 in all (computed from the paper's count formula; the harness prints the same number). Each is a statement of the form of the paper's Equation 22,
+**Definition Z5.3 (The obligations in uniform form).** The paper's Equations 19 to 21 produce, for this program, $l_{q_0} |Q_0| = 2$ initiation obligations, $\sum_{(q,\sigma,q') \in \delta} n \thinspace m_q \thinspace l_{q'} = 10 + 10 + 20 = 40$ inductive-step obligations and $\sum_{(q,\sigma,q') \in \delta} n \thinspace m_q \thinspace m_{q'} = 5 + 10 + 20 = 35$ ranking obligations, 77 in all (computed from the paper's count formula; the harness prints the same number). Each is a statement of the form of the paper's Equation 22,
 
 $$
-\forall y:\; \underbrace{A_s y \le b_s}_{\text{secret}} \implies
+\forall y:\thickspace  \underbrace{A_s y \le b_s}_{\text{secret}} \implies
   \underbrace{C_p y \le d_p \implies E_p y \not\le f_p}_{\text{public}}, \tag{5.3}
 $$
 
-whose negation (Equation 23) is the infeasibility of $A_s y \le b_s \wedge G_p y \le h_p$ with $G_p = [C_p^\top\; E_p^\top]^\top$ and $h_p = (d_p, f_p)$. For an initiation obligation $A_s = A_0$ and $G_p = E^{(q_0)}_k$; for an inductive-step obligation $A_s = A_i$ and the public rows are $P^{\sigma}$ on $x$, $C^{(q)}_j$ on $x$ and $E^{(q')}_k$ on $x'$; for a ranking obligation the last public row is the paper's Equation 21, $w^{(q)}_j x - w^{(q')}_k x' \le u^{(q')}_k - u^{(q)}_j + \mathbf{1}_F(q, \sigma, q') - 1$.
+whose negation (Equation 23) is the infeasibility of $A_s y \le b_s \wedge G_p y \le h_p$ with $G_p = [C_p^\top\thickspace E_p^\top]^\top$ and $h_p = (d_p, f_p)$. For an initiation obligation $A_s = A_0$ and $G_p = E^{(q_0)}_k$; for an inductive-step obligation $A_s = A_i$ and the public rows are $P^{\sigma}$ on $x$, $C^{(q)}_j$ on $x$ and $E^{(q')}_k$ on $x'$; for a ranking obligation the last public row is the paper's Equation 21, $w^{(q)}_j x - w^{(q')}_k x' \le u^{(q')}_k - u^{(q)}_j + \mathbf{1}_F(q, \sigma, q') - 1$.
 
 **Theorem Z5.4 (Farkas’ lemma, inequality form).** Let $A \in \mathbb{Q}^{k \times d}$ and $b \in \mathbb{Q}^k$. Exactly one of the following holds: (i) there is $y \in \mathbb{Q}^d$ with $A y \le b$; (ii) there is $\lambda \in \mathbb{Q}^k$ with $\lambda \ge 0$, $A^\top \lambda = 0$ and $b^\top \lambda < 0$ \[[6](#references)\].
 
@@ -97,8 +97,8 @@ The theorem is stated, not proved: the direction the verifier relies on is (ii) 
 *Proof.* Suppose $y$ satisfies both systems. For each row $i$ of $A$ we have $(A y)_i \le b_i$ and $\lambda_i \ge 0$, so $\lambda_i (A y)_i \le \lambda_i b_i$; summing over $i$ gives $\lambda^\top A y \le \lambda^\top b$. The same argument on $C y \le d$ with $\mu \ge 0$ gives $\mu^\top C y \le \mu^\top d$. Adding the two,
 
 $$
-(A^\top \lambda + C^\top \mu)^\top y \;=\; \lambda^\top A y + \mu^\top C y
-  \;\le\; b^\top \lambda + d^\top \mu \;<\; 0 .
+(A^\top \lambda + C^\top \mu)^\top y \thickspace =\thickspace  \lambda^\top A y + \mu^\top C y
+  \thickspace \le\thickspace  b^\top \lambda + d^\top \mu \thickspace <\thickspace  0 .
 $$
 
 The left-hand side is $0^\top y = 0$ by the hypothesis $A^\top \lambda + C^\top \mu = 0$, so $0 < 0$, a contradiction. Hence no such $y$ exists. &#9632;
@@ -106,34 +106,34 @@ The left-hand side is $0^\top y = 0$ by the hypothesis $A^\top \lambda + C^\top 
 Applied to Definition **Definition Z5.3** with $(A, b) = (A_s, b_s)$ and $(C, d) = (G_p, h_p)$ this is the paper's Equation 24: a pair $(\lambda_s, \mu_s)$ with $A_s^\top \lambda_s + G_p^\top \mu_s = 0$ and $b_s^\top \lambda_s + h_p^\top \mu_s < 0$ certifies the obligation. The paper then restricts to integers in $[0, M]$ and writes the strict inequality as a third range (its Equation 25):
 
 $$
-\lambda_s, \mu_s \in [0, M] \;\wedge\;
-  \delta_s := -\,b_s^\top \lambda_s - h_p^\top \mu_s - 1 \in [0, M] \;\wedge\;
-  A_s^\top \lambda_s = -\,G_p^\top \mu_s . \tag{5.4}
+\lambda_s, \mu_s \in [0, M] \thickspace \wedge\thickspace 
+  \delta_s := -\thinspace b_s^\top \lambda_s - h_p^\top \mu_s - 1 \in [0, M] \thickspace \wedge\thickspace 
+  A_s^\top \lambda_s = -\thinspace G_p^\top \mu_s . \tag{5.4}
 $$
 
 The equality is checked over $\mathbb{Z}_p$ by the commitment arithmetic, and the next lemma is what lets a check over $\mathbb{Z}_p$ stand for a check over $\mathbb{Z}$.
 
-**Definition Z5.6 (Canonical signed lift).** For an odd prime $p$ let $\ell : \mathbb{Z}_p \to \mathbb{Z}$ map a residue class to its unique representative in the interval $(-p/2, \, p/2)$. For every integer $a$ with $|a| < p/2$, $\ell(a \bmod p) = a$.
+**Definition Z5.6 (Canonical signed lift).** For an odd prime $p$ let $\ell : \mathbb{Z}_p \to \mathbb{Z}$ map a residue class to its unique representative in the interval $(-p/2, \thinspace p/2)$. For every integer $a$ with $|a| < p/2$, $\ell(a \bmod p) = a$.
 
 **Lemma Z5.7 (Bounded integer encoding).** Let $A \in \mathbb{Z}^{k \times d}$ with every entry in $[-M, M]$, $\lambda \in \mathbb{Z}^k$ with every entry in $[0, M]$, and $\alpha \in \mathbb{Z}_p^d$ with $A^\top \lambda \equiv \alpha \pmod p$ entrywise. If $k M^2 < p / 2$ then $A^\top \lambda = \ell(\alpha)$ over $\mathbb{Z}$, entrywise. More generally, if $a, g \in \mathbb{Z}$ satisfy $a \equiv g \pmod p$, $|a| \le B_1$, $|g| \le B_2$ and $B_1 + B_2 < p$, then $a = g$.
 
 *Proof.* Fix a column $j$ and write $a_j = (A^\top \lambda)_j = \sum_{i=1}^{k} A_{ij} \lambda_i$ over $\mathbb{Z}$. Each term satisfies $|A_{ij} \lambda_i| = |A_{ij}| \cdot \lambda_i \le M \cdot M$, so by the triangle inequality $|a_j| \le k M^2 < p / 2$. The residue of $a_j$ modulo $p$ is $\alpha_j$ by hypothesis, and $a_j$ lies in $(-p/2, p/2)$, so $a_j$ is the unique representative of the class of $\alpha_j$ in that interval, i.e. $a_j = \ell(\alpha_j)$ by Definition **Definition Z5.6**. For the general statement, $p$ divides $a - g$ and $|a - g| \le |a| + |g| \le B_1 + B_2 < p$; the only multiple of $p$ of absolute value below $p$ is $0$, so $a = g$. &#9632;
 
-**Corollary Z5.8 (The equality of Equation (5.4) holds over the integers).** With $k_s$ secret rows and $k_p$ public rows whose entries are bounded by $M_G$, if $k_s M^2 + k_p M_G M + M + 1 < p$ then $A_s^\top \lambda_s \equiv -G_p^\top \mu_s \pmod p$ with $\lambda_s, \mu_s \in [0, M]$ implies $A_s^\top \lambda_s = -G_p^\top \mu_s$ over $\mathbb{Z}$, and likewise $\delta_s \in [0, M]$ over $\mathbb{Z}_p$ gives $b_s^\top \lambda_s + h_p^\top \mu_s \le -1$ over $\mathbb{Z}$. This is the integer layer of the paper's proof sketch of Theorem 5.1, whose hypothesis $k_s M^2 + k_p M_G M + 1 < p$ the corollary strengthens by $M$.
+**Corollary Z5.8 (The equality of Equation 5.4 holds over the integers).** With $k_s$ secret rows and $k_p$ public rows whose entries are bounded by $M_G$, if $k_s M^2 + k_p M_G M + M + 1 < p$ then $A_s^\top \lambda_s \equiv -G_p^\top \mu_s \pmod p$ with $\lambda_s, \mu_s \in [0, M]$ implies $A_s^\top \lambda_s = -G_p^\top \mu_s$ over $\mathbb{Z}$, and likewise $\delta_s \in [0, M]$ over $\mathbb{Z}_p$ gives $b_s^\top \lambda_s + h_p^\top \mu_s \le -1$ over $\mathbb{Z}$. This is the integer layer of the paper's proof sketch of Theorem 5.1, whose hypothesis $k_s M^2 + k_p M_G M + 1 < p$ the corollary strengthens by $M$.
 
 *Proof.* Apply the general statement of Lemma **Lemma Z5.7** to $a = (A_s^\top \lambda_s)_j$ and $g = -(G_p^\top \mu_s)_j$ with $B_1 = k_s M^2$ and $B_2 = k_p M_G M$; the sum is below $p$ by hypothesis, so $a = g$ for every column $j$. For the second claim take $a = -b_s^\top \lambda_s - h_p^\top \mu_s - 1$ over $\mathbb{Z}$, bounded in absolute value by $B_1 = k_s M^2 + k_p M_G M + 1$, and $g = \ell(\delta_s) \in [0, M]$, bounded by $B_2 = M$; again $B_1 + B_2 < p$ by hypothesis, so $a = g \ge 0$, and $b_s^\top \lambda_s + h_p^\top \mu_s = -1 - a \le -1$. &#9632;
 
-For this chapter $k_s \le 7$, $k_p \le 9$, the public entries are bounded by $M_G = 6$, and the group is ristretto255 with $p = 2^{252} + 27742317777372353535851937790883648493$. The library proves ranges of $2^n$ for $n \in \{8, 16, 32, 64\}$ only, so the chapter proves $n = 64$ and applies the lemma with the bound the proof actually establishes, $B = 2^{64}$: $k_s B^2 + k_p M_G B + 1 < 7 \cdot 2^{128} + 2^{70} < 2^{131} < p$, computed by hand from the bounds above.
+For this chapter $k_s \le 7$, $k_p \le 9$, the public entries are bounded by $M_G = 6$, and the group is ristretto255 with $p = 2^{252} + 27742317777372353535851937790883648493$. The library proves ranges of $2^n$ for $n \in \lbrace 8, 16, 32, 64\rbrace$ only, so the chapter proves $n = 64$ and applies the lemma with the bound the proof actually establishes, $B = 2^{64}$: $k_s B^2 + k_p M_G B + 1 < 7 \cdot 2^{128} + 2^{70} < 2^{131} < p$, computed by hand from the bounds above.
 
 **Example Z5.9 (A witness by hand).** Take the ranking obligation for $u_4$ under the fair transition $(q_1, \mathsf{beeping}, q_1)$ with the finite case $m \ge 2 \wedge 0 \le c \le 5$ on both sides. The secret rows include $c' - c \le -1$ (half of $c' = c - 1$). The last public row is Equation 21 with $w_j = w_k = (0, 1)$, $u_j = u_k = 1$ and $\mathbf{1}_F = 1$: $c - c' \le 1 - 1 + 1 - 1 = 0$. Put $\lambda = 1$ on the secret row, $\mu = 1$ on the ranking row, zero elsewhere. Then $A_s^\top \lambda + G_p^\top \mu = (0, -1, 0, 1) + (0, 1, 0, -1) = 0$, $b_s^\top \lambda + h_p^\top \mu = -1 + 0 = -1 < 0$, and $\delta_s = 1 - 0 - 1 = 0 \in [0, M]$. The sum of the two rows reads $0 \le -1$, which no $y$ satisfies: the buzzer's counter strictly decreases on every fair step.
 
-**Remark Z5.11.** Completeness is not guaranteed and the paper says so: Farkas’ lemma promises a rational witness, and Equation (5.4) asks for an integer one in $[0, M]$. For this program every witness is a 0/1 combination of at most three rows, as in the example, so Z3 finds them all; a program with large coefficients may need a scaled witness that exceeds $M$, which costs completeness and never soundness (Theorem **Theorem Z5.5** holds for any non-negative witness).
+**Remark Z5.11.** Completeness is not guaranteed and the paper says so: Farkas’ lemma promises a rational witness, and Equation 5.4 asks for an integer one in $[0, M]$. For this program every witness is a 0/1 combination of at most three rows, as in the example, so Z3 finds them all; a program with large coefficients may need a scaled witness that exceeds $M$, which costs completeness and never soundness (Theorem **Theorem Z5.5** holds for any non-negative witness).
 
 ## The protocol
 
 The steps follow the paper's Figures 4 and 5 for one obligation at a time; the folding of all 77 into one is [Project 6](06-folding-and-the-salem-spencer-schedule.md).
 
-1. **Encode (device side, Python).** Build the 77 obligations of Definition **Definition Z5.3** from the five updates, the automaton and $V$; for each, ask Z3 for integers $\lambda_s, \mu_s \in [0, M]$ satisfying Equation (5.4); write `witnesses.json`. Refuse to continue if any obligation has no witness.
+1. **Encode (device side, Python).** Build the 77 obligations of Definition **Definition Z5.3** from the five updates, the automaton and $V$; for each, ask Z3 for integers $\lambda_s, \mu_s \in [0, M]$ satisfying Equation 5.4; write `witnesses.json`. Refuse to continue if any obligation has no witness.
 2. **Commit (prover).** Commit to every entry of $A_i + M$ and $b_i + M$ under a Pedersen commitment on ristretto255 (Theorems thm:z01\_hiding and thm:z01\_binding); the two-tier matrix commitment of the paper's Section 5.1 is the zkMatrix layer \[[5](#references)\] and is marked **learn** below.
 3. **Range (prover).** For every entry of $A_i + M$, $b_i + M$, $\lambda_s$, $\mu_s$ and $\delta_s$, run `RangeProof::prove_single` at 64 bits on the Pi 4B with a fresh blinding scalar and a transcript domain of `zk05 range`; keep the proof bytes and the committed value.
 4. **Equality (prover).** Prove $A_s^\top \lambda_s = -G_p^\top \mu_s$ over the commitments: the paper's zkmm for the secret product and zkeq for the public one. On this bench the harness checks the equation in the clear from the JSON, so this step is **learn** until [Project 7](07-the-esp32-proves-two-commitments-open-to-one.md)'s Chaum-Pedersen proof and a zkMatrix port exist.
@@ -252,12 +252,12 @@ The manifest pins `bulletproofs = "5.0.0"` and the `curve25519-dalek` version th
 
 ## The model, if any
 
-None. The ranking function is written by hand in Equation (5.2); the chapter where a model proposes one and the certifier decides is [Project 16](16-the-model-proposes-a-ranking-function-the-certifier.md).
+None. The ranking function is written by hand in Equation 5.2; the chapter where a model proposes one and the certifier decides is [Project 16](16-the-model-proposes-a-ranking-function-the-certifier.md).
 
 ## Real, modelled, absent
 
 - **have:** real: the Pi 4B, the Explorer700 with its PCF8574 answering at 0x20, the `bulletproofs` crate at 5.0.0 read on Friday 6 November 2026, Z3 through `z3-solver`; the 77 obligations and their witnesses, which exist on paper by Example **Example Z5.9** and its siblings and are produced by the harness
-- **learn:** modelled: the matrix-product proof (the paper's zkmm on zkMatrix) and the equality proof zkeq have no library on this bench, so the equality of Equation (5.4) is checked in the clear from the JSON; the chapter's proof is zero knowledge for the ranges only until that layer exists. The joystick and buzzer port bits on the PCF8574 are to confirm on the silkscreen. Every timing bar below is drawn dashed
+- **learn:** modelled: the matrix-product proof (the paper's zkmm on zkMatrix) and the equality proof zkeq have no library on this bench, so the equality of Equation 5.4 is checked in the clear from the JSON; the chapter's proof is zero knowledge for the ranges only until that layer exists. The joystick and buzzer port bits on the PCF8574 are to confirm on the silkscreen. Every timing bar below is drawn dashed
 - **absent:** absent: a logic analyser, so the I2C transactions to 0x20 are checked by `i2cget` replies only; a second board as an independent verifier, so the Pi 4B verifies its own proofs in the acceptance test and [Project 4](04-two-group-elements.md)'s LEDs are not lit here
 
 ## System architecture
@@ -341,7 +341,7 @@ The paper's Farkas column is the only measured figure here, and it belongs to it
 
 ## Steps
 
-**Step 1.** On the authoring laptop, write the five updates, the automaton and Equation (5.2) into the harness, enumerate the 77 obligations, and run Z3; the harness must print 77 witnesses and refuse otherwise.
+**Step 1.** On the authoring laptop, write the five updates, the automaton and Equation 5.2 into the harness, enumerate the 77 obligations, and run Z3; the harness must print 77 witnesses and refuse otherwise.
 
 **Step 2.** On the authoring laptop, check Example **Example Z5.9** against the harness's output for that obligation: the printed $\lambda$ and $\mu$ must be a non-negative combination that sums to $0 \le -1$, and $\delta$ must be 0 or another value in $[0, M]$.
 
@@ -361,7 +361,7 @@ The chapter passes when the harness prints exactly 77 witnesses with every entry
 
 ## Variants
 
-**An analog signature as the secret.** The swap is the source of the guarded commands: instead of the Explorer700's joystick and buzzer, the rules describe power regimes read from a voltage trace captured by the MCC 118 on the Pi 4B \[[13](#references)\], which is the design brief's second sketch \[[10](#references)\]. The cryptography is the control and is unchanged: the ranking function of ((5.2)), the Farkas witnesses of Theorem **Theorem Z5.5** and the range proofs over ristretto255 are the same, while the secret moves from five update matrices over two integer variables to the regime transition rules fitted to the trace. A ternary-weight model \[[11](#references), [12](#references)\] proposes the regime label of each window and the Z3 harness \[[8](#references)\] certifies that the labelled trace satisfies the guards, so a wrong proposal costs completeness and never soundness, for the reason [Project 16](16-the-model-proposes-a-ranking-function-the-certifier.md) proves. The arithmetic sets the size of the problem: the MCC 118 takes one sample every 10 microseconds, so a 60 s capture on one channel is $6000000$ samples and windows of $1024$ samples give $5859$ whole labels, computed, against the $77$ obligations this chapter already counts. Choose it when the property is about a physical regime that a button press cannot express, and keep the joystick when the point is that the program is small enough to read in a minute. Two bench corrections apply: the brief's plant is an industrial installation that is not on this bench, so the trace is replayed from a logged file and the plant is drawn as a dotted grey absent block; and the brief's 100 kS/s is the MCC 118's aggregate across the channels in use rather than a per-channel rate, so every per-channel figure reads **not measured, aggregate rate** until the capture exists.
+**An analog signature as the secret.** The swap is the source of the guarded commands: instead of the Explorer700's joystick and buzzer, the rules describe power regimes read from a voltage trace captured by the MCC 118 on the Pi 4B \[[13](#references)\], which is the design brief's second sketch \[[10](#references)\]. The cryptography is the control and is unchanged: the ranking function of (5.2), the Farkas witnesses of Theorem **Theorem Z5.5** and the range proofs over ristretto255 are the same, while the secret moves from five update matrices over two integer variables to the regime transition rules fitted to the trace. A ternary-weight model \[[11](#references), [12](#references)\] proposes the regime label of each window and the Z3 harness \[[8](#references)\] certifies that the labelled trace satisfies the guards, so a wrong proposal costs completeness and never soundness, for the reason [Project 16](16-the-model-proposes-a-ranking-function-the-certifier.md) proves. The arithmetic sets the size of the problem: the MCC 118 takes one sample every 10 microseconds, so a 60 s capture on one channel is $6000000$ samples and windows of $1024$ samples give $5859$ whole labels, computed, against the $77$ obligations this chapter already counts. Choose it when the property is about a physical regime that a button press cannot express, and keep the joystick when the point is that the program is small enough to read in a minute. Two bench corrections apply: the brief's plant is an industrial installation that is not on this bench, so the trace is replayed from a logged file and the plant is drawn as a dotted grey absent block; and the brief's 100 kS/s is the MCC 118's aggregate across the channels in use rather than a per-channel rate, so every per-channel figure reads **not measured, aggregate rate** until the capture exists.
 
 ## Pitfalls
 

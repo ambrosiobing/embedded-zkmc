@@ -40,8 +40,8 @@ The paper chooses its one-shot fold over Nova and says why in its related work: 
 Fix the step circuit $\mathsf{F}$ that checks one obligation of [Project 5](05-farkas-witnesses-for-a-joystick-program.md): given the secret row block $A_s$, the witnesses $\lambda_s, \mu_s, \delta_s$ and the public block $G_p, h_p$, it enforces $A_s^\top \lambda_s + G_p^\top \mu_s = 0$ and $\delta_s = -b_s^\top \lambda_s - h_p^\top \mu_s - 1$ over the field, and the ranges $\lambda_s, \mu_s, \delta_s \in [0, 2^{64})$ by bit decomposition, and increments a counter carried in the public state $z$. Let $(A, B, C)$ be the R1CS matrices of $\mathsf{F}$ with $m$ constraints. For step $i$ the witness is $W_i$ (every allocated value: rows, witnesses, bits, products), the public input is $x_i = (z_{i-1}, z_i)$, and the pair $(x_i, W_i)$ satisfies the R1CS of Definition **Definition Z9.1** below. The relation Nova proves after $N$ steps is
 
 $$
-\mathcal{R}_{09} = \Big\{\, \big( \{W_i\}_{i=1}^{N} ;\; (z_0, z_N, N) \big) \;\Big|\;
-    \forall i \in [N]:\; \mathsf{F}(z_{i-1}; W_i) = z_i \,\Big\}, \tag{9.1}
+\mathcal{R}_{09} = \Big\lbrace \thinspace  \big( \lbrace W_i\rbrace _{i=1}^{N} ;\thickspace  (z_0, z_N, N) \big) \thickspace \Big|\thickspace 
+    \forall i \in [N]:\thickspace  \mathsf{F}(z_{i-1}; W_i) = z_i \thinspace \Big\rbrace , \tag{9.1}
 $$
 
 which with $z_0 = 0$ and $z_N = N$ says that $N$ obligations were checked in sequence. The witness never leaves the device: the verifier receives the folded instance $(\bar W, \bar E, u, x)$ and, in Nova's design, a succinct proof of its satisfiability. The secret rows of the program enter only as entries of $W_i$ under the step's commitment $\bar W_i$ (Theorem thm:z01\_hiding for hiding, with the blinding the crate adds in its zero-knowledge mode, to verify). What is public and what is secret is the same as in [Project 5](05-farkas-witnesses-for-a-joystick-program.md): the public rows $G_p, h_p$ are carried in the clear by a hash chain in $z$ in the full build, a counter in the listing below.
@@ -59,7 +59,7 @@ where $\circ$ is the entrywise (Hadamard) product of vectors in $\mathbb{F}^m$ \
 **Definition Z9.2 (Relaxed R1CS).** For the same structure, a relaxed instance is $(\bar E, u, \bar W, x)$ with $u \in \mathbb{F}$, $x \in \mathbb{F}^{\ell}$ and commitments $\bar E = \mathsf{Com}(E; r_E)$, $\bar W = \mathsf{Com}(W; r_W)$; a witness is $(E, r_E, W, r_W)$ with $E \in \mathbb{F}^m$ and $W \in \mathbb{F}^{n_w}$. The pair satisfies the structure if the commitments open as stated and, for $z = (W, x, u)$,
 
 $$
-(A z) \circ (B z) = u \,(C z) + E . \tag{9.2}
+(A z) \circ (B z) = u \thinspace (C z) + E . \tag{9.2}
 $$
 
 An ordinary R1CS pair is a relaxed one with $u = 1$ and $E = 0$ \[[4](#references)\].
@@ -67,34 +67,34 @@ An ordinary R1CS pair is a relaxed one with $u = 1$ and $E = 0$ \[[4](#reference
 **Definition Z9.3 (The cross term).** For two vectors $z_1 = (W_1, x_1, u_1)$ and $z_2 = (W_2, x_2, u_2)$ over one structure,
 
 $$
-T \;=\; (A z_1) \circ (B z_2) \;+\; (A z_2) \circ (B z_1) \;-\; u_1 \,(C z_2)
-  \;-\; u_2 \,(C z_1) \;\in\; \mathbb{F}^m . \tag{9.3}
+T \thickspace =\thickspace  (A z_1) \circ (B z_2) \thickspace +\thickspace  (A z_2) \circ (B z_1) \thickspace -\thickspace  u_1 \thinspace (C z_2)
+  \thickspace -\thickspace  u_2 \thinspace (C z_1) \thickspace \in\thickspace  \mathbb{F}^m . \tag{9.3}
 $$
 
 $T$ depends on $z_1$ and $z_2$ only, not on any challenge.
 
-**Theorem Z9.4 (Folding two relaxed instances).** Let $(E_1, u_1, W_1, x_1)$ and $(E_2, u_2, W_2, x_2)$ satisfy Equation (9.2) for one structure, and let $r \in \mathbb{F}$. Put
+**Theorem Z9.4 (Folding two relaxed instances).** Let $(E_1, u_1, W_1, x_1)$ and $(E_2, u_2, W_2, x_2)$ satisfy Equation 9.2 for one structure, and let $r \in \mathbb{F}$. Put
 
 $$
 z = z_1 + r z_2, \qquad\text{that is}\qquad
   W = W_1 + r W_2,\quad x = x_1 + r x_2,\quad u = u_1 + r u_2,
 $$
 
-and $E = E_1 + r T + r^2 E_2$ with $T$ as in Definition **Definition Z9.3**. Then $(E, u, W, x)$ satisfies Equation (9.2).
+and $E = E_1 + r T + r^2 E_2$ with $T$ as in Definition **Definition Z9.3**. Then $(E, u, W, x)$ satisfies Equation 9.2.
 
 *Proof.* $A$, $B$ and $C$ are linear, so $A z = A z_1 + r A z_2$ and likewise for $B$ and $C$. The Hadamard product is bilinear, so
 
 $$
 \begin{aligned}
 (A z) \circ (B z)
-  &= (A z_1 + r A z_2) \circ (B z_1 + r B z_2) \notag \\
+  &= (A z_1 + r A z_2) \circ (B z_1 + r B z_2) \notag \cr 
   &= (A z_1) \circ (B z_1)
-     + r \,(A z_1) \circ (B z_2) + r \,(A z_2) \circ (B z_1)
+     + r \thinspace (A z_1) \circ (B z_2) + r \thinspace (A z_2) \circ (B z_1)
      + r^2 (A z_2) \circ (B z_2) . \tag{9.4}
 \end{aligned}
 $$
 
-By the hypothesis on the two instances, $(A z_1) \circ (B z_1) = u_1 (C z_1) + E_1$ and $(A z_2) \circ (B z_2) = u_2 (C z_2) + E_2$; substituting into Equation (9.4),
+By the hypothesis on the two instances, $(A z_1) \circ (B z_1) = u_1 (C z_1) + E_1$ and $(A z_2) \circ (B z_2) = u_2 (C z_2) + E_2$; substituting into Equation 9.4,
 
 $$
 (A z) \circ (B z) = u_1 (C z_1) + E_1
@@ -105,35 +105,35 @@ $$
 Now expand the right-hand side of the target equation with $u = u_1 + r u_2$ and $C z = C z_1 + r C z_2$:
 
 $$
-u \,(C z) = (u_1 + r u_2)(C z_1 + r C z_2)
+u \thinspace (C z) = (u_1 + r u_2)(C z_1 + r C z_2)
   = u_1 (C z_1) + r u_1 (C z_2) + r u_2 (C z_1) + r^2 u_2 (C z_2) . \tag{9.6}
 $$
 
-Subtract Equation (9.6) from Equation (9.5). The terms $u_1 (C z_1)$ and $r^2 u_2 (C z_2)$ cancel, and what remains is
+Subtract Equation 9.6 from Equation 9.5. The terms $u_1 (C z_1)$ and $r^2 u_2 (C z_2)$ cancel, and what remains is
 
 $$
 \begin{aligned}
-(A z) \circ (B z) - u \,(C z)
+(A z) \circ (B z) - u \thinspace (C z)
   &= E_1 + r \big[ (A z_1) \circ (B z_2) + (A z_2) \circ (B z_1)
-     - u_1 (C z_2) - u_2 (C z_1) \big] + r^2 E_2 \notag \\
+     - u_1 (C z_2) - u_2 (C z_1) \big] + r^2 E_2 \notag \cr 
   &= E_1 + r T + r^2 E_2 = E ,
 \end{aligned}
 $$
 
-where the bracket is exactly Equation (9.3). Hence $(A z) \circ (B z) = u (C z) + E$, which is Equation (9.2) for the folded pair. The commitments fold by the homomorphism of Pedersen commitments ([Project 2](02-a-sensor-reading-committed-on-the-microcontroller.md)'s theorem, and Theorem thm:z01\_hiding's scheme): $\bar W = \bar W_1 + r \bar W_2$ and $\bar E = \bar E_1 + r \bar T + r^2 \bar E_2$ with $\bar T = \mathsf{Com}(T; r_T)$, so the verifier folds the instance without seeing $W$, $E$ or $T$. &#9632;
+where the bracket is exactly Equation 9.3. Hence $(A z) \circ (B z) = u (C z) + E$, which is Equation 9.2 for the folded pair. The commitments fold by the homomorphism of Pedersen commitments ([Project 2](02-a-sensor-reading-committed-on-the-microcontroller.md)'s theorem, and Theorem thm:z01\_hiding's scheme): $\bar W = \bar W_1 + r \bar W_2$ and $\bar E = \bar E_1 + r \bar T + r^2 \bar E_2$ with $\bar T = \mathsf{Com}(T; r_T)$, so the verifier folds the instance without seeing $W$, $E$ or $T$. &#9632;
 
-**Remark Z9.8 (Why the slack is needed).** Without $E$ and $u$, the cross terms $r[(A z_1) \circ (B z_2) + (A z_2) \circ (B z_1)]$ in Equation (9.4) would have to vanish for the sum to satisfy an ordinary R1CS, which they do not; the relaxation moves them into $E$, and $u$ scales the constant column so that $z = z_1 + r z_2$ keeps a consistent last entry. The one-shot fold of [Project 6](06-folding-and-the-salem-spencer-schedule.md) does the same thing with $N$ instances at once and absorbs the cross terms into $\alpha^*$ through the $4|K|$ committed $C_k$, with the schedule keeping the diagonal apart from them; Nova absorbs one cross term per fold into $E$ and needs no schedule because two instances have one cross term, which the challenge $r$ separates by degree.
+**Remark Z9.8 (Why the slack is needed).** Without $E$ and $u$, the cross terms $r[(A z_1) \circ (B z_2) + (A z_2) \circ (B z_1)]$ in Equation 9.4 would have to vanish for the sum to satisfy an ordinary R1CS, which they do not; the relaxation moves them into $E$, and $u$ scales the constant column so that $z = z_1 + r z_2$ keeps a consistent last entry. The one-shot fold of [Project 6](06-folding-and-the-salem-spencer-schedule.md) does the same thing with $N$ instances at once and absorbs the cross terms into $\alpha^*$ through the $4|K|$ committed $C_k$, with the schedule keeping the diagonal apart from them; Nova absorbs one cross term per fold into $E$ and needs no schedule because two instances have one cross term, which the challenge $r$ separates by degree.
 
 **Remark Z9.9 (Soundness, cited).** Nova's folding scheme is knowledge sound in the random oracle model: from three accepting transcripts with distinct challenges on the same commitments a witness for both instances is extracted, by the same degree argument as Theorem thm:z06\_soundness applied to a polynomial of degree 2 in $r$ \[[4](#references)\]; the final folded instance is then proved satisfiable with a succinct argument, Spartan with an inner-product argument on the Pasta curves in the crate \[[7](#references), [2](#references)\]. The chapter states this and does not re-prove it; its own proof is the completeness identity above and the cost proposition below.
 
 **Proposition Z9.7 (Cost crossover between Nova and the one-shot fold).** Let $N$ obligations each have $d$ columns and at most $n$ rows, so that a cross term of the one-shot fold is a vector of length $d$, and let the Nova step circuit for one obligation have $m$ constraints, so that its cross term $T$ is a vector of length $m$. Let $|K| = |K(N)|$ be [Project 6](06-folding-and-the-salem-spencer-schedule.md)'s count and $\rho(N) = 4|K(N)| / (N - 1)$. Then:
 
 1. **(i)** Cross-term commitments: Nova sends $N - 1$, the one-shot fold $4|K|$, and $N - 1 < 4|K|$ for every $N \ge 2$.
-2. **(ii)** Total cross-term commitment length: Nova $(N - 1)\, m$, the one-shot fold $4|K|\, d$. Nova's is the smaller if and only if $m / d < \rho(N)$.
+2. **(ii)** Total cross-term commitment length: Nova $(N - 1)\thinspace m$, the one-shot fold $4|K|\thinspace d$. Nova's is the smaller if and only if $m / d < \rho(N)$.
 3. **(iii)** Sequential rounds: Nova $N - 1$, each depending on the previous folded instance; the one-shot fold one.
-4. **(iv)** Prover field multiplications for cross terms: Nova $(N - 1)\, c_T\, m$ for a constant $c_T$ counting the multiplications per constraint in Equation (9.3); the one-shot fold $N (N - 1)\, d\, n$. Nova's is the smaller if and only if $N > c_T\, m / (d\, n)$.
+4. **(iv)** Prover field multiplications for cross terms: Nova $(N - 1)\thinspace c_T\thinspace m$ for a constant $c_T$ counting the multiplications per constraint in Equation 9.3; the one-shot fold $N (N - 1)\thinspace d\thinspace n$. Nova's is the smaller if and only if $N > c_T\thinspace m / (d\thinspace n)$.
 
-*Proof.* (i) Lemma lem:z06\_Kbound gives $|K| \ge N - 1$, so $4|K| \ge 4(N - 1) > N - 1$ for $N \ge 2$. (ii) Each Nova cross term is committed with one multi-scalar multiplication of length $m$ and there are $N - 1$ of them; each of the $4|K|$ cross terms of the one-shot fold is committed with one of length $d$. Dividing $(N - 1) m < 4|K| d$ by $(N - 1) d > 0$ gives $m / d < \rho(N)$, and the steps reverse. (iii) Nova's step $i$ hashes the folded instance of step $i - 1$ to derive $r_i$, so the steps form a chain of length $N - 1$; the one-shot fold derives one $r$ from all commitments at once. (iv) Equation (9.3) costs the prover, per constraint, the products that form the four matrix-vector terms and their Hadamard products, a constant $c_T$ per constraint once $A z_i$, $B z_i$, $C z_i$ are formed, so $(N - 1) c_T m$ in all; the one-shot fold forms every $A_i \lambda_j$ with $i \ne j$ by Theorem thm:z06\_eq27, $N (N - 1)$ products of a $d \times n$ matrix by a vector, $d n$ multiplications each. Dividing $(N - 1) c_T m < N (N - 1) d n$ by $(N - 1) d n > 0$ gives $N > c_T m / (d n)$. &#9632;
+*Proof.* (i) Lemma lem:z06\_Kbound gives $|K| \ge N - 1$, so $4|K| \ge 4(N - 1) > N - 1$ for $N \ge 2$. (ii) Each Nova cross term is committed with one multi-scalar multiplication of length $m$ and there are $N - 1$ of them; each of the $4|K|$ cross terms of the one-shot fold is committed with one of length $d$. Dividing $(N - 1) m < 4|K| d$ by $(N - 1) d > 0$ gives $m / d < \rho(N)$, and the steps reverse. (iii) Nova's step $i$ hashes the folded instance of step $i - 1$ to derive $r_i$, so the steps form a chain of length $N - 1$; the one-shot fold derives one $r$ from all commitments at once. (iv) Equation 9.3 costs the prover, per constraint, the products that form the four matrix-vector terms and their Hadamard products, a constant $c_T$ per constraint once $A z_i$, $B z_i$, $C z_i$ are formed, so $(N - 1) c_T m$ in all; the one-shot fold forms every $A_i \lambda_j$ with $i \ne j$ by Theorem thm:z06\_eq27, $N (N - 1)$ products of a $d \times n$ matrix by a vector, $d n$ multiplications each. Dividing $(N - 1) c_T m < N (N - 1) d n$ by $(N - 1) d n > 0$ gives $N > c_T m / (d n)$. &#9632;
 
 For [Project 5](05-farkas-witnesses-for-a-joystick-program.md)'s instance $d = 4$, $n \le 7$, and the step has the obligation's own constraints, at most $4 + 33 \times 17 = 565$ for the two equalities and seventeen 64-bit ranges (computed), plus the recursion overhead of about $10^4$ (to verify), so $m \approx 10565$ and $m / d \approx 2641$ (computed from those two figures). The table in the Benchmark lists $\rho(N)$ for $N = 2^k$: it reaches $774.57$ at $N = 8192$ (computed), below $2641$, so by (ii) the one-shot fold commits fewer field elements in total for every $N$ in the table while Nova commits fewer vectors by (i); by (iv) with $c_T = 1$ Nova's field work is the smaller once $N > 10565 / 28 \approx 377$ (computed), that is from $N = 512$ in the table. An obligation with $d = 64$ columns would put $m / d$ near $165$ and cross (ii) at $N = 1024$, where $\rho = 226.88$; every one of these figures moves with the constraint count the crate prints, which is why the acceptance test records it.
 
@@ -258,7 +258,7 @@ None. The chapter compares two folds; nothing in it is proposed.
 
 ![Figure 9.1. Two folds of the same obligations.](../figures/z09_arch.svg)
 
-*Figure 9.1. Two folds of the same obligations. Top row: the 77 obligations of Z5 as a stop-outlined secret block, a solid arrow into the step circuit as a green user-space block, and the Nova prover with the accent outline running `prove_step` 77 times, each step folding one cross term; a solid arrow carries the running relaxed instance, a blue commitment-coloured block holding $\bar W$, $\bar E$, $u$ and $x$, to the verifier with the green outline. Second row, dashed: the one-shot fold of Z6 as a software stand-in on this board, drawn beside the Nova path with its $4\|K\|$ cross terms, so that the two certificates can be read against each other; it is not run here. Bottom, inside a dashed layer named the bench: the Pi 4B alone as a solid hardware block, and a dotted grey block for the absent measured time.*
+*Figure 9.1. Two folds of the same obligations. Top row: the 77 obligations of Z5 as a stop-outlined secret block, a solid arrow into the step circuit as a green user-space block, and the Nova prover with the accent outline running `prove_step` 77 times, each step folding one cross term; a solid arrow carries the running relaxed instance, a blue commitment-coloured block holding $\bar W$, $\bar E$, $u$ and $x$, to the verifier with the green outline. Second row, dashed: the one-shot fold of Z6 as a software stand-in on this board, drawn beside the Nova path with its $4\vert K\vert $ cross terms, so that the two certificates can be read against each other; it is not run here. Bottom, inside a dashed layer named the bench: the Pi 4B alone as a solid hardware block, and a dotted grey block for the absent measured time.*
 
 Read the figure as two paths from one secret: Nova's path is long and thin, $N - 1$ steps with one commitment each; the one-shot path is one step and wide, $4|K|$ commitments at once. The verifier at the end of either learns the same statement.
 
@@ -312,7 +312,7 @@ stateDiagram-v2
 
 ![Figure 9.3. Which fold for which task.](../figures/z09_tree.svg)
 
-*Figure 9.3. Which fold for which task. The root diamond asks whether every obligation has the same circuit shape; no leads to a leaf naming Z5, one proof bundle per obligation. Yes leads to a diamond asking whether the proof may be built step by step as the obligations arrive; no leads to a leaf naming the one-shot fold of Z6, one round and $4\|K\|$ commitments. Yes leads to a diamond asking whether $m / d$ is below $\rho(N)$ for the task's $N$; yes leads to the leaf of this chapter, Nova with fewer commitments and shorter ones; no leads to a grey leaf that still names Nova for its $N - 1$ commitments but warns that the total committed length is larger, so the table decides.*
+*Figure 9.3. Which fold for which task. The root diamond asks whether every obligation has the same circuit shape; no leads to a leaf naming Z5, one proof bundle per obligation. Yes leads to a diamond asking whether the proof may be built step by step as the obligations arrive; no leads to a leaf naming the one-shot fold of Z6, one round and $4\vert K\vert $ commitments. Yes leads to a diamond asking whether $m / d$ is below $\rho(N)$ for the task's $N$; yes leads to the leaf of this chapter, Nova with fewer commitments and shorter ones; no leads to a grey leaf that still names Nova for its $N - 1$ commitments but warns that the total committed length is larger, so the table decides.*
 
 ## Benchmark
 
@@ -320,9 +320,9 @@ stateDiagram-v2
 
 *Figure 9.4. Expected cost per step on the Pi 4B, log scale in milliseconds, drawn dashed because nothing has been measured on this bench: from left to right, one `prove_step` with the recursion overhead, the `setup` once, the `verify` of 77 steps, and the whole run of 77 steps. A solid bar replaces a dashed one when the run has happened and the acceptance test has passed.*
 
-| $N$ | $N - 1$ | $4\|K\|$ | $\rho(N)$ | $c_T m/(dn)$ | **Instrument** |
+| $N$ | $N - 1$ | $4\vert K\vert $ | $\rho(N)$ | $c_T m/(dn)$ | **Instrument** |
 | --- | --- | --- | --- | --- | --- |
-| 2 | 1 | 4 | 4.00 | 377 | computed: $\|K\|$ from Z6's script, $\rho$ by division |
+| 2 | 1 | 4 | 4.00 | 377 | computed: $\vert K\vert $ from Z6's script, $\rho$ by division |
 | 8 | 7 | 76 | 10.86 | 377 | computed, the same |
 | 32 | 31 | 844 | 27.23 | 377 | computed, the same |
 | 77 | 76 | 4076 | 53.63 | 377 | computed, the same, for Z5's $N$ |

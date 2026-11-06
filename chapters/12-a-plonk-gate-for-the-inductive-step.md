@@ -41,50 +41,50 @@ The statement is the one of Section [Project 8](08-a-ranking-function-as-a-circu
 
 $$
 \begin{aligned}
-  \mathcal{R}_{\mathrm{step}} = \Big\{\, \big( (x, x', A_i, b_i) ;\; (w_j, u_j, w_k, u_k, f) \big)
-    \;:\;\; & x, x' \in I^2,\; A_i \in I^{m \times 4},\; b_i \in I^m,\; f \in \{0, 1\}, \\
-    & A_i \begin{bmatrix} x \\ x' \end{bmatrix} \le b_i, \;\;
-      (w_j \cdot x + u_j) - (w_k \cdot x' + u_k) \ge f \,\Big\}.
+  \mathcal{R}_{\mathrm{step}} = \Big\lbrace \thinspace  \big( (x, x', A_i, b_i) ;\thickspace  (w_j, u_j, w_k, u_k, f) \big)
+    \thickspace :\thickspace \thickspace  & x, x' \in I^2,\thickspace  A_i \in I^{m \times 4},\thickspace  b_i \in I^m,\thickspace  f \in \lbrace 0, 1\rbrace , \cr 
+    & A_i \begin{bmatrix} x \cr  x' \end{bmatrix} \le b_i, \thickspace \thickspace 
+      (w_j \cdot x + u_j) - (w_k \cdot x' + u_k) \ge f \thinspace \Big\rbrace .
 \end{aligned} \tag{12.1}
 $$
 
-This is the paper's Equation 21 read at one point: the premise $A_i [x\; x']^\top \le b_i$ is membership of the transition in the $i$-th guarded update of Equation 16, and the conclusion is $V(x, q) - V(x', q') > \mathbf{1}_F(q, \sigma, q') - 1$ with $V$ the piecewise-linear function of Equation 18, which over integers is $V(x, q) - V(x', q') \ge f$ with $f = \mathbf{1}_F(q, \sigma, q')$. Equation 20, the preservation of finiteness, has the same premise and a conclusion of the same shape (a public row that must not hold), and is appended as further rows in the full build. The concrete instance is the retry loop of Section [Project 8](08-a-ranking-function-as-a-circuit.md), whose instance equation it repeats: $A_i$ with five rows over $y = (\mathit{delay}, \mathit{done}, \mathit{delay}', \mathit{done}')$, $b_i = (0, 0, 1, -1, 2)$, $w_j = w_k = (0, -1)$, $u_j = u_k = 3$, $f = 1$, witness $x = (1, 0)$, $x' = (2, 1)$. Remark rem:z08\_step on one step against the universal obligation applies here unchanged.
+This is the paper's Equation 21 read at one point: the premise $A_i [x\thickspace x']^\top \le b_i$ is membership of the transition in the $i$-th guarded update of Equation 16, and the conclusion is $V(x, q) - V(x', q') > \mathbf{1}_F(q, \sigma, q') - 1$ with $V$ the piecewise-linear function of Equation 18, which over integers is $V(x, q) - V(x', q') \ge f$ with $f = \mathbf{1}_F(q, \sigma, q')$. Equation 20, the preservation of finiteness, has the same premise and a conclusion of the same shape (a public row that must not hold), and is appended as further rows in the full build. The concrete instance is the retry loop of Section [Project 8](08-a-ranking-function-as-a-circuit.md), whose instance equation it repeats: $A_i$ with five rows over $y = (\mathit{delay}, \mathit{done}, \mathit{delay}', \mathit{done}')$, $b_i = (0, 0, 1, -1, 2)$, $w_j = w_k = (0, -1)$, $u_j = u_k = 3$, $f = 1$, witness $x = (1, 0)$, $x' = (2, 1)$. Remark rem:z08\_step on one step against the universal obligation applies here unchanged.
 
 ## The mathematics
 
-Let $\mathbb{F}$ be the scalar field of BN254 and let $n$ be a power of two dividing $|\mathbb{F}| - 1$, so that $\mathbb{F}$ has a primitive $n$-th root of unity $\omega$ and the multiplicative subgroup $H = \{1, \omega, \ldots, \omega^{n-1}\}$ of order $n$. For a vector $v \in \mathbb{F}^n$ write $v(X)$ for the unique polynomial of degree less than $n$ with $v(\omega^i) = v_i$, which exists by the Lagrange argument of Section [Project 8](08-a-ranking-function-as-a-circuit.md).
+Let $\mathbb{F}$ be the scalar field of BN254 and let $n$ be a power of two dividing $|\mathbb{F}| - 1$, so that $\mathbb{F}$ has a primitive $n$-th root of unity $\omega$ and the multiplicative subgroup $H = \lbrace 1, \omega, \ldots, \omega^{n-1}\rbrace$ of order $n$. For a vector $v \in \mathbb{F}^n$ write $v(X)$ for the unique polynomial of degree less than $n$ with $v(\omega^i) = v_i$, which exists by the Lagrange argument of Section [Project 8](08-a-ranking-function-as-a-circuit.md).
 
-**Definition Z12.1 (PLONK gate equation).** A PLONK circuit with $n$ gates over $\mathbb{F}$ is given by five selector vectors $q_L, q_R, q_O, q_M, q_C \in \mathbb{F}^n$. Three wire vectors $a, b, c \in \mathbb{F}^n$ satisfy the gate equation if for every $i \in \{0, \ldots, n - 1\}$
+**Definition Z12.1 (PLONK gate equation).** A PLONK circuit with $n$ gates over $\mathbb{F}$ is given by five selector vectors $q_L, q_R, q_O, q_M, q_C \in \mathbb{F}^n$. Three wire vectors $a, b, c \in \mathbb{F}^n$ satisfy the gate equation if for every $i \in \lbrace 0, \ldots, n - 1\rbrace$
 
 $$
-q_{L,i}\, a_i + q_{R,i}\, b_i + q_{O,i}\, c_i + q_{M,i}\, a_i b_i + q_{C,i} = 0, \tag{12.2}
+q_{L,i}\thinspace  a_i + q_{R,i}\thinspace  b_i + q_{O,i}\thinspace  c_i + q_{M,i}\thinspace  a_i b_i + q_{C,i} = 0, \tag{12.2}
 $$
 
 equivalently, if the polynomial $q_L(X) a(X) + q_R(X) b(X) + q_O(X) c(X) + q_M(X) a(X) b(X) + q_C(X)$ vanishes on $H$, equivalently, by the argument of Theorem thm:z08\_qap with the points $r_i = \omega^i$, if $Z_H(X) = X^n - 1 = \prod_{i}(X - \omega^i)$ divides it \[[2](#references)\].
 
 The selectors are the circuit; the wires are the witness. An addition gate is $(q_L, q_R, q_O, q_M, q_C) = (1, 1, -1, 0, 0)$, so that $a_i + b_i - c_i = 0$; a multiplication gate is $(0, 0, -1, 1, 0)$; a boolean gate on $a_i$ is $(-1, 0, 0, 1, 0)$, so that $a_i^2 - a_i = 0$; a constant gate is $(1, 0, 0, 0, -k)$. The bit decomposition of Lemma lem:z08\_cmp, which `api.ToBinary` emits, is $k$ boolean gates and a chain of addition gates with constant multipliers, which `gnark`'s builder packs into its wider custom gates (the exact gate count is read from the compiled system, not computed here).
 
-**Definition Z12.2 (Copy constraints and the wire permutation).** Concatenate the three wire vectors into $v = (a, b, c) \in \mathbb{F}^{3n}$, indexed by $\{1, \ldots, 3n\}$. The circuit's copy constraints say which positions must carry the same value: a permutation $\sigma$ of $\{1, \ldots, 3n\}$ whose cycles are the sets of positions that are one and the same variable. The copy constraints hold if and only if $v_{\sigma(i)} = v_i$ for every $i$.
+**Definition Z12.2 (Copy constraints and the wire permutation).** Concatenate the three wire vectors into $v = (a, b, c) \in \mathbb{F}^{3n}$, indexed by $\lbrace 1, \ldots, 3n\rbrace$. The circuit's copy constraints say which positions must carry the same value: a permutation $\sigma$ of $\lbrace 1, \ldots, 3n\rbrace$ whose cycles are the sets of positions that are one and the same variable. The copy constraints hold if and only if $v_{\sigma(i)} = v_i$ for every $i$.
 
-**Lemma Z12.3 (Grand product).** Let $N \ge 1$, $v \in \mathbb{F}^N$ and $\sigma$ a permutation of $\{1, \ldots, N\}$. Then $v_{\sigma(i)} = v_i$ for all $i$ if and only if
+**Lemma Z12.3 (Grand product).** Let $N \ge 1$, $v \in \mathbb{F}^N$ and $\sigma$ a permutation of $\lbrace 1, \ldots, N\rbrace$. Then $v_{\sigma(i)} = v_i$ for all $i$ if and only if
 
 $$
-\prod_{i=1}^{N} \big(v_i + \beta\, i + \gamma\big) \;=\; \prod_{i=1}^{N} \big(v_i + \beta\, \sigma(i) + \gamma\big) \tag{12.3}
+\prod_{i=1}^{N} \big(v_i + \beta\thinspace  i + \gamma\big) \thickspace =\thickspace  \prod_{i=1}^{N} \big(v_i + \beta\thinspace  \sigma(i) + \gamma\big) \tag{12.3}
 $$
 
 holds as an identity of polynomials in $\mathbb{F}[\beta, \gamma]$. Moreover, if the identity fails, then for $\beta, \gamma$ drawn uniformly and independently from $\mathbb{F}$ the two sides are equal with probability at most $N / |\mathbb{F}|$.
 
-*Proof.* (*If.*) Suppose $v_{\sigma(i)} = v_i$ for all $i$. Then for every $i$ the factor $v_i + \beta \sigma(i) + \gamma$ equals $v_{\sigma(i)} + \beta \sigma(i) + \gamma$. Since $\sigma$ is a bijection of $\{1, \ldots, N\}$, substituting $j = \sigma(i)$ runs $j$ over the same set exactly once, so
+*Proof.* (*If.*) Suppose $v_{\sigma(i)} = v_i$ for all $i$. Then for every $i$ the factor $v_i + \beta \sigma(i) + \gamma$ equals $v_{\sigma(i)} + \beta \sigma(i) + \gamma$. Since $\sigma$ is a bijection of $\lbrace 1, \ldots, N\rbrace$, substituting $j = \sigma(i)$ runs $j$ over the same set exactly once, so
 
 $$
-\prod_{i=1}^{N} \big(v_i + \beta\, \sigma(i) + \gamma\big)
-  = \prod_{i=1}^{N} \big(v_{\sigma(i)} + \beta\, \sigma(i) + \gamma\big)
-  = \prod_{j=1}^{N} \big(v_j + \beta\, j + \gamma\big),
+\prod_{i=1}^{N} \big(v_i + \beta\thinspace  \sigma(i) + \gamma\big)
+  = \prod_{i=1}^{N} \big(v_{\sigma(i)} + \beta\thinspace  \sigma(i) + \gamma\big)
+  = \prod_{j=1}^{N} \big(v_j + \beta\thinspace  j + \gamma\big),
 $$
 
-which is ((12.3)).
+which is (12.3).
 
-(*Only if.*) Suppose ((12.3)) holds in $\mathbb{F}[\beta, \gamma]$. Each factor $v + \beta\, t + \gamma$ with $t \in \{1, \ldots, N\}$ is a polynomial of total degree one, hence irreducible, and it is monic in $\gamma$; two such factors $v + \beta t + \gamma$ and $v' + \beta t' + \gamma$ are equal as polynomials if and only if $t = t'$ and $v = v'$, because the coefficient of $\beta$ is $t$ and the constant term is $v$. The ring $\mathbb{F}[\beta, \gamma]$ is a unique factorisation domain, so the two sides of ((12.3)), being equal, have the same multiset of monic irreducible factors. Hence the multiset $\{(v_i, i) : 1 \le i \le N\}$ equals the multiset $\{(v_i, \sigma(i)) : 1 \le i \le N\}$. Fix $j$. On the left, exactly one pair has second coordinate $j$, namely $(v_j, j)$. On the right, the pairs with second coordinate $j$ are those $i$ with $\sigma(i) = j$, and since $\sigma$ is a bijection there is exactly one, $i = \sigma^{-1}(j)$. The two multisets agree, so $(v_j, j) = (v_{\sigma^{-1}(j)}, j)$, that is, $v_j = v_{\sigma^{-1}(j)}$ for every $j$. Writing $j = \sigma(i)$ gives $v_{\sigma(i)} = v_i$ for every $i$.
+(*Only if.*) Suppose (12.3) holds in $\mathbb{F}[\beta, \gamma]$. Each factor $v + \beta\thinspace t + \gamma$ with $t \in \lbrace 1, \ldots, N\rbrace$ is a polynomial of total degree one, hence irreducible, and it is monic in $\gamma$; two such factors $v + \beta t + \gamma$ and $v' + \beta t' + \gamma$ are equal as polynomials if and only if $t = t'$ and $v = v'$, because the coefficient of $\beta$ is $t$ and the constant term is $v$. The ring $\mathbb{F}[\beta, \gamma]$ is a unique factorisation domain, so the two sides of (12.3), being equal, have the same multiset of monic irreducible factors. Hence the multiset $\lbrace (v_i, i) : 1 \le i \le N\rbrace$ equals the multiset $\lbrace (v_i, \sigma(i)) : 1 \le i \le N\rbrace$. Fix $j$. On the left, exactly one pair has second coordinate $j$, namely $(v_j, j)$. On the right, the pairs with second coordinate $j$ are those $i$ with $\sigma(i) = j$, and since $\sigma$ is a bijection there is exactly one, $i = \sigma^{-1}(j)$. The two multisets agree, so $(v_j, j) = (v_{\sigma^{-1}(j)}, j)$, that is, $v_j = v_{\sigma^{-1}(j)}$ for every $j$. Writing $j = \sigma(i)$ gives $v_{\sigma(i)} = v_i$ for every $i$.
 
 (*The probability bound.*) If the identity fails, the difference of the two sides is a nonzero polynomial in $\mathbb{F}[\beta, \gamma]$ of total degree at most $N$, each side being a product of $N$ factors of degree one. By the Schwartz-Zippel lemma, proved in Section [Project 6](06-folding-and-the-salem-spencer-schedule.md) \[[3](#references), [4](#references)\], a nonzero polynomial of total degree at most $N$ vanishes at a uniformly random point of $\mathbb{F}^2$ with probability at most $N / |\mathbb{F}|$. &#9632;
 
@@ -93,14 +93,14 @@ which is ((12.3)).
 $$
 \begin{aligned}
 \phi_i  &= (a_i + \beta \omega^i + \gamma)(b_i + \beta k_1 \omega^i + \gamma)
-             (c_i + \beta k_2 \omega^i + \gamma), \\
+             (c_i + \beta k_2 \omega^i + \gamma), \cr 
   \phi'_i &= (a_i + \beta \sigma_a(\omega^i) + \gamma)(b_i + \beta \sigma_b(\omega^i) + \gamma)
-             (c_i + \beta \sigma_c(\omega^i) + \gamma), \\
+             (c_i + \beta \sigma_c(\omega^i) + \gamma), \cr 
   z(\omega^{i+1}) &= z(\omega^{i}) \cdot \phi_i / \phi'_i, \tag{12.4}
 \end{aligned}
 $$
 
-so that $z(\omega^{n}) = z(1) = 1$ is exactly ((12.3)) after the challenges $\beta, \gamma$ have been drawn, which is why the proof is called a grand product. The verifier checks the recurrence and the boundary as polynomial identities on $H$ through KZG openings at one random point, the primitive of Section [Project 4](04-two-group-elements.md); $\beta$ and $\gamma$ come from the Fiat-Shamir hash of the wire commitments, as in Section [Project 7](07-the-esp32-proves-two-commitments-open-to-one.md). The setup is a universal structured reference string that depends only on an upper bound on $n$, not on the circuit, which is the difference from Section [Project 8](08-a-ranking-function-as-a-circuit.md) the decision tree turns on \[[2](#references)\].
+so that $z(\omega^{n}) = z(1) = 1$ is exactly (12.3) after the challenges $\beta, \gamma$ have been drawn, which is why the proof is called a grand product. The verifier checks the recurrence and the boundary as polynomial identities on $H$ through KZG openings at one random point, the primitive of Section [Project 4](04-two-group-elements.md); $\beta$ and $\gamma$ come from the Fiat-Shamir hash of the wire commitments, as in Section [Project 7](07-the-esp32-proves-two-commitments-open-to-one.md). The setup is a universal structured reference string that depends only on an upper bound on $n$, not on the circuit, which is the difference from Section [Project 8](08-a-ranking-function-as-a-circuit.md) the decision tree turns on \[[2](#references)\].
 
 ## The protocol
 

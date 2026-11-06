@@ -24,7 +24,7 @@
 
 ## Pitch
 
-The paper's certificate is public: a Buchi automaton for the complement of the specification, and a ranking function over the composed state space \[[1](#references)\]. Its Example 3.4 writes the property "the system does not wait forever" as $\neg \mathrm{FG}\,\mathrm{Wait}$ and draws the two-state automaton of its Figure 2b for the complement. Writing such a formula is the one step of the pipeline that a person does by hand, and it is the step where a language model is tempting and dangerous: tempting because the sentence is English, dangerous because a formula that reads well and means something else would be certified faithfully for the wrong property. So this chapter puts the model where the volume's rule puts it: it proposes, under a grammar that admits only LTL over the four propositions of the modem machine of [Project 3](03-the-modems-backoff-machine.md), and Spot decides, by the equivalence check that automata theory makes exact \[[3](#references)\], whether the proposal means what the template means. The formula that goes downstream is the template's unless Spot says the two are equivalent, which is why the theorem at the end of the mathematics section holds without any assumption about the model.
+The paper's certificate is public: a Buchi automaton for the complement of the specification, and a ranking function over the composed state space \[[1](#references)\]. Its Example 3.4 writes the property "the system does not wait forever" as $\neg \mathrm{FG}\thinspace \mathrm{Wait}$ and draws the two-state automaton of its Figure 2b for the complement. Writing such a formula is the one step of the pipeline that a person does by hand, and it is the step where a language model is tempting and dangerous: tempting because the sentence is English, dangerous because a formula that reads well and means something else would be certified faithfully for the wrong property. So this chapter puts the model where the volume's rule puts it: it proposes, under a grammar that admits only LTL over the four propositions of the modem machine of [Project 3](03-the-modems-backoff-machine.md), and Spot decides, by the equivalence check that automata theory makes exact \[[3](#references)\], whether the proposal means what the template means. The formula that goes downstream is the template's unless Spot says the two are equivalent, which is why the theorem at the end of the mathematics section holds without any assumption about the model.
 
 ## Parts and interface
 
@@ -41,36 +41,36 @@ The paper's certificate is public: a Buchi automaton for the complement of the s
 Nothing is hidden in this chapter. The relation it builds is the one the certificate's first half must satisfy,
 
 $$
-\mathcal{R}_{\mathrm{cert}} = \{\, (\phi, \mathcal{A}) \;:\; \mathcal{L}_\mathcal{A} = \Sigma^\omega \setminus
-  \mathcal{L}_\phi \,\}, \tag{17.1}
+\mathcal{R}_{\mathrm{cert}} = \lbrace \thinspace  (\phi, \mathcal{A}) \thickspace :\thickspace  \mathcal{L}_\mathcal{A} = \Sigma^\omega \setminus
+  \mathcal{L}_\phi \thinspace \rbrace , \tag{17.1}
 $$
 
-with $\Sigma = 2^\Pi$ over the propositions $\Pi = \{\mathrm{Closed}, \mathrm{Wait}, \mathrm{Established}, \mathrm{Exhausted}\}$ of the modem machine of [Project 3](03-the-modems-backoff-machine.md). The statement is public on both sides: $\phi$ is read by the verifier and $\mathcal{A}$ is checked by the verifier against it, which Spot's translator produces and its equivalence check confirms. The model's output $\phi_m$ enters only the second relation of the chapter,
+with $\Sigma = 2^\Pi$ over the propositions $\Pi = \lbrace \mathrm{Closed}, \mathrm{Wait}, \mathrm{Established}, \mathrm{Exhausted}\rbrace$ of the modem machine of [Project 3](03-the-modems-backoff-machine.md). The statement is public on both sides: $\phi$ is read by the verifier and $\mathcal{A}$ is checked by the verifier against it, which Spot's translator produces and its equivalence check confirms. The model's output $\phi_m$ enters only the second relation of the chapter,
 
 $$
-\mathcal{R}_{\mathrm{agree}} = \{\, (\phi_m, \phi_t) \;:\; \mathcal{L}_{\phi_m} = \mathcal{L}_{\phi_t} \,\}, \tag{17.2}
+\mathcal{R}_{\mathrm{agree}} = \lbrace \thinspace  (\phi_m, \phi_t) \thickspace :\thickspace  \mathcal{L}_{\phi_m} = \mathcal{L}_{\phi_t} \thinspace \rbrace , \tag{17.2}
 $$
 
 which is decidable and which Spot decides.
 
 ## The mathematics
 
-**Definition Z17.1 (Infinite words and LTL).** Let $\Pi$ be a finite set of atomic propositions and $\Sigma = 2^\Pi$. An infinite word is $\sigma = \sigma_0 \sigma_1 \sigma_2 \cdots \in \Sigma^\omega$ and $\sigma[i..]$ is the suffix $\sigma_i \sigma_{i+1} \cdots$. LTL formulas over $\Pi$ are built by $\phi ::= p \mid \neg\phi \mid \phi \wedge \phi \mid \mathrm{X}\phi \mid \phi\,\mathrm{U}\,\phi$ with $p \in \Pi$, and the derived operators $\mathrm{F}\phi = \mathrm{true}\,\mathrm{U}\,\phi$ and $\mathrm{G}\phi = \neg\mathrm{F}\neg\phi$ \[[2](#references)\]. Satisfaction $\sigma \models \phi$ is defined by
+**Definition Z17.1 (Infinite words and LTL).** Let $\Pi$ be a finite set of atomic propositions and $\Sigma = 2^\Pi$. An infinite word is $\sigma = \sigma_0 \sigma_1 \sigma_2 \cdots \in \Sigma^\omega$ and $\sigma[i..]$ is the suffix $\sigma_i \sigma_{i+1} \cdots$. LTL formulas over $\Pi$ are built by $\phi ::= p \mid \neg\phi \mid \phi \wedge \phi \mid \mathrm{X}\phi \mid \phi\thinspace \mathrm{U}\thinspace \phi$ with $p \in \Pi$, and the derived operators $\mathrm{F}\phi = \mathrm{true}\thinspace \mathrm{U}\thinspace \phi$ and $\mathrm{G}\phi = \neg\mathrm{F}\neg\phi$ \[[2](#references)\]. Satisfaction $\sigma \models \phi$ is defined by
 
 $$
 \begin{aligned}
 \sigma \models p &\iff p \in \sigma_0, \qquad
   \sigma \models \neg\phi \iff \sigma \not\models \phi, \qquad
-  \sigma \models \phi \wedge \psi \iff \sigma \models \phi \text{ and } \sigma \models \psi, \\
-  \sigma \models \mathrm{X}\phi &\iff \sigma[1..] \models \phi, \\
-  \sigma \models \phi\,\mathrm{U}\,\psi &\iff \exists j \ge 0 .\; \sigma[j..] \models \psi
-    \text{ and } \forall i < j .\; \sigma[i..] \models \phi .
+  \sigma \models \phi \wedge \psi \iff \sigma \models \phi \text{ and } \sigma \models \psi, \cr 
+  \sigma \models \mathrm{X}\phi &\iff \sigma[1..] \models \phi, \cr 
+  \sigma \models \phi\thinspace \mathrm{U}\thinspace \psi &\iff \exists j \ge 0 .\thickspace  \sigma[j..] \models \psi
+    \text{ and } \forall i < j .\thickspace  \sigma[i..] \models \phi .
 \end{aligned}
 $$
 
-Unfolding the derived operators, $\sigma \models \mathrm{F}\phi$ iff $\exists j .\; \sigma[j..] \models \phi$, and $\sigma \models \mathrm{G}\phi$ iff $\forall j .\; \sigma[j..] \models \phi$. The language of $\phi$ is $\mathcal{L}_\phi = \{\, \sigma \in \Sigma^\omega : \sigma \models \phi \,\}$.
+Unfolding the derived operators, $\sigma \models \mathrm{F}\phi$ iff $\exists j .\thickspace \sigma[j..] \models \phi$, and $\sigma \models \mathrm{G}\phi$ iff $\forall j .\thickspace \sigma[j..] \models \phi$. The language of $\phi$ is $\mathcal{L}_\phi = \lbrace \thinspace \sigma \in \Sigma^\omega : \sigma \models \phi \thinspace \rbrace$.
 
-**Definition Z17.2 (Nondeterministic Buchi automaton).** $\mathcal{A} = (Q, Q_0, \delta, F)$ with $Q$ finite, $Q_0 \subseteq Q$, $\delta \subseteq Q \times \Sigma \times Q$ and fair transitions $F \subseteq \delta$, as the paper defines it \[[1](#references)\]. A run on $\sigma$ is $(q_i)_{i \in \mathbb{N}}$ with $q_0 \in Q_0$ and $(q_i, \sigma_i, q_{i+1}) \in \delta$ for all $i$; it is accepting if $\{\, i : (q_i, \sigma_i, q_{i+1}) \in F \,\}$ is infinite; $\mathcal{L}_\mathcal{A}$ is the set of words with an accepting run.
+**Definition Z17.2 (Nondeterministic Buchi automaton).** $\mathcal{A} = (Q, Q_0, \delta, F)$ with $Q$ finite, $Q_0 \subseteq Q$, $\delta \subseteq Q \times \Sigma \times Q$ and fair transitions $F \subseteq \delta$, as the paper defines it \[[1](#references)\]. A run on $\sigma$ is $(q_i)_{i \in \mathbb{N}}$ with $q_0 \in Q_0$ and $(q_i, \sigma_i, q_{i+1}) \in \delta$ for all $i$; it is accepting if $\lbrace \thinspace i : (q_i, \sigma_i, q_{i+1}) \in F \thinspace \rbrace$ is infinite; $\mathcal{L}_\mathcal{A}$ is the set of words with an accepting run.
 
 **Theorem Z17.3 (Set algebra of model checking).** For every LTL formula $\phi$ and every language $\mathcal{L}_\mathcal{M} \subseteq \Sigma^\omega$: (a) $\mathcal{L}_{\neg\phi} = \Sigma^\omega \setminus \mathcal{L}_\phi$; (b) $\mathcal{L}_\mathcal{M} \subseteq \mathcal{L}_\phi$ if and only if $\mathcal{L}_\mathcal{M} \cap \mathcal{L}_{\neg\phi} = \emptyset$.
 
@@ -80,19 +80,19 @@ Unfolding the derived operators, $\sigma \models \mathrm{F}\phi$ iff $\exists j 
 
 The theorem is not proved here; it is what Spot implements, and its translator and its equivalence check are the two calls the code makes \[[5](#references)\]. What is proved is the one automaton the paper draws.
 
-**Lemma Z17.5 (The automaton of the paper's Figure 2b).** Let $\mathcal{A}$ have $Q = \{q_0, q_1\}$, $Q_0 = \{q_0\}$,
+**Lemma Z17.5 (The automaton of the paper's Figure 2b).** Let $\mathcal{A}$ have $Q = \lbrace q_0, q_1\rbrace$, $Q_0 = \lbrace q_0\rbrace$,
 
 $$
-\delta = \{\, (q_0, a, q_0) : a \in \Sigma \,\} \cup \{\, (q_0, a, q_1) : \mathrm{Wait} \in a \,\}
-  \cup \{\, (q_1, a, q_1) : \mathrm{Wait} \in a \,\}, \qquad
-  F = \{\, (q_1, a, q_1) : \mathrm{Wait} \in a \,\}.
+\delta = \lbrace \thinspace  (q_0, a, q_0) : a \in \Sigma \thinspace \rbrace  \cup \lbrace \thinspace  (q_0, a, q_1) : \mathrm{Wait} \in a \thinspace \rbrace 
+  \cup \lbrace \thinspace  (q_1, a, q_1) : \mathrm{Wait} \in a \thinspace \rbrace , \qquad
+  F = \lbrace \thinspace  (q_1, a, q_1) : \mathrm{Wait} \in a \thinspace \rbrace .
 $$
 
-Then $\mathcal{L}_\mathcal{A} = \{\, \sigma \in \Sigma^\omega : \{ i : \mathrm{Wait} \notin \sigma_i \} \text{ is finite} \,\} = \mathcal{L}_{\mathrm{FG}\,\mathrm{Wait}}$.
+Then $\mathcal{L}_\mathcal{A} = \lbrace \thinspace \sigma \in \Sigma^\omega : \lbrace i : \mathrm{Wait} \notin \sigma_i \rbrace \text{ is finite} \thinspace \rbrace = \mathcal{L}_{\mathrm{FG}\thinspace \mathrm{Wait}}$.
 
-*Proof.* First the second equality. $\sigma \models \mathrm{FG}\,\mathrm{Wait}$ iff there is $j$ with $\sigma[j..] \models \mathrm{G}\,\mathrm{Wait}$ iff there is $j$ such that for all $i \ge j$, $\mathrm{Wait} \in \sigma_i$, iff the set $\{ i : \mathrm{Wait} \notin \sigma_i \}$ is contained in $\{0, \ldots, j - 1\}$ for some $j$, iff that set is finite.
+*Proof.* First the second equality. $\sigma \models \mathrm{FG}\thinspace \mathrm{Wait}$ iff there is $j$ with $\sigma[j..] \models \mathrm{G}\thinspace \mathrm{Wait}$ iff there is $j$ such that for all $i \ge j$, $\mathrm{Wait} \in \sigma_i$, iff the set $\lbrace i : \mathrm{Wait} \notin \sigma_i \rbrace$ is contained in $\lbrace 0, \ldots, j - 1\rbrace$ for some $j$, iff that set is finite.
 
-Now $\mathcal{L}_\mathcal{A} \subseteq \mathcal{L}_{\mathrm{FG}\,\mathrm{Wait}}$. Let $(q_i)$ be an accepting run on $\sigma$. Fair transitions are the self-loops on $q_1$ only, so the run visits $q_1$ at some index $i_0$. The only transitions leaving $q_1$ are those self-loops, each requiring $\mathrm{Wait} \in \sigma_i$; so for every $i \ge i_0$, $q_i = q_1$ by induction on $i$ (the run is in $q_1$ at $i_0$, and from $q_1$ it can only go to $q_1$), and the transition taken at $i$ is $(q_1, \sigma_i, q_1) \in \delta$, which forces $\mathrm{Wait} \in \sigma_i$. Hence $\{ i : \mathrm{Wait} \notin \sigma_i \} \subseteq \{0, \ldots, i_0 - 1\}$ is finite.
+Now $\mathcal{L}_\mathcal{A} \subseteq \mathcal{L}_{\mathrm{FG}\thinspace \mathrm{Wait}}$. Let $(q_i)$ be an accepting run on $\sigma$. Fair transitions are the self-loops on $q_1$ only, so the run visits $q_1$ at some index $i_0$. The only transitions leaving $q_1$ are those self-loops, each requiring $\mathrm{Wait} \in \sigma_i$; so for every $i \ge i_0$, $q_i = q_1$ by induction on $i$ (the run is in $q_1$ at $i_0$, and from $q_1$ it can only go to $q_1$), and the transition taken at $i$ is $(q_1, \sigma_i, q_1) \in \delta$, which forces $\mathrm{Wait} \in \sigma_i$. Hence $\lbrace i : \mathrm{Wait} \notin \sigma_i \rbrace \subseteq \lbrace 0, \ldots, i_0 - 1\rbrace$ is finite.
 
 Conversely, let $\mathrm{Wait} \in \sigma_i$ for all $i \ge j$. Define $q_i = q_0$ for $i \le j$ and $q_i = q_1$ for $i > j$. This is a run: $q_0 \in Q_0$; for $i < j$ the transition $(q_0, \sigma_i, q_0)$ is in $\delta$ for every letter; at $i = j$ the transition $(q_0, \sigma_j, q_1)$ is in $\delta$ because $\mathrm{Wait} \in \sigma_j$; for $i > j$ the transition $(q_1, \sigma_i, q_1)$ is in $\delta$ because $\mathrm{Wait} \in \sigma_i$. Every transition at $i > j$ is in $F$, so infinitely many fair transitions are taken and the run is accepting. Hence $\sigma \in \mathcal{L}_\mathcal{A}$. &#9632;
 

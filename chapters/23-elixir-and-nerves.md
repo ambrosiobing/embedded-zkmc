@@ -43,26 +43,26 @@ The design brief puts this node on a Raspberry Pi 3 Model B Plus and sends its p
 The cryptographic relation is the one [Project 4](04-two-group-elements.md) verifies, the proof of knowledge of a committed polynomial that vanishes on a public set \[[1](#references)\]:
 
 $$
-\mathcal{R}_{\mathrm{eval}} = \mathsf{PoK}\Big\{\, \underbrace{(p, b)}_{w} ;\; \underbrace{(c_p, E)}_{u} \;:\;
-    c_p = \mathsf{Com}(p; b) \;\wedge\; \forall e \in E .\; p(e) = 0 \,\Big\}, \tag{23.1}
+\mathcal{R}_{\mathrm{eval}} = \mathsf{PoK}\Big\lbrace \thinspace  \underbrace{(p, b)}_{w} ;\thickspace  \underbrace{(c_p, E)}_{u} \thickspace :\thickspace 
+    c_p = \mathsf{Com}(p; b) \thickspace \wedge\thickspace  \forall e \in E .\thickspace  p(e) = 0 \thinspace \Big\rbrace , \tag{23.1}
 $$
 
 instantiated at $u = (c_T, E_{\mathrm{step}} \cup E_{\mathrm{fair}})$ with $|E_{\mathrm{step}} \cup E_{\mathrm{fair}}| = 8088$, the count [Project 4](04-two-group-elements.md) recomputes and refuses to take on trust. This chapter adds a second relation that no earlier chapter needs, because no earlier chapter has a runtime that may restart the sender. Let $\mathbb{N}$ be the sequence numbers and let $A \subseteq \mathbb{N}$ be the set a receiver has already accepted. The freshness relation and the transport relation are
 
 $$
 \begin{gathered}
-\mathcal{R}_{\mathrm{fresh}} = \{\, (s, A) \in \mathbb{N} \times 2^{\mathbb{N}} \mid s > \max(A \cup \{0\}) \,\},
-   \\
-  \mathrm{seg}_s(x) = \big((\mathrm{0x320},\, s_4 \,\|\, \mathrm{crc}_{32}(x)_4),\,
-    (\mathrm{0x321}, x_{0..7}),\, \dots,\, (\mathrm{0x338}, x_{184..191})\big), \tag{23.2}
+\mathcal{R}_{\mathrm{fresh}} = \lbrace \thinspace  (s, A) \in \mathbb{N} \times 2^{\mathbb{N}} \mid s > \max(A \cup \lbrace 0\rbrace ) \thinspace \rbrace ,
+   \cr 
+  \mathrm{seg}_s(x) = \big((\mathrm{0x320},\thinspace  s_4 \thinspace \Vert \thinspace  \mathrm{crc}_{32}(x)_4),\thinspace 
+    (\mathrm{0x321}, x_{0..7}),\thinspace  \dots,\thinspace  (\mathrm{0x338}, x_{184..191})\big), \tag{23.2}
 \end{gathered}
 $$
 
-where $x \in \{0,1\}^{8 \cdot 192}$ is the proof, the subscripts are byte counts, and $\mathrm{seg}_s$ differs from the segmentation of [Project 18](18-a-proof-over-the-wire.md) in one place only: the four bytes that there carried a length and a fixed tag here carry $s$. The length is fixed at 192 by the identifier range instead, so the replay guard costs no additional frame and no additional bus time (computed: $8 - 4 - 4 = 0$ spare header bytes, and 25 frames either way). The verdict the second node writes is $\mathsf{Verify}(c_T, E_{\mathrm{step}} \cup E_{\mathrm{fair}}, \pi_T) \wedge [\,(s, A) \in \mathcal{R}_{\mathrm{fresh}}\,]$, and the chapter's mathematics is about the right conjunct.
+where $x \in \lbrace 0,1\rbrace ^{8 \cdot 192}$ is the proof, the subscripts are byte counts, and $\mathrm{seg}_s$ differs from the segmentation of [Project 18](18-a-proof-over-the-wire.md) in one place only: the four bytes that there carried a length and a fixed tag here carry $s$. The length is fixed at 192 by the identifier range instead, so the replay guard costs no additional frame and no additional bus time (computed: $8 - 4 - 4 = 0$ spare header bytes, and 25 frames either way). The verdict the second node writes is $\mathsf{Verify}(c_T, E_{\mathrm{step}} \cup E_{\mathrm{fair}}, \pi_T) \wedge [\thinspace (s, A) \in \mathcal{R}_{\mathrm{fresh}}\thinspace ]$, and the chapter's mathematics is about the right conjunct.
 
 ## The mathematics
 
-**Definition Z23.1 (Supervision tree and its restart function).** A *supervision tree* is a triple $(P, \mathrm{par}, \mathrm{str})$ in which $P$ is a finite set of processes, $\mathrm{par} : P \setminus \{\rho\} \to P$ is a parent function with a single root $\rho$ whose graph is acyclic, and $\mathrm{str}$ assigns a strategy to every process that has children. Write $\mathrm{sub}(p) = \{\, q \in P \mid p = q \text{ or } p \text{ is an ancestor of } q \,\}$ for the subtree at $p$. Let $\mathcal{E}$ be a set of faults. The *restart function* is the partial function
+**Definition Z23.1 (Supervision tree and its restart function).** A *supervision tree* is a triple $(P, \mathrm{par}, \mathrm{str})$ in which $P$ is a finite set of processes, $\mathrm{par} : P \setminus \lbrace \rho\rbrace \to P$ is a parent function with a single root $\rho$ whose graph is acyclic, and $\mathrm{str}$ assigns a strategy to every process that has children. Write $\mathrm{sub}(p) = \lbrace \thinspace q \in P \mid p = q \text{ or } p \text{ is an ancestor of } q \thinspace \rbrace$ for the subtree at $p$. Let $\mathcal{E}$ be a set of faults. The *restart function* is the partial function
 
 $$
 \mathrm{res} : P \times \mathcal{E} \rightharpoonup 2^{P}, \tag{23.3}
@@ -78,7 +78,7 @@ which sends a failure $(p, \epsilon)$ to the set of processes that are terminate
 
 For the uncaught case, $\kappa$ is terminated with every other process and is initialised again by reading the file. By Definition **Definition Z23.2** the file holds the value written by the last completed call of $\mathsf{next}$, which is the value $\kappa$ held, so the value after the restart equals the value before it. If a call of $\mathsf{next}$ was in progress, the file holds either the old value or the new one, and both are at least the value held before that call began. In every case the value does not decrease. &#9632;
 
-**Theorem Z23.4 (A restart cannot replay a committed frame).** Let the node obey the write-before-send rule of Definition **Definition Z23.2**, with $\kappa$ and the bus process $\beta$ arranged as in Lemma **Lemma Z23.3**, and let the receiver accept a message only when its sequence number satisfies ((23.2)) against the set $A$ of numbers it has already accepted. Then
+**Theorem Z23.4 (A restart cannot replay a committed frame).** Let the node obey the write-before-send rule of Definition **Definition Z23.2**, with $\kappa$ and the bus process $\beta$ arranged as in Lemma **Lemma Z23.3**, and let the receiver accept a message only when its sequence number satisfies (23.2) against the set $A$ of numbers it has already accepted. Then
 
 1. two distinct calls of $\mathsf{next}$ return distinct values;
 2. if the call for one message precedes a restart and the call for another follows it, the second value is strictly greater than the first;
@@ -88,11 +88,11 @@ For the uncaught case, $\kappa$ is terminated with every other process and is in
 
 (ii) Let the $k$-th call precede the restart and the $k'$-th follow it, $k < k'$. Suppose first that the restart is one the supervisor caught. By Lemma **Lemma Z23.3** the value $\kappa$ holds is unchanged, so the enumeration of (i) continues without interruption and $v_{k'} = n_0 + k' > n_0 + k = v_k$. Suppose instead that the whole node restarted. By Lemma **Lemma Z23.3** the value after the restart, call it $n'_0$, satisfies $n'_0 \ge n_k = v_k$. Applying (i) to the calls after the restart gives $v_{k'} = n'_0 + j$ for some $j \ge 1$, hence $v_{k'} \ge v_k + 1 > v_k$. In both cases the second value is strictly greater.
 
-(iii) Let $m$ be a message that the receiver accepted, with number $s(m)$, and suppose a message $m'$ with the same 192 bytes is offered afterwards. At that moment $s(m) \in A$, so $\max(A \cup \{0\}) \ge s(m)$, and by ((23.2)) the receiver accepts $m'$ only if $s(m') > s(m)$. Two cases. If $m'$ is a re-queue of $m$ by the restarted bus process, it carries the number already reserved for $m$, that is $s(m') = s(m)$, and the receiver refuses it. If instead the restarted process called $\mathsf{next}$ again, then by (i) and (ii) its number is a value no earlier call returned and is strictly greater than every number issued before the restart; the frames it sends are then a fresh message with a fresh number, which is a new transmission and not a second acceptance of $m$. Hence no message is accepted twice. Finally, partial transmissions are covered by the same argument: a message missing one of the 24 data identifiers is refused before its number is examined, exactly as in [Project 18](18-a-proof-over-the-wire.md), so an incomplete first attempt adds nothing to $A$ and the retry is judged against the state $A$ had before it. &#9632;
+(iii) Let $m$ be a message that the receiver accepted, with number $s(m)$, and suppose a message $m'$ with the same 192 bytes is offered afterwards. At that moment $s(m) \in A$, so $\max(A \cup \lbrace 0\rbrace ) \ge s(m)$, and by (23.2) the receiver accepts $m'$ only if $s(m') > s(m)$. Two cases. If $m'$ is a re-queue of $m$ by the restarted bus process, it carries the number already reserved for $m$, that is $s(m') = s(m)$, and the receiver refuses it. If instead the restarted process called $\mathsf{next}$ again, then by (i) and (ii) its number is a value no earlier call returned and is strictly greater than every number issued before the restart; the frames it sends are then a fresh message with a fresh number, which is a new transmission and not a second acceptance of $m$. Hence no message is accepted twice. Finally, partial transmissions are covered by the same argument: a message missing one of the 24 data identifiers is refused before its number is examined, exactly as in [Project 18](18-a-proof-over-the-wire.md), so an incomplete first attempt adds nothing to $A$ and the retry is judged against the state $A$ had before it. &#9632;
 
 **Remark Z23.5 (What the theorem does not say).** The theorem is about this node's own restarts. It says nothing about a third node that records the 25 frames and sends them again later, because such a node can pick any sequence number it likes; the bus has no notion of sender, as [Project 18](18-a-proof-over-the-wire.md) states, and only a signature over the payload and the number would change that. Nor does it say that the message was sent by a node whose system is the committed one: that is the binding property of the commitment, thm:z01\_binding, and it is about the bytes, not about the wire. The theorem's whole content is that the sender cannot be made to repeat itself by a fault in its own supervision tree, which is the one new obligation the runtime creates.
 
-**Proposition Z23.6 (The counter's width, computed).** A four-byte counter admits $2^{32} = 4294967296$ messages before it wraps. At one message per second that is $4294967296 / 31536000 = 136.2$ years (computed, with 31536000 seconds in a year of 365 days); at the fastest rate this transport allows, one message per 6.75 ms from Proposition prop:z18\_bustime, it is $4294967296 \times 0.00675 = 2.899 \times 10^{7}$ seconds, that is 0.92 years (computed). A wrap is a failure of ((23.2)) and not of the theorem, whose hypothesis is a counter over $\mathbb{N}$; the firmware therefore refuses to send when the counter reaches $2^{32} - 1$ rather than wrapping in silence.
+**Proposition Z23.6 (The counter's width, computed).** A four-byte counter admits $2^{32} = 4294967296$ messages before it wraps. At one message per second that is $4294967296 / 31536000 = 136.2$ years (computed, with 31536000 seconds in a year of 365 days); at the fastest rate this transport allows, one message per 6.75 ms from Proposition prop:z18\_bustime, it is $4294967296 \times 0.00675 = 2.899 \times 10^{7}$ seconds, that is 0.92 years (computed). A wrap is a failure of (23.2) and not of the theorem, whose hypothesis is a counter over $\mathbb{N}$; the firmware therefore refuses to send when the counter reaches $2^{32} - 1$ rather than wrapping in silence.
 
 *Proof.* A four-byte unsigned field takes the values $0$ to $2^{32} - 1$, which is $2^{32}$ values, and $2^{32} = 4294967296$. Dividing by the seconds in a year, $4294967296 / 31536000 = 136.19$, rounded to 136.2. For the second figure, 6.75 ms is the upper bound on one message's bus time from the stuffing bound of [Project 18](18-a-proof-over-the-wire.md), so the smallest interval between consecutive messages on an idle bus is 6.75 ms and $4294967296 \times 6.75 \times 10^{-3} = 2.899 \times 10^{7}$ seconds; dividing by 31536000 gives 0.919, rounded to 0.92. Neither figure is measured: both are arithmetic on a field width and a bit count. &#9632;
 
@@ -102,7 +102,7 @@ For the uncaught case, $\kappa$ is terminated with every other process and is in
 2. On the Pi, after the boot, `dmesg` names which of `can0` and `can1` is the MCP2515 this time; that interface is brought up at 500 kbit/s and the bus process is told its name.
 3. The caller hands 192 bytes to the bus process. The bus process calls the native function to produce them if they are not already on the card, then calls $\mathsf{next}$ and waits for its reply, which does not return until the write has reached the medium.
 4. The bus process queues the header frame 0x320 carrying $s$ and the CRC-32, then the 24 data frames 0x321 to 0x338, and replies to its caller with $s$ and the frame count.
-5. The Nucleo collects the frames, refuses a message with a missing identifier or a failing CRC, refuses a message whose $s$ does not satisfy ((23.2)) against the largest it has accepted, and prints one line per message on its USB CDC console.
+5. The Nucleo collects the frames, refuses a message with a missing identifier or a failing CRC, refuses a message whose $s$ does not satisfy (23.2) against the largest it has accepted, and prints one line per message on its USB CDC console.
 6. the build laptop reads the console log and the `candump` log, runs the two pairings of [Project 4](04-two-group-elements.md) on the reassembled bytes, and writes the verdict. Nothing is sent anywhere else.
 
 ## The code
@@ -251,7 +251,7 @@ candump -t a -l can0 &
 
 ## The model, if any
 
-None. No model proposes anything in this chapter: the certificate is computed before the run and checked by the certifier of [Project 16](16-the-model-proposes-a-ranking-function-the-certifier.md), and the node's only decision on the bus is the freshness rule of ((23.2)), which is arithmetic on two integers.
+None. No model proposes anything in this chapter: the certificate is computed before the run and checked by the certifier of [Project 16](16-the-model-proposes-a-ranking-function-the-certifier.md), and the node's only decision on the bus is the freshness rule of (23.2), which is arithmetic on two integers.
 
 ## Real, modelled, absent
 

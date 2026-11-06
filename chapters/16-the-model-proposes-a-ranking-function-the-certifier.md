@@ -41,10 +41,10 @@ The paper's certificate is public: an automaton for the negated property and a r
 
 ## The secret, the statement and the relation
 
-This chapter proves nothing in zero knowledge, so there is no witness to hide. Its relation is the certification relation that every proof of the symbolic scheme rests on. Let $\mathcal{M}$ be the modem machine of [Project 3](03-the-modems-backoff-machine.md) written as linear guarded commands over the integer variables $(\mathsf{st}, \mathsf{done}, \mathsf{delay})$, let $\mathcal{A}$ be the automaton of the paper's Figure 2b for $\neg\phi$ with $\phi = \neg\mathrm{FG}\,\mathsf{Wait}$, and let $\mathcal{V}$ be the template family
+This chapter proves nothing in zero knowledge, so there is no witness to hide. Its relation is the certification relation that every proof of the symbolic scheme rests on. Let $\mathcal{M}$ be the modem machine of [Project 3](03-the-modems-backoff-machine.md) written as linear guarded commands over the integer variables $(\mathsf{st}, \mathsf{done}, \mathsf{delay})$, let $\mathcal{A}$ be the automaton of the paper's Figure 2b for $\neg\phi$ with $\phi = \neg\mathrm{FG}\thinspace \mathsf{Wait}$, and let $\mathcal{V}$ be the template family
 
 $$
-\mathcal{V} = \{\, V_{a,b,c} \mid (a, b, c) \in \mathbb{Z}^3 \,\}, \qquad
+\mathcal{V} = \lbrace \thinspace  V_{a,b,c} \mid (a, b, c) \in \mathbb{Z}^3 \thinspace \rbrace , \qquad
   V_{a,b,c}(x, q_1) = a - b \cdot \mathsf{done} + c \cdot \mathsf{delay}
   \quad \text{on } \mathsf{Wait} \wedge \mathsf{done} \le 2, \tag{16.1}
 $$
@@ -52,58 +52,58 @@ $$
 with the remaining cases of $V_{a,b,c}$ fixed as in the paper's Example 3.4: $3 \cdot 2^8$ on $\mathsf{Closed}$ in $q_1$ and everywhere in $q_0$, $0$ on $\mathsf{Established}$ and $\mathsf{Exhausted}$, and $+\infty$ on $\mathsf{Wait} \wedge \mathsf{done} = 3$ in both automaton states. The set the certifier decides is
 
 $$
-\mathrm{Acc}(\mathcal{M}, \mathcal{A}) = \{\, V \in \mathcal{V} \mid \mathsf{Cert}(\mathcal{M}, (\mathcal{A}, V)) = 1 \,\}, \tag{16.2}
+\mathrm{Acc}(\mathcal{M}, \mathcal{A}) = \lbrace \thinspace  V \in \mathcal{V} \mid \mathsf{Cert}(\mathcal{M}, (\mathcal{A}, V)) = 1 \thinspace \rbrace , \tag{16.2}
 $$
 
-and the two proposers are functions into $\mathcal{V}$: the model $P_{\mathrm{llm}} : \mathrm{Prompts} \to \mathcal{V}$ and the control rule $P_{\mathrm{grid}} : \{1, \ldots, |G|\} \to \mathcal{V}$ that walks a finite grid $G \subset \mathbb{Z}^3$. The statement a later chapter proves in zero knowledge is $V \in \mathrm{Acc}(\mathcal{M}, \mathcal{A})$ for a committed $\mathcal{M}$; this chapter establishes that the set on the right does not depend on which of the two functions produced $V$.
+and the two proposers are functions into $\mathcal{V}$: the model $P_{\mathrm{llm}} : \mathrm{Prompts} \to \mathcal{V}$ and the control rule $P_{\mathrm{grid}} : \lbrace 1, \ldots, |G|\rbrace \to \mathcal{V}$ that walks a finite grid $G \subset \mathbb{Z}^3$. The statement a later chapter proves in zero knowledge is $V \in \mathrm{Acc}(\mathcal{M}, \mathcal{A})$ for a committed $\mathcal{M}$; this chapter establishes that the set on the right does not depend on which of the two functions produced $V$.
 
 ## The mathematics
 
-The paper allows the ranking function to be given per automaton state as a piecewise-linear function over polyhedral regions, its Equation 18, and derives three families of proof obligations from the three conditions of Theorem 3.2 \[[1](#references)\]. Restated for this volume, with $x$ the current state, $x'$ the next, $\sigma = \langle\!\langle x \rangle\!\rangle$, and the guarded updates $A_i [x\; x']^\top \le b_i$:
+The paper allows the ranking function to be given per automaton state as a piecewise-linear function over polyhedral regions, its Equation 18, and derives three families of proof obligations from the three conditions of Theorem 3.2 \[[1](#references)\]. Restated for this volume, with $x$ the current state, $x'$ the next, $\sigma = \langle\negthinspace \langle x \rangle\negthinspace \rangle$, and the guarded updates $A_i [x\thickspace x']^\top \le b_i$:
 
 $$
 \begin{aligned}
-A_0 x \le b_0 \;&\Longrightarrow\; E^{(q)}_k x \not\le f^{(q)}_k
+A_0 x \le b_0 \thickspace &\Longrightarrow\thickspace  E^{(q)}_k x \not\le f^{(q)}_k
     \quad \text{for every } q \in Q_0 \text{ and every infinite case } k,
-     \\
-  A_i \begin{bmatrix} x \\ x' \end{bmatrix} \le b_i
-    \;\Longrightarrow\; \Big( P^{(\sigma)} x \le r^{(\sigma)} \wedge C^{(q)}_j x \le d^{(q)}_j
-    \;\Longrightarrow\; E^{(q')}_k x' \not\le f^{(q')}_k \Big),
-     \\
-  A_i \begin{bmatrix} x \\ x' \end{bmatrix} \le b_i
-    \;\Longrightarrow\; \Big( \text{cases } j, k \text{ hold}
-    \;\Longrightarrow\; w^{(q)}_j x + u^{(q)}_j \ge w^{(q')}_k x' + u^{(q')}_k
+     \cr 
+  A_i \begin{bmatrix} x \cr  x' \end{bmatrix} \le b_i
+    \thickspace \Longrightarrow\thickspace  \Big( P^{(\sigma)} x \le r^{(\sigma)} \wedge C^{(q)}_j x \le d^{(q)}_j
+    \thickspace \Longrightarrow\thickspace  E^{(q')}_k x' \not\le f^{(q')}_k \Big),
+     \cr 
+  A_i \begin{bmatrix} x \cr  x' \end{bmatrix} \le b_i
+    \thickspace \Longrightarrow\thickspace  \Big( \text{cases } j, k \text{ hold}
+    \thickspace \Longrightarrow\thickspace  w^{(q)}_j x + u^{(q)}_j \ge w^{(q')}_k x' + u^{(q')}_k
     + \mathbf{1}_F(q, \sigma, q') \Big). \tag{16.3}
 \end{aligned}
 $$
 
 These are the paper's Equations 19, 20 and 21. Every one has the uniform shape of its Equation 22, $\forall y : A_s y \le b_s \Longrightarrow C_p y \le d_p \Longrightarrow E_p y \not\le f_p$, whose negation, Equation 23, is the satisfiability of $A_s y \le b_s \wedge C_p y \le d_p \wedge E_p y \le f_p$; an unsatisfiable negation is a discharged obligation.
 
-**Definition Z16.1 (The certifier).** Let $\mathcal{M} = (S_0, T)$ be given by linear guarded commands as in the paper's Equations 15 and 16, let $\mathcal{A} = (Q, Q_0, \delta, F)$ be a nondeterministic Buchi automaton over $\Sigma = 2^\Pi$ with atomic predicates given by linear inequalities, and let $V$ be a piecewise-linear function of the shape of Equation 18. The *certifier* $\mathsf{Cert}(\mathcal{M}, (\mathcal{A}, V)) \in \{0, 1\}$ returns $1$ if and only if (i) the case constraints of $V$ are pairwise disjoint, (ii) they jointly cover $S \times Q$, (iii) every finite case is non-negative on its region, and (iv) every instance of ((16.3)), ((16.3)) and ((16.3)) holds, that is, every negation of the form of Equation 23 is unsatisfiable over the integers.
+**Definition Z16.1 (The certifier).** Let $\mathcal{M} = (S_0, T)$ be given by linear guarded commands as in the paper's Equations 15 and 16, let $\mathcal{A} = (Q, Q_0, \delta, F)$ be a nondeterministic Buchi automaton over $\Sigma = 2^\Pi$ with atomic predicates given by linear inequalities, and let $V$ be a piecewise-linear function of the shape of Equation 18. The *certifier* $\mathsf{Cert}(\mathcal{M}, (\mathcal{A}, V)) \in \lbrace 0, 1\rbrace$ returns $1$ if and only if (i) the case constraints of $V$ are pairwise disjoint, (ii) they jointly cover $S \times Q$, (iii) every finite case is non-negative on its region, and (iv) every instance of (16.3), (16.3) and (16.3) holds, that is, every negation of the form of Equation 23 is unsatisfiable over the integers.
 
 **Theorem Z16.2 (Soundness is independent of the proposer).** Let $\mathcal{M}$, $\mathcal{A}_{\neg\phi}$ be as above and let $P$ be any function whose values are piecewise-linear functions of the shape of Equation 18: a language model, a grid enumeration, a person, or an adversary who knows $\mathcal{M}$. If $V = P(\xi)$ for some input $\xi$ and $\mathsf{Cert}(\mathcal{M}, (\mathcal{A}_{\neg\phi}, V)) = 1$, then $\mathcal{M} \models \phi$.
 
-*Proof.* Write $Q$ for the automaton states. Conditions (i) to (iii) of Definition **Definition Z16.1** make $V : S \times Q \to \mathbb{N} \cup \{+\infty\}$ a total function with a non-negative codomain, which is the type demanded by Theorem 3.2 of the paper; the proof of that theorem is written out in [Project 3](03-the-modems-backoff-machine.md) and is not repeated here. It remains to show that (iv) gives the three hypotheses (4), (5) and (6) of that theorem.
+*Proof.* Write $Q$ for the automaton states. Conditions (i) to (iii) of Definition **Definition Z16.1** make $V : S \times Q \to \mathbb{N} \cup \lbrace +\infty\rbrace$ a total function with a non-negative codomain, which is the type demanded by Theorem 3.2 of the paper; the proof of that theorem is written out in [Project 3](03-the-modems-backoff-machine.md) and is not repeated here. It remains to show that (iv) gives the three hypotheses (4), (5) and (6) of that theorem.
 
-Hypothesis (4): let $s \in S_0$ and $q \in Q_0$. Then $A_0 s \le b_0$ by Equation 15, and ((16.3)) says that no infinite case $k$ of $V(\cdot, q)$ is satisfied by $s$; by (ii) some case is satisfied, so it is a finite one, and $V(s, q) \ne \infty$.
+Hypothesis (4): let $s \in S_0$ and $q \in Q_0$. Then $A_0 s \le b_0$ by Equation 15, and (16.3) says that no infinite case $k$ of $V(\cdot, q)$ is satisfied by $s$; by (ii) some case is satisfied, so it is a finite one, and $V(s, q) \ne \infty$.
 
-Hypothesis (5): let $(s, s') \in T$, so $A_i [s\; s']^\top \le b_i$ for some guarded update $i$ by Equation 16; let $V(s, q) \ne \infty$ and $(q, \langle\!\langle s \rangle\!\rangle, q') \in \delta$. Since $V(s, q)$ is finite, $s$ satisfies some finite case $j$ of $V(\cdot, q)$, and $\langle\!\langle s \rangle\!\rangle = \sigma$ means $P^{(\sigma)} s \le r^{(\sigma)}$ by the paper's Equation 17. Then ((16.3)) says $s'$ satisfies no infinite case of $V(\cdot, q')$, so by (ii) it satisfies a finite case $k$, and ((16.3)) for the pair $(j, k)$ gives $V(s, q) = w^{(q)}_j s + u^{(q)}_j \ge w^{(q')}_k s' + u^{(q')}_k + \mathbf{1}_F(q, \sigma, q') = V(s', q') + \mathbf{1}_F(q, \sigma, q')$. The indicator is $0$ or $1$, so $V(s, q) \ge V(s', q')$.
+Hypothesis (5): let $(s, s') \in T$, so $A_i [s\thickspace s']^\top \le b_i$ for some guarded update $i$ by Equation 16; let $V(s, q) \ne \infty$ and $(q, \langle\negthinspace \langle s \rangle\negthinspace \rangle, q') \in \delta$. Since $V(s, q)$ is finite, $s$ satisfies some finite case $j$ of $V(\cdot, q)$, and $\langle\negthinspace \langle s \rangle\negthinspace \rangle = \sigma$ means $P^{(\sigma)} s \le r^{(\sigma)}$ by the paper's Equation 17. Then (16.3) says $s'$ satisfies no infinite case of $V(\cdot, q')$, so by (ii) it satisfies a finite case $k$, and (16.3) for the pair $(j, k)$ gives $V(s, q) = w^{(q)}_j s + u^{(q)}_j \ge w^{(q')}_k s' + u^{(q')}_k + \mathbf{1}_F(q, \sigma, q') = V(s', q') + \mathbf{1}_F(q, \sigma, q')$. The indicator is $0$ or $1$, so $V(s, q) \ge V(s', q')$.
 
 Hypothesis (6): the same derivation with $(q, \sigma, q') \in F$, where the indicator is $1$, gives $V(s, q) \ge V(s', q') + 1 > V(s', q')$.
 
 Theorem 3.2 now yields $\mathcal{L}_\mathcal{M} \cap \mathcal{L}_{\mathcal{A}_{\neg\phi}} = \emptyset$, and since $\mathcal{L}_{\mathcal{A}_{\neg\phi}} = \Sigma^\omega \setminus \mathcal{L}_\phi$ this is $\mathcal{L}_\mathcal{M} \subseteq \mathcal{L}_\phi$, that is $\mathcal{M} \models \phi$ (the paper's Corollary 3.3).
 
-Nowhere in the three derivations does $\xi$ or $P$ occur: every hypothesis used is a property of the triple $(\mathcal{M}, \mathcal{A}_{\neg\phi}, V)$ alone. Formally, Theorem 3.2 is the inclusion $\mathrm{Acc}(\mathcal{M}, \mathcal{A}_{\neg\phi}) \subseteq \{\, V \mid \mathcal{L}_\mathcal{M} \cap \mathcal{L}_{\mathcal{A}_{\neg\phi}} = \emptyset \,\}$ between two sets of functions, and $V = P(\xi)$ is merely one element of the left-hand set. &#9632;
+Nowhere in the three derivations does $\xi$ or $P$ occur: every hypothesis used is a property of the triple $(\mathcal{M}, \mathcal{A}_{\neg\phi}, V)$ alone. Formally, Theorem 3.2 is the inclusion $\mathrm{Acc}(\mathcal{M}, \mathcal{A}_{\neg\phi}) \subseteq \lbrace \thinspace V \mid \mathcal{L}_\mathcal{M} \cap \mathcal{L}_{\mathcal{A}_{\neg\phi}} = \emptyset \thinspace \rbrace$ between two sets of functions, and $V = P(\xi)$ is merely one element of the left-hand set. &#9632;
 
 **Remark Z16.8.** The theorem has a converse direction that it does not claim. If the certifier rejects a proposal, nothing follows about $\mathcal{M}$: the paper's Remark 2.1 says a negative outcome does not imply $\mathcal{M} \not\models \phi$, and this is exactly the room in which a model can cost completeness. A proposer that is wrong every time leaves the verifier with no certificate and the property unproved; it never leaves the verifier with a false certificate.
 
-**Definition Z16.4 (The agreement table).** Fix a run of $n$ rounds. In round $t$ the model proposes $V^{\mathrm{llm}}_t$ and the control rule proposes the next grid point $V^{\mathrm{grid}}_t$; both are certified. Let $m_t, g_t \in \{0, 1\}$ be the two verdicts. The agreement table is the $2 \times 2$ contingency
+**Definition Z16.4 (The agreement table).** Fix a run of $n$ rounds. In round $t$ the model proposes $V^{\mathrm{llm}}_t$ and the control rule proposes the next grid point $V^{\mathrm{grid}}_t$; both are certified. Let $m_t, g_t \in \lbrace 0, 1\rbrace$ be the two verdicts. The agreement table is the $2 \times 2$ contingency
 
 $$
-n_{11} = |\{ t : m_t = 1, g_t = 1 \}|,\quad
-  n_{10} = |\{ t : m_t = 1, g_t = 0 \}|,\quad
-  n_{01} = |\{ t : m_t = 0, g_t = 1 \}|,\quad
-  n_{00} = |\{ t : m_t = 0, g_t = 0 \}|, \tag{16.4}
+n_{11} = |\lbrace  t : m_t = 1, g_t = 1 \rbrace |,\quad
+  n_{10} = |\lbrace  t : m_t = 1, g_t = 0 \rbrace |,\quad
+  n_{01} = |\lbrace  t : m_t = 0, g_t = 1 \rbrace |,\quad
+  n_{00} = |\lbrace  t : m_t = 0, g_t = 0 \rbrace |, \tag{16.4}
 $$
 
 with $n_{11} + n_{10} + n_{01} + n_{00} = n$. The model's acceptance rate is $k_{\mathrm{llm}} / n$ with $k_{\mathrm{llm}} = n_{11} + n_{10}$, the rule's is $k_{\mathrm{grid}} / n$ with $k_{\mathrm{grid}} = n_{11} + n_{01}$, and the agreement rate is $(n_{11} + n_{00}) / n$.
@@ -112,19 +112,19 @@ with $n_{11} + n_{10} + n_{01} + n_{00} = n$. The model's acceptance rate is $k_
 
 *Proof.* (a) By Definition **Definition Z16.4**, $k_{\mathrm{llm}} - k_{\mathrm{grid}} = (n_{11} + n_{10}) - (n_{11} + n_{01}) = n_{10} - n_{01}$, so $k_{\mathrm{llm}} > k_{\mathrm{grid}}$ if and only if $n_{10} > n_{01}$, and dividing both sides by $n > 0$ preserves the inequality. (b) A round is certified by the fallback procedure when $m_t = 1$ or $g_t = 1$; the three cells $n_{11}, n_{10}, n_{01}$ are exactly those rounds and are disjoint, so the count is their sum. Since $n_{01} \ge 0$ the sum is at least $n_{11} + n_{10} = k_{\mathrm{llm}}$, and since $n_{10} \ge 0$ it is at least $n_{11} + n_{01} = k_{\mathrm{grid}}$. &#9632;
 
-**Lemma Z16.6 (Enumeration decides the obligations on a finite box).** Let the state variables range over the finite box $B = \{\mathsf{Closed}, \mathsf{Wait}, \mathsf{Established}, \mathsf{Exhausted}\} \times [0, 3] \times [0, 255]$, so $|B| = 4 \cdot 4 \cdot 256 = 4096$. Then $\mathsf{Cert}(\mathcal{M}, (\mathcal{A}, V)) = 1$ if and only if the three conditions (4), (5), (6) of Theorem 3.2 hold at every $s \in S_0$, every $(s, s') \in T \cap B^2$ and every automaton transition, and this is decided by at most $|T \cap B^2| \cdot |\delta|$ evaluations of $V$.
+**Lemma Z16.6 (Enumeration decides the obligations on a finite box).** Let the state variables range over the finite box $B = \lbrace \mathsf{Closed}, \mathsf{Wait}, \mathsf{Established}, \mathsf{Exhausted}\rbrace \times [0, 3] \times [0, 255]$, so $|B| = 4 \cdot 4 \cdot 256 = 4096$. Then $\mathsf{Cert}(\mathcal{M}, (\mathcal{A}, V)) = 1$ if and only if the three conditions (4), (5), (6) of Theorem 3.2 hold at every $s \in S_0$, every $(s, s') \in T \cap B^2$ and every automaton transition, and this is decided by at most $|T \cap B^2| \cdot |\delta|$ evaluations of $V$.
 
-*Proof.* Each obligation ((16.3)) to ((16.3)) is a universally quantified implication over $y = (x, x')$ with $x, x' \in B$. Over a finite domain a universal statement is the conjunction of its instances, so it holds if and only if every instance holds, and an instance is checked by evaluating finitely many linear inequalities. The proof of Theorem **Theorem Z16.2** shows the instances of ((16.3)) to ((16.3)) at $(s, s', q, q')$ are equivalent to (4), (5), (6) at the same point; conversely, (5) and (6) at a point where $V(s, q)$ is finite give, by the uniqueness of the case $k$ satisfied by $s'$ under (i) and (ii), the finiteness of $V(s', q')$ and the linear inequality of ((16.3)). The bound counts one evaluation of $V$ at $(s, q)$ and one at $(s', q')$ per transition pair, the initial condition being one evaluation per element of $S_0 \times Q_0$, which is dominated. &#9632;
+*Proof.* Each obligation (16.3) to (16.3) is a universally quantified implication over $y = (x, x')$ with $x, x' \in B$. Over a finite domain a universal statement is the conjunction of its instances, so it holds if and only if every instance holds, and an instance is checked by evaluating finitely many linear inequalities. The proof of Theorem **Theorem Z16.2** shows the instances of (16.3) to (16.3) at $(s, s', q, q')$ are equivalent to (4), (5), (6) at the same point; conversely, (5) and (6) at a point where $V(s, q)$ is finite give, by the uniqueness of the case $k$ satisfied by $s'$ under (i) and (ii), the finiteness of $V(s', q')$ and the linear inequality of (16.3). The bound counts one evaluation of $V$ at $(s, q)$ and one at $(s', q')$ per transition pair, the initial condition being one evaluation per element of $S_0 \times Q_0$, which is dominated. &#9632;
 
 The lemma is the reason the chapter carries a C program as well as a Z3 harness: on the enumerated instance the two decide the same set, and a round on which they disagree is a defect in one encoding, found before any verdict is trusted.
 
-**Example Z16.9 (The paper's certificate is in the template family).** Example 3.4 of the paper gives $V(\cdot, q_1) = 2^9 + 1 - 2^8 \cdot \mathsf{done} + \mathsf{delay}$ on $\mathsf{Wait} \wedge \mathsf{done} \le 2$, that is $V_{513, 256, 1}$ in ((16.1)), with the sign of the $\mathsf{delay}$ term positive because $\mathsf{delay}$ counts down by one on the fair self-loop. A template with a negative sign on that term admits no certified point on this machine: on the tick transition $V$ would rise by $c$. The grammar below therefore carries a sign on the delay term, so that the paper's own certificate lies in its language.
+**Example Z16.9 (The paper's certificate is in the template family).** Example 3.4 of the paper gives $V(\cdot, q_1) = 2^9 + 1 - 2^8 \cdot \mathsf{done} + \mathsf{delay}$ on $\mathsf{Wait} \wedge \mathsf{done} \le 2$, that is $V_{513, 256, 1}$ in (16.1), with the sign of the $\mathsf{delay}$ term positive because $\mathsf{delay}$ counts down by one on the fair self-loop. A template with a negative sign on that term admits no certified point on this machine: on the tick transition $V$ would rise by $c$. The grammar below therefore carries a sign on the delay term, so that the paper's own certificate lies in its language.
 
 ## The protocol
 
 This is a certification protocol with two proposers and one judge, written so that it can fail.
 
-1. The harness loads the guarded commands of the modem machine (the same source as [Project 3](03-the-modems-backoff-machine.md)) and the automaton of Figure 2b, and builds the Z3 queries of ((16.3)) to ((16.3)) once; the coefficients $(a, b, c)$ are the only free symbols.
+1. The harness loads the guarded commands of the modem machine (the same source as [Project 3](03-the-modems-backoff-machine.md)) and the automaton of Figure 2b, and builds the Z3 queries of (16.3) to (16.3) once; the coefficients $(a, b, c)$ are the only free symbols.
 2. Round $t$: the harness posts the prompt and the grammar to `llama-server`, receives one line, and parses it; a line the regular expression does not match is a grammar defect and stops the run.
 3. The harness substitutes $(a, b, c)$ into the queries and asks Z3; `unsat` on every negated obligation is accept.
 4. The harness takes the next grid point as the control rule's proposal and certifies it the same way.
@@ -261,7 +261,7 @@ sign ::= "+" | "-"
 int  ::= [0-9] | [1-9] [0-9] | [1-9] [0-9] [0-9] | [1-9] [0-9] [0-9] [0-9]
 ```
 
-The control rule is the grid $G = \{256, 512, 513, 768, 1024\} \times \{1, 128, 255, 256, 257\} \times \{-2, -1, 0, 1, 2\}$ of 125 points, walked in order and certified one per round. The theorem that says a wrong proposal cannot cost soundness is Theorem **Theorem Z16.2**; the proposition that says what it can cost is Proposition **Proposition Z16.5**. The table has one row per model and every cell reads "not measured" until the 100 rounds have run:
+The control rule is the grid $G = \lbrace 256, 512, 513, 768, 1024\rbrace \times \lbrace 1, 128, 255, 256, 257\rbrace \times \lbrace -2, -1, 0, 1, 2\rbrace$ of 125 points, walked in order and certified one per round. The theorem that says a wrong proposal cannot cost soundness is Theorem **Theorem Z16.2**; the proposition that says what it can cost is Proposition **Proposition Z16.5**. The table has one row per model and every cell reads "not measured" until the 100 rounds have run:
 
 | **Model** | $n_{11}$ | $n_{10}$ | $n_{01}$ | $n_{00}$ | **rates** | **Instrument** |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -385,7 +385,7 @@ The chapter passes when, for each of the two models, 100 rounds exist in the log
 
 ## Variants
 
-**A one-bit model as the proposer.** The floating-point model behind the HTTP call is replaced by a ternary-weight one, BitNet b1.58, whose every weight is minus one, zero or one \[[4](#references)\], served by its own inference framework \[[5](#references)\] on the same Pi 4B; the prompt, the grammar, the Z3 queries, the grid rule and the C check are untouched, so the only thing that changes is the stream of proposals. What it buys is memory: at 1.58 bits per weight a model of 1.7 billion weights holds its weights in 335.8 megabytes, against 956.3 megabytes for the same weight count at the 4.5 bits per weight a Q4\_K\_M file averages, a factor of 2.85 (computed from the weight count and the bits per weight, not from a file read on this bench). What it does not change is the theorem, and that is the point of writing the variant down: Theorem **Theorem Z16.2** quantifies over every function whose values lie in the template family of ((16.1)), so a ternary proposer enters its proof exactly where a floating-point one did, which is nowhere, and the acceptance set $\mathrm{Acc}(\mathcal{M}, \mathcal{A})$ of ((16.2)) is the same set of functions. What can move is the acceptance rate, which is completeness and is read from Proposition **Proposition Z16.5** with the grid's own rate on the same rows. Choose this variant when the proposer has to share the Pi 4B's 8 GB with the certifier rather than sit on the build laptop, and not because a ternary model is expected to propose better certificates. It is the brief's projects 2, 10 and 19 \[[3](#references)\], and [Project 24](24-a-one-bit-model.md) builds the ternary linear layer, counts its additions and subtractions against the floating-point product, and states the quantisation limit, none of which is repeated here. The brief reads its one-bit model beside an MCC 118 capture at 100 kS/s across eight channels; on this bench that rate is the aggregate across the channels in use, so eight channels sample at 12.5 kS/s each (computed), and the brief's medical framing of its project 10 is not taken up, because nothing in this volume diagnoses anything.
+**A one-bit model as the proposer.** The floating-point model behind the HTTP call is replaced by a ternary-weight one, BitNet b1.58, whose every weight is minus one, zero or one \[[4](#references)\], served by its own inference framework \[[5](#references)\] on the same Pi 4B; the prompt, the grammar, the Z3 queries, the grid rule and the C check are untouched, so the only thing that changes is the stream of proposals. What it buys is memory: at 1.58 bits per weight a model of 1.7 billion weights holds its weights in 335.8 megabytes, against 956.3 megabytes for the same weight count at the 4.5 bits per weight a Q4\_K\_M file averages, a factor of 2.85 (computed from the weight count and the bits per weight, not from a file read on this bench). What it does not change is the theorem, and that is the point of writing the variant down: Theorem **Theorem Z16.2** quantifies over every function whose values lie in the template family of (16.1), so a ternary proposer enters its proof exactly where a floating-point one did, which is nowhere, and the acceptance set $\mathrm{Acc}(\mathcal{M}, \mathcal{A})$ of (16.2) is the same set of functions. What can move is the acceptance rate, which is completeness and is read from Proposition **Proposition Z16.5** with the grid's own rate on the same rows. Choose this variant when the proposer has to share the Pi 4B's 8 GB with the certifier rather than sit on the build laptop, and not because a ternary model is expected to propose better certificates. It is the brief's projects 2, 10 and 19 \[[3](#references)\], and [Project 24](24-a-one-bit-model.md) builds the ternary linear layer, counts its additions and subtractions against the floating-point product, and states the quantisation limit, none of which is repeated here. The brief reads its one-bit model beside an MCC 118 capture at 100 kS/s across eight channels; on this bench that rate is the aggregate across the channels in use, so eight channels sample at 12.5 kS/s each (computed), and the brief's medical framing of its project 10 is not taken up, because nothing in this volume diagnoses anything.
 
 ## Pitfalls
 

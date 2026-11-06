@@ -45,15 +45,15 @@ The three BCM numbers are the ones measured with these LEDs on Saturday 3 Octobe
 The verifier holds no witness. It decides membership in two relations. The single opening relation is that of [Project 2](02-a-sensor-reading-committed-on-the-microcontroller.md),
 
 $$
-\mathcal{R}_{\mathrm{open}} = \big\{\, ((v, r), c) \in (\mathbb{Z}_p \times \mathbb{Z}_p) \times \mathbb{G}
-    \;:\; c = g^v h^r \,\big\}, \tag{15.1}
+\mathcal{R}_{\mathrm{open}} = \big\lbrace \thinspace  ((v, r), c) \in (\mathbb{Z}_p \times \mathbb{Z}_p) \times \mathbb{G}
+    \thickspace :\thickspace  c = g^v h^r \thinspace \big\rbrace , \tag{15.1}
 $$
 
 with the parse condition $v < 2^{16}$ checked beside it, a condition on the format and not on the cryptography, since $v$ is disclosed. The batch relation for $n$ openings is the product
 
 $$
-\mathcal{R}_{\mathrm{open}}^{n} = \big\{\, \big((v_i, r_i)_{i=1}^{n}, (c_i)_{i=1}^{n}\big)
-    \;:\; \forall i \in \{1, \dots, n\} .\; c_i = g^{v_i} h^{r_i} \,\big\}, \tag{15.2}
+\mathcal{R}_{\mathrm{open}}^{n} = \big\lbrace \thinspace  \big((v_i, r_i)_{i=1}^{n}, (c_i)_{i=1}^{n}\big)
+    \thickspace :\thickspace  \forall i \in \lbrace 1, \dots, n\rbrace  .\thickspace  c_i = g^{v_i} h^{r_i} \thinspace \big\rbrace , \tag{15.2}
 $$
 
 and the question is whether $n$ group equations can be decided by one. In the paper's Figure 4 the verifier of `zkeq` checks products of commitments raised to challenge powers in exactly this way, with challenges from the Fiat-Shamir hash \[[1](#references)\]; here the challenges are the verifier's own random draws, which is the interactive form, and the lemma below is the reason the paper's verifier can afford a batch of obligations at all.
@@ -63,20 +63,20 @@ and the question is whether $n$ group equations can be decided by one. In the pa
 **Definition Z15.1 (The batched opening check).** Given $(c_i, v_i, r_i)_{i=1}^{n}$, the verifier draws $\rho_1, \dots, \rho_n$ independent and uniform in $\mathbb{Z}_p$ after all $n$ openings have arrived, and accepts if and only if
 
 $$
-\prod_{i=1}^{n} c_i^{\rho_i} \;=\; g^{\sum_{i=1}^{n} \rho_i v_i} \; h^{\sum_{i=1}^{n} \rho_i r_i}, \tag{15.3}
+\prod_{i=1}^{n} c_i^{\rho_i} \thickspace =\thickspace  g^{\sum_{i=1}^{n} \rho_i v_i} \thickspace  h^{\sum_{i=1}^{n} \rho_i r_i}, \tag{15.3}
 $$
 
 the exponents on the right reduced modulo $p$.
 
-**Lemma Z15.2 (A random linear combination catches a wrong opening).** If every $(v_i, r_i)$ opens $c_i$, the check of Equation (15.3) accepts. If some $(v_j, r_j)$ does not open $c_j$, the check accepts with probability exactly $1/p$ over the choice of $\rho_1, \dots, \rho_n$.
+**Lemma Z15.2 (A random linear combination catches a wrong opening).** If every $(v_i, r_i)$ opens $c_i$, the check of Equation 15.3 accepts. If some $(v_j, r_j)$ does not open $c_j$, the check accepts with probability exactly $1/p$ over the choice of $\rho_1, \dots, \rho_n$.
 
-*Proof.* For each $i$ let $e_i = c_i \, g^{-v_i} h^{-r_i} \in \mathbb{G}$. By Lemma lem:z02\_prime the group is cyclic of prime order $p$ with generator $g$, so every element is a power of $g$; write $e_i = g^{d_i}$ with $d_i \in \mathbb{Z}_p$ (the verifier cannot compute $d_i$, but it exists). Then $(v_i, r_i)$ opens $c_i$ if and only if $e_i = 1$, that is, $d_i = 0$. Dividing the left side of Equation (15.3) by the right side and using that $\mathbb{G}$ is abelian,
+*Proof.* For each $i$ let $e_i = c_i \thinspace g^{-v_i} h^{-r_i} \in \mathbb{G}$. By Lemma lem:z02\_prime the group is cyclic of prime order $p$ with generator $g$, so every element is a power of $g$; write $e_i = g^{d_i}$ with $d_i \in \mathbb{Z}_p$ (the verifier cannot compute $d_i$, but it exists). Then $(v_i, r_i)$ opens $c_i$ if and only if $e_i = 1$, that is, $d_i = 0$. Dividing the left side of Equation 15.3 by the right side and using that $\mathbb{G}$ is abelian,
 
 $$
 \begin{aligned}
 \prod_{i=1}^{n} c_i^{\rho_i} \cdot g^{-\sum_i \rho_i v_i} h^{-\sum_i \rho_i r_i}
   &= \prod_{i=1}^{n} \big( c_i^{\rho_i} g^{-\rho_i v_i} h^{-\rho_i r_i} \big)
-   = \prod_{i=1}^{n} \big( c_i g^{-v_i} h^{-r_i} \big)^{\rho_i} \\
+   = \prod_{i=1}^{n} \big( c_i g^{-v_i} h^{-r_i} \big)^{\rho_i} \cr 
   &= \prod_{i=1}^{n} e_i^{\rho_i} = \prod_{i=1}^{n} g^{\rho_i d_i} = g^{\sum_{i=1}^{n} \rho_i d_i},
 \end{aligned}
 $$
@@ -98,7 +98,7 @@ and the check accepts although the first opening is wrong by $\delta$ and the se
 
 **Lemma Z15.5 (Cost of the batched check).** Checking $n$ openings one by one costs $2n$ scalar multiplications, $n$ group additions and $n$ comparisons. The batched check costs $n + 2$ scalar multiplications, $n$ group additions, one comparison and $2n$ multiplications with $2n - 2$ additions in $\mathbb{Z}_p$. For $n = 64$ the scalar multiplications are 128 against 66, computed.
 
-*Proof.* One by one: each check is Lemma lem:z02\_open\_cost, two multiplications, one addition and one comparison, times $n$. Batched: the left side of Equation (15.3) is $n$ multiplications $[\rho_i] c_i$ and $n - 1$ additions to accumulate them; the two exponents on the right are $2n$ field multiplications $\rho_i v_i$ and $\rho_i r_i$ with $2(n - 1)$ field additions; the right side is two multiplications $[\sum \rho_i v_i] G$ and $[\sum \rho_i r_i] H$ and one addition; the comparison is one. Totals: $n + 2$ scalar multiplications, $n$ group additions, one comparison. For $n = 64$: $2 \cdot 64 = 128$ against $64 + 2 = 66$. &#9632;
+*Proof.* One by one: each check is Lemma lem:z02\_open\_cost, two multiplications, one addition and one comparison, times $n$. Batched: the left side of Equation 15.3 is $n$ multiplications $[\rho_i] c_i$ and $n - 1$ additions to accumulate them; the two exponents on the right are $2n$ field multiplications $\rho_i v_i$ and $\rho_i r_i$ with $2(n - 1)$ field additions; the right side is two multiplications $[\sum \rho_i v_i] G$ and $[\sum \rho_i r_i] H$ and one addition; the comparison is one. Totals: $n + 2$ scalar multiplications, $n$ group additions, one comparison. For $n = 64$: $2 \cdot 64 = 128$ against $64 + 2 = 66$. &#9632;
 
 **Remark Z15.8 (Constant time, on the side that has no secret).** The library's scalar multiplication runs in constant time with respect to the scalar; on the verifier that costs and protects nothing, because $v$ and $r$ are public once sent and the $\rho_i$ are used once and discarded. The timing that matters on this board is thermal: a run that drives the Pi 3B+ past its soft limit is throttled, and a throttled figure is not a figure. Every benchmark loop here is bounded to 60 s and the throttle word is read before and after.
 
@@ -108,7 +108,7 @@ and the check accepts although the first opening is wrong by $\delta$ and the se
 2. Verifier, on each `zk02 seq=<n> cyc=<k> c=<hex>` line: decode the 32 bytes with `Ristretto255.fromBytes`; refuse a non-canonical encoding; store $c$ under $n$ in a table of 64; pulse the blue LED.
 3. Verifier, every tenth commitment or on the operator's key: send `open <n>`.
 4. Verifier, on `zk02 open seq=<n> v=<v> r=<hex>`: check $v < 2^{16}$; compute $[v]G + [r]H$ and compare with the stored $c_n$; light green for 200 ms on accept, red on refuse; print `zk15 seq=<n> verdict=accept` or `reject`.
-5. Verifier, in batch mode: collect 64 openings, then draw $\rho_1, \dots, \rho_{64}$ from `std.crypto.random`, evaluate Equation (15.3) and print one verdict line for the batch; on a refusal, fall back to the single checks to name the sequence numbers that fail.
+5. Verifier, in batch mode: collect 64 openings, then draw $\rho_1, \dots, \rho_{64}$ from `std.crypto.random`, evaluate Equation 15.3 and print one verdict line for the batch; on a refusal, fall back to the single checks to name the sequence numbers that fail.
 6. Verifier, at the end of a timed run: read the throttle word again and discard the run if it changed.
 
 ## The code

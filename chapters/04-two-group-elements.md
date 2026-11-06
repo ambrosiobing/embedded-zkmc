@@ -34,7 +34,7 @@ The paper's explicit-state scheme ends in one sentence: the proof is two group e
 | Raspberry Pi 3 Model B Rev 1.2 | the second verifier, same binary | SSH; its card and OS word size to be read on the day | `/dev/gpiochip0` |
 | green LED, Joy-it | accept | GPIO, driven high | BCM 17, header pin 11; ground pin 9 |
 | red LED, Joy-it | reject, and any refusal before the pairings | GPIO, driven high | BCM 22, header pin 15; ground pin 14 |
-| `zk03_proof.bin` | $c_{S_0} \\| c_T \\| \pi_{S_0} \\| \pi_T$, 192 bytes | file | from [Project 3](03-the-modems-backoff-machine.md) by `scp`, or from [Project 18](18-a-proof-over-the-wire.md) over CAN |
+| `zk03_proof.bin` | $c_{S_0} \Vert c_T \Vert \pi_{S_0} \Vert \pi_T$, 192 bytes | file | from [Project 3](03-the-modems-backoff-machine.md) by `scp`, or from [Project 18](18-a-proof-over-the-wire.md) over CAN |
 | `zk03_setup.bin` | the toy setup: $\omega$, 65538 $\mathbb{G}_1$ powers, 8089 $\mathbb{G}_2$ powers | file | from [Project 3](03-the-modems-backoff-machine.md) |
 | `blst` v0.3.17 | pairings, $\mathbb{G}_2$ arithmetic, field arithmetic | static library, cross built | \[[7](#references)\] |
 | `libgpiod` 2.x | the LED lines | the Pi's own package, linked through a sysroot | (to verify) |
@@ -45,8 +45,8 @@ The paper's explicit-state scheme ends in one sentence: the proof is two group e
 The verifier holds no witness. It decides membership in the statement side of the paper's evaluation relation \[[1](#references)\], written for a vanishing set:
 
 $$
-R_{\mathrm{eval}} = \mathsf{PoK}\Big\{\, \underbrace{(p, b)}_{w} ;\; \underbrace{(c_p, E)}_{u} \;:\;
-    c_p = \mathsf{Com}(p; b) \;\wedge\; \forall e \in E .\; p(e) = 0 \,\Big\}, \tag{4.1}
+R_{\mathrm{eval}} = \mathsf{PoK}\Big\lbrace \thinspace  \underbrace{(p, b)}_{w} ;\thickspace  \underbrace{(c_p, E)}_{u} \thickspace :\thickspace 
+    c_p = \mathsf{Com}(p; b) \thickspace \wedge\thickspace  \forall e \in E .\thickspace  p(e) = 0 \thinspace \Big\rbrace , \tag{4.1}
 $$
 
 twice: once with $u_1 = (c_{S_0}, E_{\mathrm{init}})$ and $\pi_{S_0}$, once with $u_2 = (c_T, E_{\mathrm{step}} \cup E_{\mathrm{fair}})$ and $\pi_T$. The sets of this project are
@@ -54,9 +54,9 @@ twice: once with $u_1 = (c_{S_0}, E_{\mathrm{init}})$ and $\pi_{S_0}$, once with
 $$
 \begin{gathered}
 u \in \mathbb{G}_1 \times \mathbb{G}_1 \times 2^{\mathbb{F}_r} \times 2^{\mathbb{F}_r} \times \mathbb{G}_1 \times \mathbb{G}_1, \qquad
-  |E_{\mathrm{init}}| = 16, \qquad |E_{\mathrm{step}} \cup E_{\mathrm{fair}}| = 8088, \\
-  \mathsf{Verify} : \mathbb{G}_1 \times 2^{\mathbb{F}_r} \times \mathbb{G}_1 \to \{0, 1\}, \qquad
-  \mathsf{Verify}(c, E, \pi) = \big[\, e(c, g_2) = e(\pi, g_2^{Z_E(\tau)}) \,\big],
+  |E_{\mathrm{init}}| = 16, \qquad |E_{\mathrm{step}} \cup E_{\mathrm{fair}}| = 8088, \cr 
+  \mathsf{Verify} : \mathbb{G}_1 \times 2^{\mathbb{F}_r} \times \mathbb{G}_1 \to \lbrace 0, 1\rbrace , \qquad
+  \mathsf{Verify}(c, E, \pi) = \big[\thinspace  e(c, g_2) = e(\pi, g_2^{Z_E(\tau)}) \thinspace \big],
 \end{gathered}
 $$
 
@@ -66,30 +66,30 @@ and the verdict is $\mathsf{Verify}(c_{S_0}, E_{\mathrm{init}}, \pi_{S_0}) \wedg
 
 **Definition Z4.1 (Bilinear pairing).** Let $\mathbb{G}_1, \mathbb{G}_2, \mathbb{G}_T$ be cyclic groups of prime order $r$ with generators $g_1, g_2$ and $g_T = e(g_1, g_2)$. A pairing is a map $e : \mathbb{G}_1 \times \mathbb{G}_2 \to \mathbb{G}_T$ that is bilinear, $e(g_1^a, g_2^b) = e(g_1, g_2)^{ab}$ for all $a, b \in \mathbb{F}_r$, and non-degenerate, $e(g_1, g_2) \ne 1$ \[[4](#references)\]. On BLS12-381 a $\mathbb{G}_1$ element compresses to 48 bytes and a $\mathbb{G}_2$ element to 96 bytes \[[7](#references)\], which is why the proof file of [Project 3](03-the-modems-backoff-machine.md) is $4 \times 48 = 192$ bytes (computed).
 
-**Definition Z4.2 (KZG commit, open, batch open).** Let $\tau \in \mathbb{F}_r$ be the setup secret and $\mathsf{sp} = \big((g_1^{\tau^i})_{0 \le i \le d},\, (g_2^{\tau^i})_{0 \le i \le m}\big)$ the public setup \[[2](#references)\]. For $p(X) = \sum_{i=0}^{d} a_i X^i \in \mathbb{F}_r[X]$:
+**Definition Z4.2 (KZG commit, open, batch open).** Let $\tau \in \mathbb{F}_r$ be the setup secret and $\mathsf{sp} = \big((g_1^{\tau^i})_{0 \le i \le d},\thinspace (g_2^{\tau^i})_{0 \le i \le m}\big)$ the public setup \[[2](#references)\]. For $p(X) = \sum_{i=0}^{d} a_i X^i \in \mathbb{F}_r[X]$:
 
 $$
 \begin{aligned}
-\mathsf{Com}(p) &= \prod_{i=0}^{d} \big(g_1^{\tau^i}\big)^{a_i} = g_1^{p(\tau)}, \\
+\mathsf{Com}(p) &= \prod_{i=0}^{d} \big(g_1^{\tau^i}\big)^{a_i} = g_1^{p(\tau)}, \cr 
   \mathsf{Open}(p, z) &= g_1^{q_z(\tau)} \text{ with } q_z(X) = \frac{p(X) - p(z)}{X - z}, \qquad
-    \text{checked by } e\big(c_p \cdot g_1^{-p(z)}, g_2\big) = e\big(\pi, g_2^{\tau} \cdot g_2^{-z}\big), \\
+    \text{checked by } e\big(c_p \cdot g_1^{-p(z)}, g_2\big) = e\big(\pi, g_2^{\tau} \cdot g_2^{-z}\big), \cr 
   \mathsf{BatchOpen}(p, E) &= g_1^{q(\tau)} \text{ with } q(X) = \frac{p(X)}{Z_E(X)}, \quad
     Z_E(X) = \prod_{e \in E}(X - e), \qquad \text{checked by } e(c_p, g_2) = e(\pi, g_2^{Z_E(\tau)}). \tag{4.2}
 \end{aligned}
 $$
 
-Equation (4.2) is the special case of KZG batch opening in which every claimed value is zero, the case the paper's Section 4 singles out \[[1](#references)\]; it needs $|E| \le m$ so that $g_2^{Z_E(\tau)}$ can be formed from the setup.
+Equation 4.2 is the special case of KZG batch opening in which every claimed value is zero, the case the paper's Section 4 singles out \[[1](#references)\]; it needs $|E| \le m$ so that $g_2^{Z_E(\tau)}$ can be formed from the setup.
 
 **Theorem Z4.3 (Correctness of the vanishing check).** Let $E \subseteq \mathbb{F}_r$ be a finite set of distinct elements and $p \in \mathbb{F}_r[X]$ with $\deg p \le d$. If $p(e) = 0$ for every $e \in E$, then (i) $Z_E$ divides $p$ in $\mathbb{F}_r[X]$, and (ii) with $q = p / Z_E$ and $\pi = g_1^{q(\tau)}$ the equation $e(\mathsf{Com}(p), g_2) = e(\pi, g_2^{Z_E(\tau)})$ holds. Hence an honest prover is always accepted.
 
-*Proof.* (i) By induction on $|E|$. If $E = \emptyset$ then $Z_E = 1$ and the claim is trivial. Let $|E| \ge 1$, pick $e \in E$ and put $E' = E \setminus \{e\}$. Division with remainder in $\mathbb{F}_r[X]$ by the monic polynomial $X - e$ gives unique $q_1 \in \mathbb{F}_r[X]$ and $\rho \in \mathbb{F}_r$ with $p(X) = (X - e)\, q_1(X) + \rho$, the remainder being a constant because its degree is below $1$. Evaluating at $X = e$ gives $p(e) = 0 \cdot q_1(e) + \rho = \rho$, and $p(e) = 0$ by hypothesis, so $\rho = 0$ and $p = (X - e)\, q_1$. Now $q_1$ vanishes on $E'$: for $e' \in E'$ we have $0 = p(e') = (e' - e)\, q_1(e')$ with $e' - e \ne 0$ because the elements of $E$ are distinct, and a field has no zero divisors, so $q_1(e') = 0$. The induction hypothesis applied to $q_1$ and $E'$ gives $q_1 = Z_{E'}\, q$ for some $q \in \mathbb{F}_r[X]$, and therefore $p = (X - e)\, Z_{E'}\, q = Z_E\, q$, since $Z_E = (X - e)\, Z_{E'}$ by definition.
+*Proof.* (i) By induction on $|E|$. If $E = \emptyset$ then $Z_E = 1$ and the claim is trivial. Let $|E| \ge 1$, pick $e \in E$ and put $E' = E \setminus \lbrace e\rbrace$. Division with remainder in $\mathbb{F}_r[X]$ by the monic polynomial $X - e$ gives unique $q_1 \in \mathbb{F}_r[X]$ and $\rho \in \mathbb{F}_r$ with $p(X) = (X - e)\thinspace q_1(X) + \rho$, the remainder being a constant because its degree is below $1$. Evaluating at $X = e$ gives $p(e) = 0 \cdot q_1(e) + \rho = \rho$, and $p(e) = 0$ by hypothesis, so $\rho = 0$ and $p = (X - e)\thinspace q_1$. Now $q_1$ vanishes on $E'$: for $e' \in E'$ we have $0 = p(e') = (e' - e)\thinspace q_1(e')$ with $e' - e \ne 0$ because the elements of $E$ are distinct, and a field has no zero divisors, so $q_1(e') = 0$. The induction hypothesis applied to $q_1$ and $E'$ gives $q_1 = Z_{E'}\thinspace q$ for some $q \in \mathbb{F}_r[X]$, and therefore $p = (X - e)\thinspace Z_{E'}\thinspace q = Z_E\thinspace q$, since $Z_E = (X - e)\thinspace Z_{E'}$ by definition.
 
-(ii) By (i), $p(X) = Z_E(X)\, q(X)$ as polynomials, so in particular at the setup secret, $p(\tau) = Z_E(\tau)\, q(\tau)$ in $\mathbb{F}_r$. Then, using Equation (4.2) and bilinearity twice,
+(ii) By (i), $p(X) = Z_E(X)\thinspace q(X)$ as polynomials, so in particular at the setup secret, $p(\tau) = Z_E(\tau)\thinspace q(\tau)$ in $\mathbb{F}_r$. Then, using Equation 4.2 and bilinearity twice,
 
 $$
 \begin{aligned}
 e(\mathsf{Com}(p), g_2) &= e\big(g_1^{p(\tau)}, g_2\big) = e(g_1, g_2)^{p(\tau)}
-    = e(g_1, g_2)^{q(\tau)\, Z_E(\tau)} \\
+    = e(g_1, g_2)^{q(\tau)\thinspace  Z_E(\tau)} \cr 
   &= e\big(g_1^{q(\tau)}, g_2^{Z_E(\tau)}\big) = e\big(\pi, g_2^{Z_E(\tau)}\big),
 \end{aligned}
 $$
@@ -98,10 +98,10 @@ which is the verifier's equation. An honest prover computes exactly this $\pi$, 
 
 **Lemma Z4.4 (The vanishing element is public and cheap).** Given $E$ with $|E| = n \le m$ and the setup, the coefficients $z_0, \dots, z_n$ of $Z_E$ are computable with $n(n+1)/2$ multiplications and as many additions in $\mathbb{F}_r$, and $g_2^{Z_E(\tau)}$ with $n + 1$ scalar multiplications and $n$ additions in $\mathbb{G}_2$, that is, $O(n)$ group operations; neither step uses $\tau$ or any secret.
 
-*Proof.* Order $E = \{e_1, \dots, e_n\}$ and let $Z_k = \prod_{i \le k}(X - e_i)$, so $Z_0 = 1$ and $Z_n = Z_E$. If $Z_{k-1} = \sum_{j=0}^{k-1} z_j X^j$ then
+*Proof.* Order $E = \lbrace e_1, \dots, e_n\rbrace$ and let $Z_k = \prod_{i \le k}(X - e_i)$, so $Z_0 = 1$ and $Z_n = Z_E$. If $Z_{k-1} = \sum_{j=0}^{k-1} z_j X^j$ then
 
 $$
-Z_k = (X - e_k)\, Z_{k-1} = \sum_{j=0}^{k-1} z_j X^{j+1} - e_k \sum_{j=0}^{k-1} z_j X^j
+Z_k = (X - e_k)\thinspace  Z_{k-1} = \sum_{j=0}^{k-1} z_j X^{j+1} - e_k \sum_{j=0}^{k-1} z_j X^j
       = z_{k-1} X^{k} + \sum_{j=1}^{k-1} (z_{j-1} - e_k z_j) X^j - e_k z_0,
 $$
 
@@ -114,7 +114,7 @@ $$
 
 one scalar multiplication per term and one group addition to fold each product in, which is $n + 1$ scalar multiplications and $n$ additions. Every input is public. &#9632;
 
-**Remark Z4.5 (The trusted setup and the assumption the bench cannot buy).** Soundness of Equation (4.2), the statement that a prover who does not hold a vanishing $p$ cannot produce an accepted $\pi$, rests on the $q$-strong Diffie-Hellman assumption in the bilinear group and on $\tau$ being unknown to every party \[[2](#references)\]; the paper assumes the setup is produced by a multi-party powers-of-tau ceremony and treats it as part of $\mathsf{sp}$ \[[1](#references)\]. The setup this chapter reads was written by [Project 3](03-the-modems-backoff-machine.md)'s own script, which drew $\tau$ from `/dev/urandom` and printed it. So the verdict below is correct as a computation and worthless as a proof to anyone but the bench: whoever reads the setup log can open $c_T$ to a polynomial that vanishes anywhere. The acceptance test keeps this visible by also running a forged proof made with the printed $\tau$, which must be accepted, so that nobody mistakes the green LED for a security claim.
+**Remark Z4.5 (The trusted setup and the assumption the bench cannot buy).** Soundness of Equation 4.2, the statement that a prover who does not hold a vanishing $p$ cannot produce an accepted $\pi$, rests on the $q$-strong Diffie-Hellman assumption in the bilinear group and on $\tau$ being unknown to every party \[[2](#references)\]; the paper assumes the setup is produced by a multi-party powers-of-tau ceremony and treats it as part of $\mathsf{sp}$ \[[1](#references)\]. The setup this chapter reads was written by [Project 3](03-the-modems-backoff-machine.md)'s own script, which drew $\tau$ from `/dev/urandom` and printed it. So the verdict below is correct as a computation and worthless as a proof to anyone but the bench: whoever reads the setup log can open $c_T$ to a polynomial that vanishes anywhere. The acceptance test keeps this visible by also running a forged proof made with the printed $\tau$, which must be accepted, so that nobody mistakes the green LED for a security claim.
 
 ## The protocol
 
@@ -315,7 +315,7 @@ stateDiagram-v2
 
 ![Figure 4.4. Verifier time against state-space size, log scale from 1 ms to 100 s.](../figures/z04_data.svg)
 
-*Figure 4.4. Verifier time against state-space size, log scale from 1 ms to 100 s. Seven solid bars are the paper's Table 1 verifier column for exb\_i1a2 through exb\_i8a3 on its AWS c6g.8xlarge, attributed, placed at the paper's $\|S\|$ from $2^5$ to $2^{9.6}$; two dashed bars at $\|S\| = 2^8$ are the expected orders for this chapter's instance on the Pi 4B and the Pi 3B, not measured. The column is constant only in its two pairings; the rest grows with the batch size, which is why the paper's bars rise.*
+*Figure 4.4. Verifier time against state-space size, log scale from 1 ms to 100 s. Seven solid bars are the paper's Table 1 verifier column for exb\_i1a2 through exb\_i8a3 on its AWS c6g.8xlarge, attributed, placed at the paper's $\vert S\vert $ from $2^5$ to $2^{9.6}$; two dashed bars at $\vert S\vert = 2^8$ are the expected orders for this chapter's instance on the Pi 4B and the Pi 3B, not measured. The column is constant only in its two pairings; the rest grows with the batch size, which is why the paper's bars rise.*
 
 | **Quantity** | **Paper, i4a3** | **Pi 4B** | **Pi 3B** | **Instrument** |
 | --- | --- | --- | --- | --- |

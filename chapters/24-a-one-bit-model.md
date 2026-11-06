@@ -40,34 +40,34 @@ The design brief builds this project as a portable medical triage tool that a pe
 
 ## The secret, the statement and the relation
 
-Nothing is hidden in this chapter, so its relation is the certification relation of [Project 16](16-the-model-proposes-a-ranking-function-the-certifier.md) with a different proposer in front of it. Let $\mathcal{W} = \{\, -1, 0, 1 \,\}$ be the weight alphabet, let a window of the replayed log be $v \in \mathbb{R}^{256}$, and let the feature map be
+Nothing is hidden in this chapter, so its relation is the certification relation of [Project 16](16-the-model-proposes-a-ranking-function-the-certifier.md) with a different proposer in front of it. Let $\mathcal{W} = \lbrace \thinspace -1, 0, 1 \thinspace \rbrace$ be the weight alphabet, let a window of the replayed log be $v \in \mathbb{R}^{256}$, and let the feature map be
 
 $$
-\phi(v) = \big(\max_i v_i - \min_i v_i,\; \tfrac{1}{256}\textstyle\sum_i |v_i - \bar v|,\;
-    |\{\, i \mid |v_i| > 1 \,\}| / 256,\; \max_i |v_i| \big) \in \mathbb{R}^4, \tag{24.1}
+\phi(v) = \big(\max_i v_i - \min_i v_i,\thickspace  \tfrac{1}{256}\textstyle\sum_i |v_i - \bar v|,\thickspace 
+    |\lbrace \thinspace  i \mid |v_i| > 1 \thinspace \rbrace | / 256,\thickspace  \max_i |v_i| \big) \in \mathbb{R}^4, \tag{24.1}
 $$
 
-with $\bar v$ the mean of the window. The four classes are $C = \{\, \mathsf{nominal}, \mathsf{watch}, \mathsf{service}, \mathsf{withdraw} \,\}$, indexed $0$ to $3$, and each carries a public guard written as a closed band on the first feature,
+with $\bar v$ the mean of the window. The four classes are $C = \lbrace \thinspace \mathsf{nominal}, \mathsf{watch}, \mathsf{service}, \mathsf{withdraw} \thinspace \rbrace$, indexed $0$ to $3$, and each carries a public guard written as a closed band on the first feature,
 
 $$
-G_0 = [0.0,\, 3.0], \quad G_1 = [2.0,\, 5.0], \quad G_2 = [4.0,\, 8.0], \quad
-  G_3 = [7.0,\, \infty), \tag{24.2}
+G_0 = [0.0,\thinspace  3.0], \quad G_1 = [2.0,\thinspace  5.0], \quad G_2 = [4.0,\thinspace  8.0], \quad
+  G_3 = [7.0,\thinspace  \infty), \tag{24.2}
 $$
 
 all in volts, the unit of the replayed log. The bands overlap deliberately, so that more than one class can be admissible on a window and a proposer has something to contribute. The relation the certifier decides is
 
 $$
-\mathcal{R}_{\mathrm{cls}} = \{\, (c, v) \in C \times \mathbb{R}^{256} \mid \phi(v)_1 \in G_c \,\}, \tag{24.3}
+\mathcal{R}_{\mathrm{cls}} = \lbrace \thinspace  (c, v) \in C \times \mathbb{R}^{256} \mid \phi(v)_1 \in G_c \thinspace \rbrace , \tag{24.3}
 $$
 
 and the two proposers are functions into $C$: the model $P_{\mathrm{llm}}$, bounded by the grammar below, and the control rule $P_{\mathrm{rule}}$, which returns the smallest index whose guard admits the window. The statement a later run would prove in zero knowledge is $(c, v) \in \mathcal{R}_{\mathrm{cls}}$ for a committed $v$; this chapter establishes, as [Project 16](16-the-model-proposes-a-ranking-function-the-certifier.md) does for ranking functions, that the right-hand side does not depend on which proposer produced $c$.
 
 ## The mathematics
 
-**Definition Z24.1 (Ternary linear layer).** Let $m, n \ge 1$. A *ternary linear layer* is a pair $(W, \beta)$ with $W \in \{-1, 0, 1\}^{m \times n}$ and $\beta \in \mathbb{R}_{>0}^{m}$, acting on $x \in \mathbb{R}^n$ by
+**Definition Z24.1 (Ternary linear layer).** Let $m, n \ge 1$. A *ternary linear layer* is a pair $(W, \beta)$ with $W \in \lbrace -1, 0, 1\rbrace ^{m \times n}$ and $\beta \in \mathbb{R}_{>0}^{m}$, acting on $x \in \mathbb{R}^n$ by
 
 $$
-L(x)_i = \beta_i \sum_{j=1}^{n} w_{ij}\, x_j, \qquad i = 1, \dots, m. \tag{24.4}
+L(x)_i = \beta_i \sum_{j=1}^{n} w_{ij}\thinspace  x_j, \qquad i = 1, \dots, m. \tag{24.4}
 $$
 
 It is obtained from a real matrix $A \in \mathbb{R}^{m \times n}$ by the mean-magnitude quantiser of \[[2](#references)\]: with $\beta_i = \frac{1}{n}\sum_{j} |a_{ij}|$ assumed positive,
@@ -78,16 +78,16 @@ $$
 
 where $\lfloor \cdot \rceil$ is rounding to the nearest integer, ties away from zero, and $\mathrm{clip}(t, -1, 1) = \max(-1, \min(1, t))$. The *cost model* counts one addition and one subtraction alike as one *additive operation*, counts one real multiplication as one *multiplication*, and counts a sign change as free, it being a flip of one bit of a floating-point word.
 
-**Lemma Z24.2 (A ternary product needs only additions and subtractions).** Let $(W, \beta)$ be a ternary linear layer and $x \in \mathbb{R}^n$. For each row $i$ put $p_i = |\{\, j \mid w_{ij} = 1 \,\}|$ and $q_i = |\{\, j \mid w_{ij} = -1 \,\}|$, and $k_i = p_i + q_i$. Then $L(x)$ is computed with
+**Lemma Z24.2 (A ternary product needs only additions and subtractions).** Let $(W, \beta)$ be a ternary linear layer and $x \in \mathbb{R}^n$. For each row $i$ put $p_i = |\lbrace \thinspace j \mid w_{ij} = 1 \thinspace \rbrace |$ and $q_i = |\lbrace \thinspace j \mid w_{ij} = -1 \thinspace \rbrace |$, and $k_i = p_i + q_i$. Then $L(x)$ is computed with
 
 $$
-\sum_{i=1}^{m} \max(k_i - 1,\, 0) \;\le\; mn - m \quad \text{additive operations and} \quad
+\sum_{i=1}^{m} \max(k_i - 1,\thinspace  0) \thickspace \le\thickspace  mn - m \quad \text{additive operations and} \quad
   m \quad \text{multiplications}, \tag{24.6}
 $$
 
 and with no multiplication by any entry of $W$. The dense layer $x \mapsto A x$ over the same shape costs $mn$ multiplications and $m(n-1)$ additive operations. Hence the ternary layer performs a fraction $1/n$ of the multiplications of the dense layer, and no more additive operations than it.
 
-*Proof.* Fix a row $i$ and let $P_i$ and $N_i$ be the index sets of the entries equal to $1$ and to $-1$. By ((24.4)), and because the entries of $W$ outside $P_i \cup N_i$ are zero,
+*Proof.* Fix a row $i$ and let $P_i$ and $N_i$ be the index sets of the entries equal to $1$ and to $-1$. By (24.4), and because the entries of $W$ outside $P_i \cup N_i$ are zero,
 
 $$
 L(x)_i = \beta_i \Big( \sum_{j \in P_i} x_j - \sum_{j \in N_i} x_j \Big).
@@ -101,18 +101,18 @@ For the dense layer, $(Ax)_i = \sum_{j=1}^n a_{ij} x_j$ is $n$ products and the 
 
 **Example Z24.3 (The two instances this chapter uses, computed).** For the decision path's own layer, $m = n = 4$: the dense form costs $16$ multiplications and $12$ additive operations, the ternary form at most $12$ additive operations and $4$ multiplications, a ratio of multiplications of $1/4$ (computed). For one square layer of the model at $m = n = 2048$: the dense form costs $2048^2 = 4194304$ multiplications and $2048 \times 2047 = 4192256$ additive operations, the ternary form $2048$ multiplications and at most $4192256$ additive operations, a ratio of multiplications of $1/2048$ (computed). Neither figure is a time: a multiplication and an addition do not cost the same on a Cortex-A72 and nothing here has been timed, so the benchmark table reads not measured for every duration.
 
-**Proposition Z24.4 (A margin smaller than the quantisation error is not preserved).** Let $a \in \mathbb{R}^n$ be one row of a dense layer, let $(w, \beta)$ be its ternary quantisation by ((24.5)), and write $e = \beta w - a$ for the coefficient error. For $x \in \mathbb{R}^n$ let $s(x) = \langle a, x \rangle$ and $\hat s(x) = \beta \langle w, x \rangle$ be the dense and the quantised scores. Then:
+**Proposition Z24.4 (A margin smaller than the quantisation error is not preserved).** Let $a \in \mathbb{R}^n$ be one row of a dense layer, let $(w, \beta)$ be its ternary quantisation by (24.5), and write $e = \beta w - a$ for the coefficient error. For $x \in \mathbb{R}^n$ let $s(x) = \langle a, x \rangle$ and $\hat s(x) = \beta \langle w, x \rangle$ be the dense and the quantised scores. Then:
 
-1. if $|s(x)| > \|e\|_2 \|x\|_2$ then $\hat s(x)$ has the same sign as $s(x)$, so the decision $\mathrm{sign}(s)$ is preserved;
+1. if $|s(x)| > \Vert e\Vert _2 \Vert x\Vert _2$ then $\hat s(x)$ has the same sign as $s(x)$, so the decision $\mathrm{sign}(s)$ is preserved;
 2. the bound is not vacuous and cannot be improved to zero: for every $\varepsilon \in (0, 2/3)$ and every $\delta \in (0, \varepsilon)$ there are $a$ and $x$ in $\mathbb{R}^2$ with $s(x) > 0$ and $\hat s(x) < 0$, and with $s(x) \to 0$ as $\delta \to \varepsilon$;
-3. each coordinate of the error of an unclipped entry satisfies $|e_j| \le \beta/2$, so $\|e\|_2 \le (\beta/2)\sqrt{n}$ and a margin above $(\beta/2)\sqrt{n}\,\|x\|_2$ is safe.
+3. each coordinate of the error of an unclipped entry satisfies $|e_j| \le \beta/2$, so $\Vert e\Vert _2 \le (\beta/2)\sqrt{n}$ and a margin above $(\beta/2)\sqrt{n}\thinspace \Vert x\Vert _2$ is safe.
 
-*Proof.* (i) By the definition of $e$, $\hat s(x) = \langle \beta w, x \rangle = \langle a + e, x \rangle = s(x) + \langle e, x \rangle$, and by the Cauchy-Schwarz inequality $|\langle e, x \rangle| \le \|e\|_2 \|x\|_2$. Suppose $s(x) > \|e\|_2\|x\|_2$. Then $\hat s(x) \ge s(x) - |\langle e, x\rangle| \ge s(x) - \|e\|_2\|x\|_2 > 0$. If instead $s(x) < -\|e\|_2\|x\|_2$ then $\hat s(x) \le s(x) + \|e\|_2\|x\|_2 < 0$. In both cases the sign is unchanged.
+*Proof.* (i) By the definition of $e$, $\hat s(x) = \langle \beta w, x \rangle = \langle a + e, x \rangle = s(x) + \langle e, x \rangle$, and by the Cauchy-Schwarz inequality $|\langle e, x \rangle| \le \Vert e\Vert _2 \Vert x\Vert _2$. Suppose $s(x) > \Vert e\Vert _2\Vert x\Vert _2$. Then $\hat s(x) \ge s(x) - |\langle e, x\rangle| \ge s(x) - \Vert e\Vert _2\Vert x\Vert _2 > 0$. If instead $s(x) < -\Vert e\Vert _2\Vert x\Vert _2$ then $\hat s(x) \le s(x) + \Vert e\Vert _2\Vert x\Vert _2 < 0$. In both cases the sign is unchanged.
 
 (ii) The construction is two lines. Take
 
 $$
-a = (1,\; 1 - \varepsilon), \qquad x = (1,\; -1 - \delta),
+a = (1,\thickspace  1 - \varepsilon), \qquad x = (1,\thickspace  -1 - \delta),
   \qquad 0 < \delta < \varepsilon < 2/3 .
 $$
 
@@ -122,29 +122,29 @@ $$
 \begin{aligned}
 s(x) &= 1 \cdot 1 + (1 - \varepsilon)(-1 - \delta)
         = 1 - (1 + \delta - \varepsilon - \varepsilon\delta)
-        = \varepsilon - \delta + \varepsilon\delta \;>\; 0,
-    \quad \text{since } \delta < \varepsilon, \\
+        = \varepsilon - \delta + \varepsilon\delta \thickspace >\thickspace  0,
+    \quad \text{since } \delta < \varepsilon, \cr 
   \hat s(x) &= \beta\big(1 \cdot 1 + 1 \cdot (-1 - \delta)\big) = -\beta\delta
-        = -(1 - \varepsilon/2)\,\delta \;<\; 0,
+        = -(1 - \varepsilon/2)\thinspace \delta \thickspace <\thickspace  0,
     \quad \text{since } \delta > 0 \text{ and } \varepsilon < 2 .
 \end{aligned}
 $$
 
-The signs differ. As $\delta$ rises to $\varepsilon$ the margin $s(x) = \varepsilon - \delta + \varepsilon\delta$ falls to $\varepsilon^2 > 0$ and, taking $\varepsilon$ small as well, to zero; so there is no positive margin below which the sign is guaranteed, and in particular the bound of (i) cannot be replaced by zero. For this pair, $e = \beta w - a = (-\varepsilon/2,\; \varepsilon/2)$ and $\|e\|_2 = \varepsilon/\sqrt{2}$, which is consistent with (i): the flipped margin $\varepsilon - \delta + \varepsilon\delta$ is below $\|e\|_2\|x\|_2$ for the $\delta$ chosen.
+The signs differ. As $\delta$ rises to $\varepsilon$ the margin $s(x) = \varepsilon - \delta + \varepsilon\delta$ falls to $\varepsilon^2 > 0$ and, taking $\varepsilon$ small as well, to zero; so there is no positive margin below which the sign is guaranteed, and in particular the bound of (i) cannot be replaced by zero. For this pair, $e = \beta w - a = (-\varepsilon/2,\thickspace \varepsilon/2)$ and $\Vert e\Vert _2 = \varepsilon/\sqrt{2}$, which is consistent with (i): the flipped margin $\varepsilon - \delta + \varepsilon\delta$ is below $\Vert e\Vert _2\Vert x\Vert _2$ for the $\delta$ chosen.
 
-(iii) If the entry is not clipped, $w_j = \lfloor a_j/\beta \rceil$, so $|a_j/\beta - w_j| \le 1/2$ by the definition of rounding to the nearest integer; multiplying by $\beta > 0$ gives $|a_j - \beta w_j| \le \beta/2$, that is $|e_j| \le \beta/2$. Then $\|e\|_2 = (\sum_j e_j^2)^{1/2} \le (n \beta^2/4)^{1/2} = (\beta/2)\sqrt{n}$, and (i) gives the stated safe margin. &#9632;
+(iii) If the entry is not clipped, $w_j = \lfloor a_j/\beta \rceil$, so $|a_j/\beta - w_j| \le 1/2$ by the definition of rounding to the nearest integer; multiplying by $\beta > 0$ gives $|a_j - \beta w_j| \le \beta/2$, that is $|e_j| \le \beta/2$. Then $\Vert e\Vert _2 = (\sum_j e_j^2)^{1/2} \le (n \beta^2/4)^{1/2} = (\beta/2)\sqrt{n}$, and (i) gives the stated safe margin. &#9632;
 
-**Remark Z24.5 (Why the guards are bands and not a boundary).** Proposition **Proposition Z24.4** is the reason the public guards of ((24.2)) are overlapping closed bands rather than three cut points. A proposer whose score sits within $\|e\|_2\|x\|_2$ of a cut point may name either side of it, and with cut points one of the two answers would be refused, which would make the measured acceptance rate a measurement of the quantisation and not of the proposer. With bands, both answers are admissible in the overlap and the certifier refuses only a class whose band the window is genuinely outside. The width of each overlap, 1.0 V, is a design choice recorded here and not derived from the bound, because the model's own $\|e\|_2$ is a property of weights this bench has not read.
+**Remark Z24.5 (Why the guards are bands and not a boundary).** Proposition **Proposition Z24.4** is the reason the public guards of (24.2) are overlapping closed bands rather than three cut points. A proposer whose score sits within $\Vert e\Vert _2\Vert x\Vert _2$ of a cut point may name either side of it, and with cut points one of the two answers would be refused, which would make the measured acceptance rate a measurement of the quantisation and not of the proposer. With bands, both answers are admissible in the overlap and the certifier refuses only a class whose band the window is genuinely outside. The width of each overlap, 1.0 V, is a design choice recorded here and not derived from the bound, because the model's own $\Vert e\Vert _2$ is a property of weights this bench has not read.
 
-**Remark Z24.6 (Soundness is cited, not re-proved).** The theorem that the certifier's acceptance does not depend on which function produced the proposal is Theorem thm:z16\_independent of [Project 16](16-the-model-proposes-a-ranking-function-the-certifier.md), proved there for an arbitrary proposer, including a quantised model and including an adversary. Nothing in this chapter weakens its hypotheses: the certifier here evaluates the public guard of ((24.2)) on the window and nothing else. What the quantisation can cost is completeness, which Proposition **Proposition Z24.4** bounds and the agreement table counts, and thm:z01\_hiding is the reason a committed window reveals nothing about the features to a verifier that checks only the guard.
+**Remark Z24.6 (Soundness is cited, not re-proved).** The theorem that the certifier's acceptance does not depend on which function produced the proposal is Theorem thm:z16\_independent of [Project 16](16-the-model-proposes-a-ranking-function-the-certifier.md), proved there for an arbitrary proposer, including a quantised model and including an adversary. Nothing in this chapter weakens its hypotheses: the certifier here evaluates the public guard of (24.2) on the window and nothing else. What the quantisation can cost is completeness, which Proposition **Proposition Z24.4** bounds and the agreement table counts, and thm:z01\_hiding is the reason a committed window reveals nothing about the features to a verifier that checks only the guard.
 
 ## The protocol
 
-1. The decision path reads the replayed log, builds window $t$ of 256 samples with a stride of 128, and computes $\phi$ by ((24.1)).
+1. The decision path reads the replayed log, builds window $t$ of 256 samples with a stride of 128, and computes $\phi$ by (24.1).
 2. The decision path evaluates its own four by four ternary layer on $\phi$, prints the count of additive operations it performed, and takes the index of the largest output as the tiny layer's proposal.
 3. The harness posts the prompt and the grammar to the inference server and receives one line; a line the regular expression does not match is a grammar defect and stops the run.
 4. The control rule returns the smallest index whose guard admits $\phi(v)_1$.
-5. The decision path checks each proposal against the guard of ((24.2)) and exits non-zero on a refusal, printing which band was missed and by how much.
+5. The decision path checks each proposal against the guard of (24.2) and exits non-zero on a refusal, printing which band was missed and by how much.
 6. The verdict is shown: on the display in one configuration, on the three LEDs in the other, and on the console in both.
 7. After $n \ge 100$ windows the harness prints the $2 \times 2$ table with both marginal rates and the agreement rate, one row per proposer.
 
@@ -419,7 +419,7 @@ stateDiagram-v2
 
 ## Steps
 
-**Step 1.** On the authoring laptop, write the decision path, the harness and the grammar, and record the four bands of ((24.2)) with the log they were chosen from; commit. Nothing is compiled here.
+**Step 1.** On the authoring laptop, write the decision path, the harness and the grammar, and record the four bands of (24.2) with the log they were chosen from; commit. Nothing is compiled here.
 
 **Step 2.** On the build laptop in WSL, `git pull --ff-only`, cross build the decision path for aarch64, and copy the binary, the harness, the grammar and the replayed log to the Pi 4B.
 
@@ -460,7 +460,7 @@ The chapter passes when, for each proposer, 100 windows exist in the log; every 
 - Python for the decision path: the brief's own choice \[[1](#references)\]; here Python is the harness only, because a decision that a certifier checks is written where the certifier can be read, and the volume's rule puts no decision in Python.
 - C++ with the inference framework's own API in place of HTTP: one process instead of two and no port to forward, and the host may be the build laptop, so the harness talks HTTP and the C keeps the decision.
 - Rust with a ternary kernel: safer accumulation and a borrow checker over the packed weights, and one more toolchain on the Pi for a 16-element product that fits on one page of C.
-- A fixed-point integer path instead of single-precision floating point: the Cortex-A72 has floating-point hardware and the features are volts, so the conversion would add a scale factor to every band in ((24.2)) and buy nothing this chapter measures.
+- A fixed-point integer path instead of single-precision floating point: the Cortex-A72 has floating-point hardware and the features are volts, so the conversion would add a scale factor to every band in (24.2) and buy nothing this chapter measures.
 
 ## Sources
 

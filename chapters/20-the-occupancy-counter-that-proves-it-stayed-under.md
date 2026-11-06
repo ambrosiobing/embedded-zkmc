@@ -44,15 +44,15 @@ Every earlier chapter proves one piece; this one puts a piece in front of a pers
 The witness is $(n, r)$ and the statement is $(c, m)$:
 
 $$
-\mathcal{R}_{\mathrm{range}} = \{\, ((n, r), (c, m)) \;:\; n \in \mathbb{Z},\; r \in \mathbb{Z}_p,\;
-  c = g^n h^r \in \mathbb{G},\; 0 \le n < 2^m \,\}, \tag{20.1}
+\mathcal{R}_{\mathrm{range}} = \lbrace \thinspace  ((n, r), (c, m)) \thickspace :\thickspace  n \in \mathbb{Z},\thickspace  r \in \mathbb{Z}_p,\thickspace 
+  c = g^n h^r \in \mathbb{G},\thickspace  0 \le n < 2^m \thinspace \rbrace , \tag{20.1}
 $$
 
 over ristretto255 with $g, h$ the generators of the crate's `PedersenGens` \[[7](#references)\]. The paper's `zkrp` relation, its $\mathcal{R}_{\mathrm{zkrp}}$ of Section 5.1, is the same relation taken over every entry of a committed matrix with the bound $M$ in place of $2^m$ \[[1](#references)\]; here there is one entry and the bound is the room's limit. The limit itself, $B = 16$, is not of the form $2^m$ for a bit size the crate accepts, so the statement the device actually proves is the conjunction
 
 $$
-((n, r), (c, 8)) \in \mathcal{R}_{\mathrm{range}} \;\wedge\;
-  ((B - 1 - n, -r), (c', 8)) \in \mathcal{R}_{\mathrm{range}} \;\wedge\; c \cdot c' = g^{B-1}, \tag{20.2}
+((n, r), (c, 8)) \in \mathcal{R}_{\mathrm{range}} \thickspace \wedge\thickspace 
+  ((B - 1 - n, -r), (c', 8)) \in \mathcal{R}_{\mathrm{range}} \thickspace \wedge\thickspace  c \cdot c' = g^{B-1}, \tag{20.2}
 $$
 
 and Corollary **Corollary Z20.4** says this is equivalent to $0 \le n \le B - 1$.
@@ -61,7 +61,7 @@ and Corollary **Corollary Z20.4** says this is equivalent to $0 \le n \le B - 1$
 
 Throughout, $m$ is a power of two, $p$ is the prime order of ristretto255 (about $2^{252}$, so $2^m < p$ for every $m$ used), vectors are in $\mathbb{Z}_p^m$, $\mathbf{1}^m = (1, \ldots, 1)$, $\mathbf{2}^m = (1, 2, 4, \ldots, 2^{m-1})$, $\mathbf{y}^m = (1, y, \ldots, y^{m-1})$, $\circ$ is the entrywise product and $\langle \cdot, \cdot \rangle$ the inner product.
 
-**Definition Z20.1 (Range relation and bit vectors).** For $n \in \mathbb{Z}_p$ and $m \ge 1$, a *bit decomposition* of $n$ is a vector $\mathbf{a}_L \in \{0, 1\}^m \subset \mathbb{Z}_p^m$ with $\langle \mathbf{a}_L, \mathbf{2}^m \rangle = n$. The range relation is ((20.1)); a witness for it is $(n, r)$ together with any bit decomposition of $n$.
+**Definition Z20.1 (Range relation and bit vectors).** For $n \in \mathbb{Z}_p$ and $m \ge 1$, a *bit decomposition* of $n$ is a vector $\mathbf{a}_L \in \lbrace 0, 1\rbrace ^m \subset \mathbb{Z}_p^m$ with $\langle \mathbf{a}_L, \mathbf{2}^m \rangle = n$. The range relation is (20.1); a witness for it is $(n, r)$ together with any bit decomposition of $n$.
 
 **Lemma Z20.2 (Bit decomposition in both directions).** Let $\mathbf{a}_L, \mathbf{a}_R \in \mathbb{Z}_p^m$ and $n \in \mathbb{Z}_p$. The three conditions
 
@@ -73,14 +73,14 @@ $$
 
 hold if and only if $\mathbf{a}_L$ is the binary representation of an integer $n$ with $0 \le n < 2^m$ (and then $\mathbf{a}_R = \mathbf{a}_L - \mathbf{1}^m$).
 
-*Proof.* ($\Rightarrow$) From the second condition, $a_{R,i} = a_{L,i} - 1$ for every $i$. Substituting into the first, $a_{L,i} (a_{L,i} - 1) = 0$ in $\mathbb{Z}_p$ for every $i$. Since $p$ is prime, $\mathbb{Z}_p$ is a field and has no zero divisors, so $a_{L,i} = 0$ or $a_{L,i} = 1$. Hence $\mathbf{a}_L \in \{0, 1\}^m$, and the third condition reads $n = \sum_{i=0}^{m-1} a_{L,i} 2^i$ in $\mathbb{Z}_p$. The integer $N = \sum_{i} a_{L,i} 2^i$ satisfies $0 \le N \le \sum_i 2^i = 2^m - 1 < p$, so $N$ is the canonical representative of the residue $n$, and $0 \le n < 2^m$ as an integer. Finally, the binary representation of an integer in $[0, 2^m)$ with $m$ digits is unique (two distinct digit vectors differ first at some position $j$, and the difference of their values is then $\pm 2^j + \sum_{i < j} \epsilon_i 2^i$ with $\epsilon_i \in \{-1, 0, 1\}$, which is non-zero because $\sum_{i<j} 2^i = 2^j - 1 < 2^j$), so $\mathbf{a}_L$ is that representation.
+*Proof.* ($\Rightarrow$) From the second condition, $a_{R,i} = a_{L,i} - 1$ for every $i$. Substituting into the first, $a_{L,i} (a_{L,i} - 1) = 0$ in $\mathbb{Z}_p$ for every $i$. Since $p$ is prime, $\mathbb{Z}_p$ is a field and has no zero divisors, so $a_{L,i} = 0$ or $a_{L,i} = 1$. Hence $\mathbf{a}_L \in \lbrace 0, 1\rbrace ^m$, and the third condition reads $n = \sum_{i=0}^{m-1} a_{L,i} 2^i$ in $\mathbb{Z}_p$. The integer $N = \sum_{i} a_{L,i} 2^i$ satisfies $0 \le N \le \sum_i 2^i = 2^m - 1 < p$, so $N$ is the canonical representative of the residue $n$, and $0 \le n < 2^m$ as an integer. Finally, the binary representation of an integer in $[0, 2^m)$ with $m$ digits is unique (two distinct digit vectors differ first at some position $j$, and the difference of their values is then $\pm 2^j + \sum_{i < j} \epsilon_i 2^i$ with $\epsilon_i \in \lbrace -1, 0, 1\rbrace$, which is non-zero because $\sum_{i<j} 2^i = 2^j - 1 < 2^j$), so $\mathbf{a}_L$ is that representation.
 
-($\Leftarrow$) Let $\mathbf{a}_L$ be the binary representation of $n \in [0, 2^m)$ and set $\mathbf{a}_R = \mathbf{a}_L - \mathbf{1}^m$. The second condition holds by construction. For the first, $a_{L,i} \in \{0, 1\}$ gives $a_{L,i} a_{R,i} = a_{L,i}(a_{L,i} - 1) = 0$ for each $i$. For the third, $\langle \mathbf{a}_L, \mathbf{2}^m \rangle = \sum_i a_{L,i} 2^i = n$ by the definition of the binary representation, and the equation holds in $\mathbb{Z}_p$ because it holds in $\mathbb{Z}$ and $n < p$. &#9632;
+($\Leftarrow$) Let $\mathbf{a}_L$ be the binary representation of $n \in [0, 2^m)$ and set $\mathbf{a}_R = \mathbf{a}_L - \mathbf{1}^m$. The second condition holds by construction. For the first, $a_{L,i} \in \lbrace 0, 1\rbrace$ gives $a_{L,i} a_{R,i} = a_{L,i}(a_{L,i} - 1) = 0$ for each $i$. For the third, $\langle \mathbf{a}_L, \mathbf{2}^m \rangle = \sum_i a_{L,i} 2^i = n$ by the definition of the binary representation, and the equation holds in $\mathbb{Z}_p$ because it holds in $\mathbb{Z}$ and $n < p$. &#9632;
 
-**Theorem Z20.3 (Structure of the range proof).** Let $m$ be a power of two. (a) For $\mathbf{a}_L, \mathbf{a}_R \in \mathbb{Z}_p^m$ and $n \in \mathbb{Z}_p$, the three conditions ((20.3)) hold if and only if, for all $y, z \in \mathbb{Z}_p$,
+**Theorem Z20.3 (Structure of the range proof).** Let $m$ be a power of two. (a) For $\mathbf{a}_L, \mathbf{a}_R \in \mathbb{Z}_p^m$ and $n \in \mathbb{Z}_p$, the three conditions (20.3) hold if and only if, for all $y, z \in \mathbb{Z}_p$,
 
 $$
-\big\langle \mathbf{a}_L - z \mathbf{1}^m,\;
+\big\langle \mathbf{a}_L - z \mathbf{1}^m,\thickspace 
   \mathbf{y}^m \circ (\mathbf{a}_R + z \mathbf{1}^m) + z^2 \mathbf{2}^m \big\rangle
   = z^2 n + \delta(y, z), \qquad
   \delta(y, z) = (z - z^2) \langle \mathbf{1}^m, \mathbf{y}^m \rangle
@@ -89,7 +89,7 @@ $$
 
 (b) A claim $P = \mathbf{g}^{\mathbf{a}} \mathbf{h}^{\mathbf{b}} u^{\langle \mathbf{a}, \mathbf{b} \rangle}$ about vectors of length $m$ reduces, in one round that sends two group elements $L, R$ and receives a challenge $x$, to a claim of the same shape about vectors of length $m / 2$; after $\log_2 m$ rounds the claim is about scalars $a, b$, which are sent. (c) Hence the range proof for $m$ bits consists of $2 \log_2 m + 4$ group elements ($A$, $S$, $T_1$, $T_2$, and $L_j, R_j$ for $j = 1, \ldots, \log_2 m$) and $5$ scalars ($t_x$, $\tau_x$, $\mu$, $a$, $b$): $2 \log_2 m + 9$ elements, each $32$ bytes on ristretto255.
 
-*Proof.* (a) Expand the left-hand side of ((20.4)) by bilinearity of the inner product:
+*Proof.* (a) Expand the left-hand side of (20.4) by bilinearity of the inner product:
 
 $$
 \begin{aligned}
@@ -97,14 +97,14 @@ $$
     + z^2 \mathbf{2}^m \rangle
   &= \langle \mathbf{a}_L, \mathbf{y}^m \circ \mathbf{a}_R \rangle
     + z \langle \mathbf{a}_L, \mathbf{y}^m \rangle
-    + z^2 \langle \mathbf{a}_L, \mathbf{2}^m \rangle \notag \\
+    + z^2 \langle \mathbf{a}_L, \mathbf{2}^m \rangle \notag \cr 
   &\quad - z \langle \mathbf{1}, \mathbf{y}^m \circ \mathbf{a}_R \rangle
     - z^2 \langle \mathbf{1}, \mathbf{y}^m \rangle
     - z^3 \langle \mathbf{1}, \mathbf{2}^m \rangle . \tag{20.5}
 \end{aligned}
 $$
 
-Two identities hold for every $\mathbf{u}, \mathbf{v}, \mathbf{w}$: $\langle \mathbf{u}, \mathbf{w} \circ \mathbf{v} \rangle = \sum_i u_i w_i v_i = \langle \mathbf{u} \circ \mathbf{v}, \mathbf{w} \rangle$ and $\langle \mathbf{1}, \mathbf{w} \circ \mathbf{v} \rangle = \langle \mathbf{v}, \mathbf{w} \rangle$. Applying them to the first and fourth terms of ((20.5)) and collecting the $z$ terms,
+Two identities hold for every $\mathbf{u}, \mathbf{v}, \mathbf{w}$: $\langle \mathbf{u}, \mathbf{w} \circ \mathbf{v} \rangle = \sum_i u_i w_i v_i = \langle \mathbf{u} \circ \mathbf{v}, \mathbf{w} \rangle$ and $\langle \mathbf{1}, \mathbf{w} \circ \mathbf{v} \rangle = \langle \mathbf{v}, \mathbf{w} \rangle$. Applying them to the first and fourth terms of (20.5) and collecting the $z$ terms,
 
 $$
 \text{LHS} = \langle \mathbf{a}_L \circ \mathbf{a}_R, \mathbf{y}^m \rangle
@@ -113,11 +113,11 @@ $$
   - z^2 \langle \mathbf{1}, \mathbf{y}^m \rangle - z^3 \langle \mathbf{1}, \mathbf{2}^m \rangle . \tag{20.6}
 $$
 
-If the three conditions hold, the first term is $\langle \mathbf{0}, \mathbf{y}^m \rangle = 0$, the second is $z \langle \mathbf{1}, \mathbf{y}^m \rangle$ and the third is $z^2 n$, so the right-hand side of ((20.6)) is $z^2 n + (z - z^2) \langle \mathbf{1}, \mathbf{y}^m \rangle - z^3 \langle \mathbf{1}, \mathbf{2}^m \rangle = z^2 n + \delta(y, z)$, which is ((20.4)). Conversely, if ((20.4)) holds for all $y, z$, subtract $z^2 n + \delta(y, z)$ from ((20.6)): the polynomial
+If the three conditions hold, the first term is $\langle \mathbf{0}, \mathbf{y}^m \rangle = 0$, the second is $z \langle \mathbf{1}, \mathbf{y}^m \rangle$ and the third is $z^2 n$, so the right-hand side of (20.6) is $z^2 n + (z - z^2) \langle \mathbf{1}, \mathbf{y}^m \rangle - z^3 \langle \mathbf{1}, \mathbf{2}^m \rangle = z^2 n + \delta(y, z)$, which is (20.4). Conversely, if (20.4) holds for all $y, z$, subtract $z^2 n + \delta(y, z)$ from (20.6): the polynomial
 
 $$
-F(y, z) = \sum_{i=0}^{m-1} a_{L,i} a_{R,i} \, y^i
-  + z \sum_{i=0}^{m-1} (a_{L,i} - a_{R,i} - 1) \, y^i
+F(y, z) = \sum_{i=0}^{m-1} a_{L,i} a_{R,i} \thinspace  y^i
+  + z \sum_{i=0}^{m-1} (a_{L,i} - a_{R,i} - 1) \thinspace  y^i
   + z^2 \big( \langle \mathbf{a}_L, \mathbf{2}^m \rangle - n \big)
 $$
 
@@ -137,11 +137,11 @@ the verifier returns $x \ne 0$, and both sides form $\mathbf{g}' = \mathbf{g}_1^
 $$
 \mathbf{g}'^{\mathbf{a}'}
   = \prod_i \big( g_{1,i}^{x^{-1}} g_{2,i}^{x} \big)^{x a_{1,i} + x^{-1} a_{2,i}}
-  = \mathbf{g}_1^{\mathbf{a}_1} \, \mathbf{g}_1^{x^{-2} \mathbf{a}_2} \,
-    \mathbf{g}_2^{x^{2} \mathbf{a}_1} \, \mathbf{g}_2^{\mathbf{a}_2},
+  = \mathbf{g}_1^{\mathbf{a}_1} \thinspace  \mathbf{g}_1^{x^{-2} \mathbf{a}_2} \thinspace 
+    \mathbf{g}_2^{x^{2} \mathbf{a}_1} \thinspace  \mathbf{g}_2^{\mathbf{a}_2},
 $$
 
-and in the same way $\mathbf{h}'^{\mathbf{b}'} = \mathbf{h}_1^{\mathbf{b}_1} \, \mathbf{h}_1^{x^{2} \mathbf{b}_2} \, \mathbf{h}_2^{x^{-2} \mathbf{b}_1} \, \mathbf{h}_2^{\mathbf{b}_2}$. Second,
+and in the same way $\mathbf{h}'^{\mathbf{b}'} = \mathbf{h}_1^{\mathbf{b}_1} \thinspace \mathbf{h}_1^{x^{2} \mathbf{b}_2} \thinspace \mathbf{h}_2^{x^{-2} \mathbf{b}_1} \thinspace \mathbf{h}_2^{\mathbf{b}_2}$. Second,
 
 $$
 \langle \mathbf{a}', \mathbf{b}' \rangle
