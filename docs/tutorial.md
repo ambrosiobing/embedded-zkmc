@@ -1,9 +1,9 @@
 ## A tutorial: one proof, end to end
 
-The twenty-four chapters each take one piece of the paper's construction and price it on one board. This tutorial does the opposite: it takes the smallest complete instance of the whole construction, a system with four states, and walks it from a state machine to a verifier's verdict without skipping a line. Every set is small enough to write out on paper. How long the prover's run takes is not known: nothing in this tutorial has been run, here or anywhere. What is known is the size of the work, and it is computed from the degrees below: in $`\mathbb{G}_1`$, four multi-scalar multiplications of $`6`$, $`18`$, $`5`$ and $`14`$ terms, two for the commitments and two for the openings; in $`\mathbb{G}_2`$, two of $`2`$ and $`5`$ terms, for the two vanishing polynomials; two synthetic divisions; and the two pairing equations of (18) (all computed). A reader who times their own first run should write the number down beside the machine and the Python version that produced it, because this tutorial has none.
+The twenty-four chapters each take one piece of the paper's construction and price it on one board. This tutorial does the opposite: it takes the smallest complete instance of the whole construction, a system with four states, and walks it from a state machine to a verifier's verdict without skipping a line. Every set is small enough to write out on paper. How long the prover's run takes is not known: the four scripts were run once on the authoring laptop on Saturday 7 November 2026, with Python 3.12.10 and py\_ecc 8.0.0, on no board, and that run was not timed; nothing in this tutorial has been run on any board. What is known is the size of the work, and it is computed from the degrees below: in $`\mathbb{G}_1`$, four multi-scalar multiplications of $`6`$, $`18`$, $`5`$ and $`14`$ terms, two for the commitments and two for the openings; in $`\mathbb{G}_2`$, two of $`2`$ and $`5`$ terms, for the two vanishing polynomials; two synthetic divisions; and the two pairing equations of (18) (all computed). A reader who times their own first run should write the number down beside the machine and the Python version that produced it, because this tutorial has none.
 
 > [!NOTE]
-> **What this is.** Nothing in this tutorial has been run on this bench. The numbered steps are instructions to follow, not a record of a run, and every quantity below is derived rather than measured: each one says **computed** where it is first stated. Once the steps have been followed, the record of that run belongs in the chapter whose acceptance test it satisfies, and not here.
+> **What this is.** Nothing in this tutorial has been run on this bench. Its four scripts were run once on the authoring laptop on Saturday 7 November 2026, with Python 3.12.10 and py\_ecc 8.0.0, on no board, and every line they printed is one derived below; no timing was taken. The numbered steps are instructions to follow, and every quantity below is derived rather than measured: each one says **computed** where it is first stated. Once the steps have been followed, the record of that run belongs in the chapter whose acceptance test it satisfies, and not here.
 
 ### What you will have at the end
 
@@ -23,9 +23,9 @@ The mathematics behind the certificate is Theorem 3.2 of the paper \[[1](#refere
 
 ### The first hour, from a clean machine
 
-This is the tutorial's main path. Nine steps, no hardware, and nothing bought. Each step is checkable before the next begins. Steps 7 to 9 need three scripts that this tutorial specifies, in the note before its closing command block, and does not yet carry; until they exist the hour stops at step 5, which is still the paper's central move seen working. The numbered Steps that follow the mathematics below are the same path with the arithmetic beside it, and every one of them that names a board is optional.
+This is the tutorial's main path. Nine steps, no hardware, and nothing bought. Each step is checkable before the next begins. Steps 7 to 9 need three scripts that this tutorial carries in full, in the note before its closing command block, each run once on the authoring laptop on Saturday 7 November 2026, with Python 3.12.10 and py\_ecc 8.0.0, on no board. The numbered Steps that follow the mathematics below are the same path with the arithmetic beside it, and every one of them that names a board is optional.
 
-1. **Install Python 3.12 or later.** From python.org on Windows or macOS, or the distribution's package on Linux. Confirm with `python --version`. The one complete script of step 4 uses nothing newer than Python 3.8; the three specified scripts are to be written against 3.12, so that one version serves the whole tutorial.
+1. **Install Python 3.12 or later.** From python.org on Windows or macOS, or the distribution's package on Linux. Confirm with `python --version`. The one complete script of step 4 uses nothing newer than Python 3.8; the other three were run under 3.12.10, so that one version serves the whole tutorial.
 
 2. **Install git** and confirm with `git --version`.
 
@@ -339,9 +339,9 @@ of degrees at most $`3`$ and $`15`$ (computed). Each is then blinded by adding $
 
 The commitments are KZG \[[2](#references)\]: $`c = g_1^{p(\tau)}`$, evaluated as a multi-scalar multiplication of the setup powers by the coefficients. The setup this instance needs is therefore $`18`$ powers of $`\tau`$ in $`\mathbb{G}_1`$, for degrees $`0`$ to $`17`$, and $`5`$ in $`\mathbb{G}_2`$, for degrees $`0`$ to $`4`$, which is the degree of the larger vanishing polynomial (both computed). That is a toy setup whose $`\tau`$ the prover's own script draws and prints, so the proof convinces nobody but this bench; the same honest limitation is stated in [Project 3](../chapters/03-the-modems-backoff-machine.md) and [Project 4](../chapters/04-two-group-elements.md).
 
-**Step 1.** On the laptop, in the working directory with `py_ecc` installed, run the setup script, `supp_tutorial_setup.py` as specified in the note before the closing command block, for $`18`$ powers in $`\mathbb{G}_1`$ and $`5`$ in $`\mathbb{G}_2`$ and keep its log. Read the printed count back and refuse to continue on $`17`$ or fewer $`\mathbb{G}_1`$ powers: the two mask terms would then be dropped in silence by the coefficient-by-power loop, and the pairing check would fail later for a reason that looks like a wrong proof.
+**Step 1.** On the laptop, in the working directory with `py_ecc` installed, run the setup script, `supp_tutorial_setup.py` as carried in the note before the closing command block, for $`18`$ powers in $`\mathbb{G}_1`$ and $`5`$ in $`\mathbb{G}_2`$ and keep its log. Read the printed count back and refuse to continue on $`17`$ or fewer $`\mathbb{G}_1`$ powers: the two mask terms would then be dropped in silence by the coefficient-by-power loop, and the pairing check would fail later for a reason that looks like a wrong proof.
 
-**Step 2.** On the laptop, build $`p_{S_0}`$ and $`p_T`$ from (15), blind both, and commit; this is the first half of `supp_tutorial_prove.py` as specified. Print the two commitments as 48-byte compressed $`\mathbb{G}_1`$ elements, 96 bytes together (computed).
+**Step 2.** On the laptop, build $`p_{S_0}`$ and $`p_T`$ from (15), blind both, and commit; this is the first half of `supp_tutorial_prove.py` as carried in the note before the closing command block. Print the two commitments as 48-byte compressed $`\mathbb{G}_1`$ elements, 96 bytes together (computed).
 
 ### The proof
 
@@ -384,7 +384,7 @@ accepting only if both hold. The second step is not a formality: a point on the 
 
 The first step deserves its own sentence. The verifier recomputing the sets is what ties the proof to the certificate rather than to some other certificate; if the prover's and the verifier's sizes differ, the honest response is to stop, not to evaluate a pairing. In this instance the two must both read $`1`$, $`3`$, $`2`$ and $`4`$.
 
-**Step 1.** On the laptop, in the working directory, run `supp_tutorial_verify.py` against `tutorial_proof.bin` and `tutorial_setup.bin`. The script is specified in the note before the closing command block and is not yet written; it is to do the three things the paragraph above describes, in that order: recompute the three sets and print its own batch sizes, which must read $`1`$, $`3`$, $`2`$ and $`4`$; decompress the four elements and check that each lies in $`\mathbb{G}_1`$; and evaluate the two pairing equations of (18). Its verdict is to be one printed line, `accept` or `reject`, and it needs no board.
+**Step 1.** On the laptop, in the working directory, run `supp_tutorial_verify.py` against `tutorial_proof.bin` and `tutorial_setup.bin`. The script is carried in the note before the closing command block; it is to do the three things the paragraph above describes, in that order: recompute the three sets and print its own batch sizes, which must read $`1`$, $`3`$, $`2`$ and $`4`$; decompress the four elements and check that each lies in $`\mathbb{G}_1`$; and evaluate the two pairing equations of (18). Its verdict is to be one printed line, `accept` or `reject`, and it needs no board.
 
 The C verifier of [Project 4](../chapters/04-two-group-elements.md) is not the program that checks this file, and that is worth saying because the chapter is the obvious place a reader would look. That verifier is written for the 256-state machine of [Project 3](../chapters/03-the-modems-backoff-machine.md) and for nothing else. Its state count is a compile-time constant of 256 and its pair count is the square of that; its batch enumerator is the ranking function of the paper's Example 3.4; it must print the batch sizes $`16`$ and $`8088`$; it takes no arguments and reads the two fixed filenames `zk03_setup.bin` and `zk03_proof.bin`, the first of which it also checks for that chapter's magic bytes; and although it reads its root of unity from the setup header rather than fixing it in the source, the stride of 256 it passes to its vanishing polynomial is fixed, so this instance's fourth and sixteenth roots cannot be used by it. The binary that chapter's build line produces is named `zk04`. Handed this tutorial's 192 bytes under any file name, it would refuse them before a pairing was evaluated, and the refusal would say nothing about the proof. A reader who wants this verification on the Pi 4B, with a timing, builds [Project 3](../chapters/03-the-modems-backoff-machine.md)'s own instance and reads [Project 4](../chapters/04-two-group-elements.md) beside it.
 
@@ -418,18 +418,287 @@ The two LEDs belong to [Project 4](../chapters/04-two-group-elements.md), not to
 **Step 2.** On the laptop, remove the remainder assertion from the prover's source, let the broken prover write its 192 bytes, and run `supp_tutorial_verify.py` on them. Confirm that the printed verdict is `reject`. Then restore the assertion and the relation in the same session, so that the next reader of the directory finds a prover that refuses rather than one that forges.
 
 > [!NOTE]
-> **Four scripts, one of them written here.** The listing above is `supp_tutorial_sets.py` and it is complete: copy it out, run it, and it prints its two lines. The other three are specified here and are not yet written, so the command block below is what this tutorial will look like once they exist, and not a record of a run.
+> **Four scripts, all four written here.** The listing above is `supp_tutorial_sets.py` and it is complete: copy it out, run it, and it prints its two lines. The other three follow this note, complete, and the command block after them is the record of one run, on the authoring laptop on Saturday 7 November 2026 with Python 3.12.10 and py\_ecc 8.0.0 and no board, in which every expected line appeared.
 >
 > - `supp_tutorial_setup.py n1 n2` draws one $`\tau`$ uniformly from $`\mathbb{F}_r`$, prints it, writes $`n_1`$ powers of $`\tau`$ in $`\mathbb{G}_1`$ and $`n_2`$ in $`\mathbb{G}_2`$ to `tutorial_setup.bin`, and prints the two counts it actually wrote. For this instance $`n_1 = 18`$ and $`n_2 = 5`$.
 > - `supp_tutorial_prove.py` reads `tutorial_setup.bin`, builds $`p_{S_0}`$ and $`p_T`$ from (15), blinds both, commits, divides by the two vanishing polynomials of (16), asserts that both remainders are zero, and writes the four compressed elements to `tutorial_proof.bin`, which is 192 bytes.
 > - `supp_tutorial_verify.py proof setup` does the three things the verification section above describes, in that order, and prints `accept` or `reject`.
 >
-> The three use `py_ecc` 8.0.0 \[[7](#references)\] for the BLS12-381 arithmetic and the Python standard library for everything else; the first uses the standard library alone. Not one of the four needs a board.
+> The three use `py_ecc` 8.0.0 \[[7](#references)\] for the BLS12-381 arithmetic and the Python standard library for everything else; the first uses the standard library alone. Not one of the four needs a board. One thing the run found is worth a sentence: `py_ecc` ships two curve modules, and its 48-byte compression accepts points only from `optimized_bls12_381`; a script that imports the plain module fails at its first point, and the setup it leaves behind is a header with no points, which the prover then reads as a point with a wrong flag. The listings import the optimised module.
+
+The setup, which draws and prints a toy $`\tau`$:
+
+```python
+"""supp_tutorial_setup.py n1 n2: a toy KZG setup for the tutorial, and nothing more.
+
+Draws one tau uniformly from the scalar field of BLS12-381, prints it, writes n1 powers of
+tau in G1 and n2 in G2 to tutorial_setup.bin, and prints the two counts it actually wrote.
+The printed tau is why this proof convinces nobody but your own machine: a ceremony that
+forgets tau is the missing piece, as the verifier chapter says."""
+import secrets
+import struct
+import sys
+
+from py_ecc.optimized_bls12_381 import G1, G2, curve_order as r, multiply
+from py_ecc.bls.g2_primitives import G1_to_pubkey, G2_to_signature
+
+MAGIC = b"ZKTU"             # the header a verifier checks before it reads anything else
+GENERATOR = 7               # a multiplicative generator of the scalar field
+
+
+def root_of_unity(n):
+    """A primitive n-th root of unity in the scalar field; 2^32 divides r - 1."""
+    assert (r - 1) % n == 0
+    w = pow(GENERATOR, (r - 1) // n, r)
+    assert pow(w, n, r) == 1 and pow(w, n // 2, r) != 1
+    return w
+
+
+def main(n1, n2):
+    tau = secrets.randbelow(r - 1) + 1
+    print("tau", tau)
+    w1, w2 = root_of_unity(4), root_of_unity(16)
+    g1_powers = [multiply(G1, pow(tau, i, r)) for i in range(n1)]
+    g2_powers = [multiply(G2, pow(tau, i, r)) for i in range(n2)]
+    with open("tutorial_setup.bin", "wb") as f:
+        f.write(MAGIC)
+        f.write(struct.pack(">II", n1, n2))
+        f.write(w1.to_bytes(32, "big") + w2.to_bytes(32, "big"))
+        for p in g1_powers:
+            f.write(G1_to_pubkey(p))          # 48 bytes each
+        for p in g2_powers:
+            f.write(G2_to_signature(p))       # 96 bytes each
+    print("wrote", len(g1_powers), "G1 powers and", len(g2_powers), "G2 powers")
+
+
+if __name__ == "__main__":
+    main(int(sys.argv[1]), int(sys.argv[2]))
+```
+
+The prover, which refuses at a non-zero remainder before it writes anything:
+
+```python
+"""supp_tutorial_prove.py: the tutorial's prover. Reads tutorial_setup.bin, builds the two
+indicator polynomials from the Lagrange basis over the roots of unity, blinds both, commits,
+divides by the two vanishing polynomials root by root, asserts that both remainders are
+zero, and writes the four compressed elements to tutorial_proof.bin, which is 192 bytes."""
+import secrets
+import struct
+
+from py_ecc.optimized_bls12_381 import Z1, add, curve_order as r, multiply
+from py_ecc.bls.g2_primitives import G1_to_pubkey, pubkey_to_G1
+
+# The secret relation, pair by pair as idx(s) + 4 idx(s'); the certificate is public.
+IDLE, PEND, DONE, HOLD = 0, 1, 2, 3
+S0 = {IDLE}
+T = {(IDLE, PEND), (PEND, DONE), (DONE, IDLE), (DONE, DONE)}
+J_T = sorted(s + 4 * t for s, t in T)                      # {2, 4, 9, 10}
+J_E_INIT = [3]                                             # B_init = {Hold}
+J_E = sorted(s + 4 * t for s, t in                         # B_step and B_fair together
+             {(IDLE, HOLD), (PEND, HOLD), (DONE, HOLD), (PEND, PEND)})   # {5, 12, 13, 14}
+
+
+def read_setup(path="tutorial_setup.bin"):
+    with open(path, "rb") as f:
+        assert f.read(4) == b"ZKTU", "not a tutorial setup file"
+        n1, n2 = struct.unpack(">II", f.read(8))
+        w1 = int.from_bytes(f.read(32), "big")
+        w2 = int.from_bytes(f.read(32), "big")
+        g1 = [pubkey_to_G1(f.read(48)) for _ in range(n1)]
+    return w1, w2, g1
+
+
+def lagrange(j, w, n):
+    """Coefficients of L_j(X) = n^{-1} sum_i w^{-ij} X^i, which is 1 at w^j and 0 at the
+    other n-th roots of unity: the indicator of one embedded element."""
+    ninv = pow(n, r - 2, r)
+    return [ninv * pow(w, (-i * j) % (r - 1), r) % r for i in range(n)]
+
+
+def indicator(js, w, n):
+    coeffs = [0] * n
+    for j in js:
+        for i, c in enumerate(lagrange(j, w, n)):
+            coeffs[i] = (coeffs[i] + c) % r
+    return coeffs
+
+
+def blind(p, n):
+    """Add (b0 + b1 X)(X^n - 1), which vanishes on every n-th root of unity, so no
+    evaluation the protocol uses changes and the degree rises by two."""
+    b0, b1 = secrets.randbelow(r), secrets.randbelow(r)
+    q = p + [0, 0]
+    q[0] = (q[0] - b0) % r
+    q[1] = (q[1] - b1) % r
+    q[n] = (q[n] + b0) % r
+    q[n + 1] = (q[n + 1] + b1) % r
+    return q
+
+
+def commit(p, g1):
+    """g1^{p(tau)} as a multi-scalar multiplication over the setup powers. Refuses a setup
+    with too few powers: the coefficient-by-power loop would otherwise drop the top terms
+    in silence, and the pairing check would fail later for a reason that looks like a
+    wrong proof."""
+    assert len(g1) >= len(p), f"setup has {len(g1)} G1 powers, polynomial needs {len(p)}"
+    acc = Z1
+    for c, g in zip(p, g1):
+        if c:
+            acc = add(acc, multiply(g, c))
+    return acc
+
+
+def divide_by_root(p, root):
+    """Synthetic division of p by (X - root): returns the quotient and the remainder."""
+    q = [0] * (len(p) - 1)
+    carry = 0
+    for i in range(len(p) - 1, 0, -1):
+        carry = (p[i] + carry * root) % r
+        q[i - 1] = carry
+    remainder = (p[0] + carry * root) % r
+    return q, remainder
+
+
+def open_batch(p, roots):
+    for root in roots:
+        p, rem = divide_by_root(p, root)
+        print("remainder", rem)
+        assert rem == 0, "the secret meets the batch: this system violates the property"
+    return p
+
+
+def main():
+    w1, w2, g1 = read_setup()
+    p_s0 = blind(indicator(sorted(S0), w1, 4), 4)           # degree 5
+    p_t = blind(indicator(J_T, w2, 16), 16)                 # degree 17
+    c_s0, c_t = commit(p_s0, g1), commit(p_t, g1)
+    q_s0 = open_batch(p_s0, [pow(w1, j, r) for j in J_E_INIT])   # degree 4
+    q_t = open_batch(p_t, [pow(w2, j, r) for j in J_E])          # degree 13
+    pi_s0, pi_t = commit(q_s0, g1), commit(q_t, g1)
+    proof = b"".join(G1_to_pubkey(x) for x in (c_s0, c_t, pi_s0, pi_t))
+    with open("tutorial_proof.bin", "wb") as f:
+        f.write(proof)
+    print("degrees", len(p_s0) - 1, len(p_t) - 1, len(q_s0) - 1, len(q_t) - 1)
+    print("wrote tutorial_proof.bin,", len(proof), "bytes")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+The verifier, which holds no secret and stops before any pairing if the sizes are not its own:
+
+```python
+"""supp_tutorial_verify.py proof setup: the tutorial's verifier. It holds no secret. It
+recomputes the three violation sets from public data and prints their sizes, decompresses
+the four elements and checks each lies in G1, and evaluates the two pairing equations.
+It prints accept or reject, and stops before any pairing if the sizes are not its own."""
+import itertools
+import struct
+import sys
+
+from py_ecc.optimized_bls12_381 import G2, add, curve_order as r, is_inf, multiply, pairing
+from py_ecc.bls.g2_primitives import pubkey_to_G1, signature_to_G2
+
+# Public data only: the state space, the observation, the automaton and the ranking table.
+IDLE, PEND, DONE, HOLD = 0, 1, 2, 3
+S = (IDLE, PEND, DONE, HOLD)
+OBS = {IDLE: "idle", PEND: "pending", DONE: "done", HOLD: "pending"}
+INF = float("inf")
+V = {(IDLE, 0): 1, (PEND, 0): 1, (DONE, 0): 1, (HOLD, 0): INF,
+     (IDLE, 1): 0, (PEND, 1): 1, (DONE, 1): 0, (HOLD, 1): INF}
+
+
+def delta(q, s):
+    return ([0] if q == 0 else []) + ([1] if OBS[s] == "pending" else [])
+
+
+def violation_sets():
+    b_init = {s for s in S if V[(s, 0)] == INF}
+    b_step, b_fair = set(), set()
+    for s, t in itertools.product(S, S):
+        for q in (0, 1):
+            v = V[(s, q)]
+            if v == INF:
+                continue
+            for q2 in delta(q, s):
+                w = V[(t, q2)]
+                if v < w:
+                    b_step.add((s, t))
+                if q == 1 and q2 == 1 and OBS[s] == "pending" and v <= w:
+                    b_fair.add((s, t))
+    return b_init, b_step, b_fair
+
+
+def read_setup(path):
+    with open(path, "rb") as f:
+        assert f.read(4) == b"ZKTU", "not a tutorial setup file"
+        n1, n2 = struct.unpack(">II", f.read(8))
+        w1 = int.from_bytes(f.read(32), "big")
+        w2 = int.from_bytes(f.read(32), "big")
+        f.read(48 * n1)                                    # G1 powers: the prover's
+        g2 = [signature_to_G2(f.read(96)) for _ in range(n2)]
+    return w1, w2, g2
+
+
+def in_g1(p):
+    """A point on the curve but outside G1 decompresses without error and makes the
+    pairing equation meaningless, so each element costs one subgroup check."""
+    return is_inf(multiply(p, r))
+
+
+def vanishing(roots):
+    """Coefficients of prod (X - root)."""
+    z = [1]
+    for root in roots:
+        z = [((z[i - 1] if i else 0) - root * (z[i] if i < len(z) else 0)) % r
+             for i in range(len(z) + 1)]
+    return z
+
+
+def commit_g2(z, g2):
+    assert len(g2) >= len(z), f"setup has {len(g2)} G2 powers, polynomial needs {len(z)}"
+    acc = None
+    for c, g in zip(z, g2):
+        if c:
+            acc = multiply(g, c) if acc is None else add(acc, multiply(g, c))
+    return acc
+
+
+def main(proof_path, setup_path):
+    b_init, b_step, b_fair = violation_sets()
+    print("sizes", len(b_init), len(b_step), len(b_fair), len(b_step | b_fair))
+    if (len(b_init), len(b_step), len(b_fair), len(b_step | b_fair)) != (1, 3, 2, 4):
+        print("reject: these are not the tutorial's sets, stopping before any pairing")
+        return 1
+    w1, w2, g2 = read_setup(setup_path)
+    with open(proof_path, "rb") as f:
+        proof = f.read()
+    if len(proof) != 192:
+        print("reject:", len(proof), "bytes is a serialisation defect and not a proof")
+        return 1
+    c_s0, c_t, pi_s0, pi_t = (pubkey_to_G1(proof[i:i + 48]) for i in range(0, 192, 48))
+    if not all(in_g1(p) for p in (c_s0, c_t, pi_s0, pi_t)):
+        print("reject: an element is on the curve but outside G1")
+        return 1
+    z_init = vanishing([pow(w1, j, r) for j in [3]])                      # B_init = {Hold}
+    z_e = vanishing([pow(w2, s + 4 * t, r)
+                     for s, t in sorted(b_step | b_fair)])                 # {5, 12, 13, 14}
+    ok_init = pairing(G2, c_s0) == pairing(commit_g2(z_init, g2), pi_s0)
+    ok_step = pairing(G2, c_t) == pairing(commit_g2(z_e, g2), pi_t)
+    print("accept" if ok_init and ok_step else "reject")
+    return 0 if ok_init and ok_step else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1], sys.argv[2]))
+```
 
 ```bash
 # any laptop with Python 3.12 or later: no board, no cross compiler, no WSL.
-# What this tutorial will look like once the three specified scripts exist; not a record
-# of a run. The first five lines are the setup of the first hour and run once.
+# The record of one run, authoring laptop, Saturday 7 November 2026, Python 3.12.10,
+# py_ecc 8.0.0, no board; every expected line below appeared, and nothing was timed.
+# The first five lines are the setup of the first hour and run once.
 git clone https://github.com/ambrosiobing/embedded-zkmc.git
 mkdir -p embedded-zkmc/work/tutorial
 cd embedded-zkmc/work/tutorial

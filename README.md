@@ -208,12 +208,14 @@ mathematics is written so that the host typesets it.
 else. Of its tracked files, 26 are chapter Markdown, 99 are SVG figures, 4 are the companion,
 and the only code is four Python guards under `tools/` that check this repository's own
 hygiene. Every program in the volume appears as a listing inside the prose and not as a file
-you can run, and none of those listings has been compiled or executed by the author. A
+you can run, and none of those listings has been compiled or executed by the author, with
+the one exception at the end of this paragraph. A
 reader who wants to run something copies the listing out of the chapter, writes the
 manifest or build file themselves, and supplies the toolchain; the chapter's own Steps
-section says which machine each piece belongs on. The one exception is the tutorial's
-self-contained script, which uses only the standard library and prints the two lines the
-tutorial predicts.
+section says which machine each piece belongs on. The one exception is the tutorial's four scripts, which are complete listings and were run
+once on the authoring laptop on Saturday 7 November 2026 with Python 3.12.10 and py_ecc
+8.0.0, printing every line the tutorial predicts. That is a run on a laptop and not on a
+board, and it was not timed.
 
 **To run the four checks,** Python 3.10 or newer and no package outside the standard
 library.

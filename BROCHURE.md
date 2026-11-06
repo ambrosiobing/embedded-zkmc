@@ -189,9 +189,10 @@ against a distributor before ordering. The volume itself carries no price anywhe
 **Nothing at all.** A laptop you already have and a recent Python. This lets you read all
 twenty-four chapters, every figure and every proof, work any mathematical statement in the
 volume with a pencil, and run the companion's one complete script, which computes the worked
-example's four set sizes and checks them against the hand computation two pages earlier. That
-script needs no package at all and is the one piece of this volume that runs today with
-nothing. Every chapter's own success condition names a board, so no chapter passes without
+example's four set sizes and checks them against the hand computation two pages earlier. That script needs no package at all. Three more, which set up, prove and verify that same
+instance on the laptop, need one package, and all four were run once on the author's laptop
+on Saturday 7 November 2026 and printed every line the companion predicts. Those four are
+the only parts of this volume that have been executed, and no board was involved. Every chapter's own success condition names a board, so no chapter passes without
 one.
 
 **One single-board computer and a few parts, in the region of a hundred euro.** A Raspberry
