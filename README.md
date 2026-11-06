@@ -85,7 +85,7 @@ time.
 | 24 | [A one-bit model: ternary weights on the Pi](chapters/24-a-one-bit-model.md) | C and Python | Pi 4B, LCD, LEDs |
 
 [`CONTENTS.md`](CONTENTS.md) is the generated version of this table, and
-[`PITFALLS.md`](PITFALLS.md) indexes all 146 pitfalls across the chapters.
+[`PITFALLS.md`](PITFALLS.md) indexes all 152 pitfalls across the chapters.
 
 Four chapters are worth reading as a set. Chapter 1 is the price list and every later cost
 claim is a count of operations multiplied by one of its numbers. Chapters 3, 4 and 18 are
