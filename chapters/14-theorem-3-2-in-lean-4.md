@@ -1,4 +1,4 @@
-# Project 14. Theorem 3.2 in Lean 4: the descent lemma machine checked, the rule stated
+# Project 14. Theorem 3.2 in Lean 4: the ranking-function rule and the descent lemma it rests on
 
 > **Board:** Pi 4B alone over ssh; the Renkforce cable on its console; the build laptop elaborates, the Pi checks  
 > **Language:** Lean 4

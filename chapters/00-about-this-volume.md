@@ -99,7 +99,7 @@ Measured, not asserted: every colour pair was computed with the WCAG 2.2 relativ
 | Z11 | The prover's cost: multi-scalar multiplication and FFT on two Pis | C++ | MSM, NTT | Pi 4B, Pi 3B+ |
 | Z12 | A PLONK gate for the inductive step, verified on the NanoPi | Go | PLONK, gnark | NanoPi, Pi 4B |
 | Z13 | The obligation in Noir, proved with UltraHonk | Noir | sumcheck-based proving | Pi 4B |
-| Z14 | Theorem 3.2 in Lean 4: the descent lemma machine checked, the rule stated | Lean 4 | the certifier's soundness | Pi 4B |
+| Z14 | Theorem 3.2 in Lean 4: the ranking-function rule and the descent lemma it rests on | Lean 4 | the certifier's soundness | Pi 4B |
 | Z15 | A Zig verifier of Pedersen openings for the Pi 3B+ | Zig | ristretto255 openings | Pi 3B+, Nucleo |
 | Z16 | The model proposes a ranking function; the certifier decides | Python and C | Z3 certification, GBNF | Pi 4B, build laptop |
 | Z17 | From a sentence to a Buchi automaton with Spot | C++ | LTL to automata | Pi 4B |

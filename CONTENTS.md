@@ -13,7 +13,7 @@
 | 11 | [The prover's cost: multi-scalar multiplication and FFT on two Pis](chapters/11-the-provers-cost.md) | C++ |
 | 12 | [A PLONK gate for the inductive step, verified on the NanoPi](chapters/12-a-plonk-gate-for-the-inductive-step.md) | Go |
 | 13 | [The obligation in Noir, proved with UltraHonk](chapters/13-the-obligation-in-noir.md) | Noir |
-| 14 | [Theorem 3.2 in Lean 4: the descent lemma machine checked, the rule stated](chapters/14-theorem-3-2-in-lean-4.md) | Lean 4 |
+| 14 | [Theorem 3.2 in Lean 4: the ranking-function rule and the descent lemma it rests on](chapters/14-theorem-3-2-in-lean-4.md) | Lean 4 |
 | 15 | [A Zig verifier of Pedersen openings for the Pi 3B+](chapters/15-a-zig-verifier-of-pedersen-openings.md) | Zig |
 | 16 | [The model proposes a ranking function; the certifier decides](chapters/16-the-model-proposes-a-ranking-function-the-certifier.md) | Python and C |
 | 17 | [From a sentence to a B\"uchi automaton with Spot](chapters/17-from-a-sentence-to-a-b-uchi-automaton.md) | C++ |

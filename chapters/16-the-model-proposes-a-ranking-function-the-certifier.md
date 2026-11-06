@@ -407,7 +407,7 @@ The chapter passes when, for each of the two models, 100 rounds exist in the log
 
 - C with the `llama.cpp` C API in place of HTTP: the sibling volume's loop; here the host may be the build laptop, so the harness talks HTTP and the C is kept for the check.
 - Rust with a Z3 binding: the certifier is the paper's own Python front-end role, and the `z3` module is the shortest path to the paper's queries.
-- Lean 4: the machine-checked Theorem 3.2 is [Project 14](14-theorem-3-2-in-lean-4.md); a checked proof of the certifier's soundness is the next step after this chapter, not a substitute for it.
+- Lean 4: Theorem 3.2 written for a proof assistant is [Project 14](14-theorem-3-2-in-lean-4.md); a checked proof of the certifier's soundness is the next step after this chapter, not a substitute for it.
 - Spot: translating the sentence to the automaton is [Project 17](17-from-a-sentence-to-a-b-uchi-automaton.md); this chapter takes the automaton of Figure 2b as given.
 
 ## Sources

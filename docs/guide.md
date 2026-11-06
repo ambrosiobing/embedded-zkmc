@@ -17,7 +17,7 @@ The volume can be read in order, and it was written to be. It can also be entere
 | Z11 | The prover's cost: multi-scalar multiplication and FFT on two Pis | C++ | Pi 4B and Pi 3B+ | multi-scalar multiplication and the transform |
 | Z12 | A PLONK gate for the inductive step, verified on the NanoPi | Go | NanoPi NEO Air and Pi 4B | PLONK through gnark |
 | Z13 | The obligation in Noir, proved with UltraHonk | Noir | Pi 4B alone | sumcheck-based proving |
-| Z14 | Theorem 3.2 in Lean 4: the ranking-function rule, machine checked | Lean 4 | Pi 4B; the build laptop elaborates | the certifier's soundness |
+| Z14 | Theorem 3.2 in Lean 4: the ranking-function rule and the descent lemma it rests on | Lean 4 | Pi 4B; the build laptop elaborates | the certifier's soundness |
 | Z15 | A Zig verifier of Pedersen openings for the Pi 3B+ | Zig | Pi 3B+ and the Nucleo; three LEDs | ristretto255 openings, singly and batched |
 | Z16 | The model proposes a ranking function; the certifier decides | Python and C | Pi 4B; the build laptop may serve the model | certification and a GBNF grammar |
 | Z17 | From a sentence to a Buchi automaton with Spot | C++ | Pi 4B with libspot | LTL to automata |
@@ -135,7 +135,7 @@ Four groupings cut across the table and are worth knowing before choosing. Z1 an
 - **The trap** is the arithmetic type: a comparison on the native field type is not an integer comparison, and the narrower integer type overflows on an honest row, so the program uses the wider one throughout.
 - **Acceptance** the test suite passes on the instance, the honest proof verifies on the Pi, the proof with one public value changed is rejected, and the out-of-range witness is refused at execution with a failed assertion.
 
-### Z14. Theorem 3.2 in Lean 4: the ranking-function rule, machine checked
+### Z14. Theorem 3.2 in Lean 4: the ranking-function rule and the descent lemma it rests on
 
 - **Assumes** the proof of Theorem 3.2 as written in [Project 3](../chapters/03-the-modems-backoff-machine.md); it formalises that argument and adds no new bench hardware.
 - **The idea** is that the one sentence every chapter rests on can be handed to a kernel, and that having a checked object is the precondition for later hiding the check itself.

@@ -72,7 +72,7 @@ time.
 | 11 | [The prover's cost: multi-scalar multiplication and FFT on two Pis](chapters/11-the-provers-cost.md) | C++ | Pi 4B, Pi 3B+ |
 | 12 | [A PLONK gate for the inductive step, verified on the NanoPi](chapters/12-a-plonk-gate-for-the-inductive-step.md) | Go | NanoPi, Pi 4B |
 | 13 | [The obligation in Noir, proved with UltraHonk](chapters/13-the-obligation-in-noir.md) | Noir | Pi 4B |
-| 14 | [Theorem 3.2 in Lean 4: the descent lemma machine checked, the rule stated](chapters/14-theorem-3-2-in-lean-4.md) | Lean 4 | Pi 4B |
+| 14 | [Theorem 3.2 in Lean 4: the ranking-function rule and the descent lemma it rests on](chapters/14-theorem-3-2-in-lean-4.md) | Lean 4 | Pi 4B |
 | 15 | [A Zig verifier of Pedersen openings for the Pi 3B+](chapters/15-a-zig-verifier-of-pedersen-openings.md) | Zig | Pi 3B+, Nucleo |
 | 16 | [The model proposes a ranking function; the certifier decides](chapters/16-the-model-proposes-a-ranking-function-the-certifier.md) | Python and C | Pi 4B |
 | 17 | [From a sentence to a Büchi automaton with Spot](chapters/17-from-a-sentence-to-a-b-uchi-automaton.md) | C++ | Pi 4B |
