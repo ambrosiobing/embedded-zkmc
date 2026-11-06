@@ -63,7 +63,7 @@ jobs:
       - name: No journal and no correspondence is published
         run: |
           set -e
-          if git ls-files | grep -iE '(^|/)(private_journal|correspondence)/|(^|/)DIARY[^/]*\.md$'; then
+          if git ls-files | grep -iE '(^|/)(private_journal|correspondence|review)/|(^|/)(DIARY[^/]*|referee_[^/]*|editor_[^/]*)\.md$'; then
             echo "A journal or a correspondence file is committed."
             echo "The working record of this volume is kept in the catalogue, which is"
             echo "local only. A published repository carries the work, never the running"

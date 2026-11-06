@@ -71,6 +71,12 @@ __pycache__/
 private_journal/
 correspondence/
 DIARY*.md
+# Referee reports and the editor's consolidation, added Friday 6 November 2026.
+# A review is a working record of the same kind: it names what was wrong before it
+# was right, and it is for the author rather than for the reader.
+review/
+referee_*.md
+editor_*.md
 
 # The scratch file a hand-over writes a commit message into, because PowerShell has no
 # usable heredoc and git commit -F is the way in. The commit carries it; the tree does not.
