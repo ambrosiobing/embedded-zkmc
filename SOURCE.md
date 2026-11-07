@@ -90,9 +90,17 @@ sensor, its I2C address and its known behaviour at close range come from
 chapter 24 is built on and the thermal record of the Pi 3B+ that the front matter cites.
 Six chapters here lean on that work.
 
-**The mathematics is written for a proof assistant and has not yet been checked by one.**
-Chapter 14 carries the paper's Theorem 3.2 as a Lean 4 development. A kernel can check it;
-no kernel has run on this bench. The README says the same in its own section.
+**The mathematics is written for a proof assistant, and one of the two developments is now
+checked.** Chapter 14 carries the paper's Theorem 3.2 as a Lean 4 development, and the
+repository carries a second one at [`lean/`](lean/) that closes the step the chapter leaves
+open. The second builds: `lake build` passes on a clean checkout under continuous integration,
+so a kernel has accepted every declaration in it. The listing printed inside the chapter is the
+other development, declares one gap with a `sorry`, and no kernel has read it.
+
+Lean is installed on neither machine on this bench, so the only kernel that has run is the one
+in the runner, and a passing build says the proofs elaborate rather than that they state what
+they should. [`lean/STATUS.md`](lean/STATUS.md) says which development is which and records one
+theorem that compiled and proved nothing.
 
 **The hardware testing is the author's, and it is still to come.** Every chapter ends with
 an acceptance test written so that it can fail, naming the board, the instrument, the
