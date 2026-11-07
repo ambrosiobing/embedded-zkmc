@@ -4,23 +4,38 @@ Last changed Saturday 7 November 2026.
 
 ## The one sentence
 
-**Nothing here has been compiled.** The mathematics is written out in full, there is no `sorry`
-anywhere in it, and no kernel has ever read a line of it. Those three statements are all true at
-once, and the third is the one that matters.
+**A kernel has read every line of this and accepted it.** `lake build` passes on a clean
+checkout in GitHub Actions, pinned to `leanprover/lean4:v4.35.0`, with no Mathlib and no
+placeholder proof anywhere. That happened for the first time on Saturday 7 November 2026, in
+run 3 of the `lean` workflow, on commit `0ad4af3`:
+https://github.com/ambrosiobing/embedded-zkmc/actions/runs/42401534830
 
-## Why there is a workflow that fails
+## What that does and does not mean
 
-`.github/workflows/lean.yml` runs `lake build` on this directory on every push that touches it.
-**It is expected to fail today, and its failures are the point.** Lean 4 is installed on neither
-machine this volume is written on, which is recorded in the volume itself, so the first kernel to
-read this development is the one in that workflow.
+**It means** the proofs elaborate: the statements are well formed, the terms have the types
+they claim, and nothing rests on an unproved step. That was not known before, and the two
+earlier runs never reached the build at all, both failing on defects in the workflow rather
+than in the mathematics.
 
-A red run here is not neglect. It is the only honest way to publish a development in this state:
-the error count is a measurement, anyone can read it, and it falls as the work is done. The
-alternative, holding the development back until it is green, would mean asking a reader to take
-on trust both that it exists and that it is nearly right.
+**It does not mean the theorems say what they should.** Review of this development found one
+that compiled and proved nothing, because it assumed its own conclusion. See the known defects
+section below. A green build is a check on form, not on meaning, and the second is still done
+by reading.
 
-When the run goes green, this file says so and names the run.
+**It does not mean Theorem 3.2 is formalised end to end.** What is proved here is the
+ranking-function argument: the three conditions rule out any fair execution of the composition.
+The paper's actual conclusion is that the language intersection is empty, and Corollary 3.3
+goes from there to the system satisfying its specification. Neither of those steps exists in
+this development. See section 4.
+
+## Why the workflow still matters
+
+`.github/workflows/lean.yml` runs `lake build` on every push that touches this directory, and
+it refuses a placeholder in any proof position and a Mathlib dependency in the lakefile. Both
+patterns are proved against a planted positive before they are trusted, because a check that
+cannot fail is not a check.
+
+The run is the claim. Nothing in this directory asks a reader to take the build on trust.
 
 ## What is actually claimed
 
@@ -30,8 +45,9 @@ When the run goes green, this file says so and names the run.
 | There is no `sorry`, `admit`, `sorryAx` or `native_decide` in any proof | Yes. The five occurrences of the word `sorry` are prose, in the header comment of `ZKMC/Theorem32.lean` |
 | There is no Mathlib dependency | Yes, by design. Every tactic used is core Lean 4 |
 | The toolchain is pinned | Yes, `leanprover/lean4:v4.35.0` |
-| A kernel has checked any of it | **No** |
-| It builds | **Unknown, and that is what the workflow is for** |
+| A kernel has accepted every line | Yes, run 3 of the `lean` workflow |
+| The theorems say what they should | Checked by reading, not by the build. One did not. See below |
+| Theorem 3.2 is formalised end to end | **No.** The ranking argument only; two steps remain |
 
 ## How this relates to chapter 14
 
@@ -48,9 +64,10 @@ names: it reformulates the valuation through a total projection, so no choice pr
 needed. That is why there is no `sorry` here and no Mathlib either.
 
 So the chapter is not out of date and this directory is not a correction of it. The chapter
-describes a development with a declared gap; this is a development that closes the gap and has
-never been compiled. Neither is checked. Until the workflow goes green, the honest description
-of both is "written out, not checked".
+describes a development with a declared gap; this one closes that gap and now compiles. The
+chapter's own printed listing has still never been through a kernel, and it carries a separate
+defect of its own: it uses a term-level `exists` binder, which Lean 4 does not have, so it
+would not parse as printed. Correcting that listing is on the list of work still to do.
 
 ## Known defects, found by review and not by a compiler
 
