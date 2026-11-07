@@ -80,10 +80,12 @@ hidden), `publicblk`, `commitblk`, `llm`, `rulebl`. Decision trees use `decision
 `leaf` and `leafno`. Bar charts use `bar` and `barm` with `axis` and `tick`. Never present a
 modelled result as a measured one. Every table that carries numbers has a column that says
 which instrument produced them, or reads "not measured" with the reason. Nothing in this volume
-has been run on the bench yet unless a chapter says which record proves it; a benchmark figure
-is the shape the acceptance test expects, drawn dashed, with the paper's own Table 1 figures
-as the only measured numbers, each attributed to the paper's AWS c6g.8xlarge and never to a
-Pi.
+has been run on a board yet unless a chapter says which record proves it. The one execution
+anywhere is the companion tutorial's four scripts, run once on the authoring laptop on Saturday
+7 November 2026, printing every line the tutorial predicts: a run on a laptop and not on a
+board, and not timed. Otherwise a benchmark figure is the shape the acceptance test expects,
+drawn dashed, with the paper's own Table 1 figures as the only measured numbers, each
+attributed to the paper's AWS c6g.8xlarge and never to a Pi.
 
 **The mathematics rule.** Definitions, theorems, lemmas and proofs use the amsthm environments
 `definition`, `theorem`, `lemma`, `proposition`, `corollary`, `example`, `remark`, `proof`,
