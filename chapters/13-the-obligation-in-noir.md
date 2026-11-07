@@ -87,14 +87,14 @@ where $`r_1, \ldots, r_{i-1}`$ are the challenges of the earlier rounds. The ver
 
 *Base case $`v = 1`$.* The sum is $`g(0) + g(1) \ne H`$. The prover sends some $`g_1`$ of degree at most $`d`$. If $`g_1(0) + g_1(1) \ne H`$ the verifier rejects at once. Otherwise $`g_1(0) + g_1(1) = H \ne g(0) + g(1)`$, so $`g_1 \ne g`$ as polynomials. The verifier accepts if and only if $`g_1(r_1) = g(r_1)`$, that is, if and only if $`r_1`$ is a root of the nonzero polynomial $`g_1 - g`$, which has degree at most $`d`$ and therefore at most $`d`$ roots in $`\mathbb{F}`$. For $`r_1`$ uniform in $`\mathbb{F}`$ this happens with probability at most $`d / |\mathbb{F}|`$, which is $`dv / |\mathbb{F}|`$ for $`v = 1`$.
 
-*Inductive step.* Let $`v \ge 2`$ and assume the claim for $`v - 1`$. Let $`H`$ differ from the sum. The prover sends $`g_1`$. If $`g_1(0) + g_1(1) \ne H`$ the verifier rejects. Otherwise, since the honest round polynomial $`s_1`$ of (13.3) satisfies $`s_1(0) + s_1(1) = \sum_{b} g(b) \ne H = g_1(0) + g_1(1)`$, we have $`g_1 \ne s_1`$ as polynomials, both of degree at most $`d`$. Let $`E`$ be the event $`g_1(r_1) = s_1(r_1)`$. As in the base case, $`r_1`$ must be a root of the nonzero polynomial $`g_1 - s_1`$ of degree at most $`d`$, so $`\operatorname{Pr}[E] \le d / |\mathbb{F}|`$.
+*Inductive step.* Let $`v \ge 2`$ and assume the claim for $`v - 1`$. Let $`H`$ differ from the sum. The prover sends $`g_1`$. If $`g_1(0) + g_1(1) \ne H`$ the verifier rejects. Otherwise, since the honest round polynomial $`s_1`$ of (13.3) satisfies $`s_1(0) + s_1(1) = \sum_{b} g(b) \ne H = g_1(0) + g_1(1)`$, we have $`g_1 \ne s_1`$ as polynomials, both of degree at most $`d`$. Let $`E`$ be the event $`g_1(r_1) = s_1(r_1)`$. As in the base case, $`r_1`$ must be a root of the nonzero polynomial $`g_1 - s_1`$ of degree at most $`d`$, so $`\Pr[E] \le d / |\mathbb{F}|`$.
 
 Condition on the complement of $`E`$, that is, on $`g_1(r_1) \ne s_1(r_1)`$. From round 2 on, the protocol is exactly the sumcheck protocol for the $`(v-1)`$-variate polynomial $`g'(X_2, \ldots, X_v) = g(r_1, X_2, \ldots, X_v)`$, which has degree at most $`d`$ in each variable, with the claimed sum $`H' = g_1(r_1)`$: round 2 checks $`g_2(0) + g_2(1) = g_1(r_1)`$, the later rounds check the same recurrence, and the final oracle query is $`g(r_1, \ldots, r_v) = g'(r_2, \ldots, r_v)`$. The true sum of $`g'`$ over $`\{0,1\}^{v-1}`$ is $`s_1(r_1)`$ by (13.3), and $`s_1(r_1) \ne g_1(r_1) = H'`$ on the complement of $`E`$. By the induction hypothesis the verifier accepts this residual protocol with probability at most $`d(v - 1) / |\mathbb{F}|`$, whatever the prover does from round 2 on; the prover's freedom to choose $`g_1`$ after seeing nothing, and $`g_2, \ldots`$ after seeing $`r_1`$, is exactly the freedom the hypothesis quantifies over.
 
 Putting the two together with the union bound,
 
 ```math
-\operatorname{Pr}[\text{accept}] \;\le\; \operatorname{Pr}[E] + \operatorname{Pr}[\text{accept} \mid \neg E]
+\Pr[\text{accept}] \;\le\; \Pr[E] + \Pr[\text{accept} \mid \neg E]
   \;\le\; \frac{d}{|\mathbb{F}|} + \frac{d(v-1)}{|\mathbb{F}|} \;=\; \frac{dv}{|\mathbb{F}|},
 ```
 
