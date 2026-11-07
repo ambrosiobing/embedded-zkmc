@@ -50,10 +50,25 @@ jobs:
           if [ -n "$bad" ]; then
             echo "A proof position uses a placeholder:"; echo "$bad"; exit 1
           fi
-          if grep -rniE 'mathlib' lean/lakefile.toml; then
+          # Comment lines are stripped before this looks for Mathlib. The first version of
+          # this step did not strip them, and it failed on run 1 against the lakefile's own
+          # sentence saying there is no Mathlib dependency. A guard must not match its own
+          # prose, and the red run it produced said nothing about the development.
+          if grep -v '^[[:space:]]*#' lean/lakefile.toml | grep -iq 'mathlib'; then
             echo "lakefile declares a Mathlib dependency, which STATUS.md says it does not"; exit 1
           fi
-          echo "no placeholder in any proof position; no Mathlib dependency declared"
+          # A check that cannot fail is not a check, so prove both can, on inputs that are
+          # thrown away. If either of these stops being detected, the guard above is broken.
+          printf 'theorem t : True := by
+  sorry
+' > /tmp/probe.lean
+          grep -qE '^[[:space:]]*(sorry|admit|sorryAx|native_decide)' /tmp/probe.lean             || { echo "self-test failed: the placeholder pattern no longer matches a sorry"; exit 1; }
+          printf '[[require]]
+name = "mathlib"
+' > /tmp/probe.toml
+          grep -v '^[[:space:]]*#' /tmp/probe.toml | grep -iq 'mathlib'             || { echo "self-test failed: the Mathlib pattern no longer matches a real require"; exit 1; }
+          rm -f /tmp/probe.lean /tmp/probe.toml
+          echo "self-tests passed; no placeholder in any proof position; no Mathlib dependency"
 
       - name: Install elan
         run: |
