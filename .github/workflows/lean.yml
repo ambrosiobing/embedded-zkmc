@@ -8,6 +8,12 @@
 # It is a separate workflow from checks.yml on purpose. checks.yml guards what is published and
 # must stay green; this one reports on something that is openly unfinished. Do not merge them,
 # and do not make this one pass by weakening what it runs.
+#
+# No backslash escape appears in any script below. Two earlier versions were written through a
+# shell heredoc, which ate the escapes: a printf newline became a real line break that broke the
+# YAML indentation, and a grep word boundary became a literal backspace, which is the character
+# the parser rejected on run 2. Shell here-documents are used instead, and the word boundary is
+# spelled as a character class.
 
 name: lean
 
@@ -40,35 +46,47 @@ jobs:
           echo "files and line counts:"
           find lean -name '*.lean' -print0 | xargs -0 wc -l
 
-      - name: Refuse a closed gap that was never checked
+      - name: Prove the guards can fail, then run them
         run: |
-          # The development claims no sorry and no Mathlib. Both are cheap to verify here, and
-          # a claim that is cheap to verify should never be left to a reader's trust. The word
-          # may appear in prose, so only proof positions are counted: a line whose first
-          # non-space token is the keyword.
-          bad=$(grep -rnE '^[[:space:]]*(sorry|admit|sorryAx|native_decide)\b' lean --include='*.lean' || true)
+          PATTERN='^[[:space:]]*(sorry|admit|sorryAx|native_decide)([^A-Za-z0-9_]|$)'
+
+          # A check that cannot fail is not a check. Both patterns run against a planted
+          # positive first, so that an empty result below is evidence rather than an accident.
+          mkdir -p /tmp/probe
+          cat > /tmp/probe/probe.lean <<'PROBE_LEAN'
+          theorem t : True := by
+            sorry
+          PROBE_LEAN
+          cat > /tmp/probe/probe.toml <<'PROBE_TOML'
+          # this comment mentions mathlib and must NOT trigger the test
+          [[require]]
+          name = "mathlib"
+          PROBE_TOML
+
+          grep -qE "$PATTERN" /tmp/probe/probe.lean \
+            || { echo "self-test failed: the placeholder pattern no longer matches a sorry"; exit 1; }
+          grep -v '^[[:space:]]*#' /tmp/probe/probe.toml | grep -iq 'mathlib' \
+            || { echo "self-test failed: the Mathlib pattern no longer matches a real require"; exit 1; }
+          echo "self-tests passed: both patterns detect a planted positive"
+
+          # Now the real checks. The development claims no placeholder in any proof position
+          # and no Mathlib dependency, and both are cheap to verify, so neither is left to a
+          # reader's trust.
+          bad=$(grep -rnE "$PATTERN" lean --include='*.lean' || true)
           if [ -n "$bad" ]; then
-            echo "A proof position uses a placeholder:"; echo "$bad"; exit 1
+            echo "A proof position uses a placeholder:"
+            echo "$bad"
+            exit 1
           fi
-          # Comment lines are stripped before this looks for Mathlib. The first version of
-          # this step did not strip them, and it failed on run 1 against the lakefile's own
-          # sentence saying there is no Mathlib dependency. A guard must not match its own
-          # prose, and the red run it produced said nothing about the development.
+
+          # Comment lines are stripped before looking for Mathlib. The first version of this
+          # step did not strip them and failed on run 1 against the lakefile's own sentence
+          # saying there is no Mathlib dependency: a guard must not match its own prose.
           if grep -v '^[[:space:]]*#' lean/lakefile.toml | grep -iq 'mathlib'; then
-            echo "lakefile declares a Mathlib dependency, which STATUS.md says it does not"; exit 1
+            echo "lakefile declares a Mathlib dependency, which STATUS.md says it does not"
+            exit 1
           fi
-          # A check that cannot fail is not a check, so prove both can, on inputs that are
-          # thrown away. If either of these stops being detected, the guard above is broken.
-          printf 'theorem t : True := by
-  sorry
-' > /tmp/probe.lean
-          grep -qE '^[[:space:]]*(sorry|admit|sorryAx|native_decide)' /tmp/probe.lean             || { echo "self-test failed: the placeholder pattern no longer matches a sorry"; exit 1; }
-          printf '[[require]]
-name = "mathlib"
-' > /tmp/probe.toml
-          grep -v '^[[:space:]]*#' /tmp/probe.toml | grep -iq 'mathlib'             || { echo "self-test failed: the Mathlib pattern no longer matches a real require"; exit 1; }
-          rm -f /tmp/probe.lean /tmp/probe.toml
-          echo "self-tests passed; no placeholder in any proof position; no Mathlib dependency"
+          echo "no placeholder in any proof position; no Mathlib dependency declared"
 
       - name: Install elan
         run: |
