@@ -51,7 +51,7 @@ This chapter proves nothing in zero knowledge, so there is no witness to hide. I
 
 *(16.1)*
 
-with the remaining cases of $`V_{a,b,c}`$ fixed as in the paper's Example 3.4: $`3 \cdot 2^8`$ on $`\mathsf{Closed}`$ in $`q_1`$ and everywhere in $`q_0`$, $`0`$ on $`\mathsf{Registered}`$ and $`\mathsf{Exhausted}`$, and $`+\infty`$ on $`\mathsf{Wait} \wedge \mathsf{done} = 3`$ in both automaton states. The set the certifier decides is
+with the remaining cases of $`V_{a,b,c}`$ fixed as in the paper's Example 3.4: $`3 \cdot 2^8`$ on $`\mathsf{Closed}`$ in $`q_1`$ and everywhere in $`q_0`$, $`0`$ on $`\mathsf{Registered}`$ and $`\mathsf{Exhausted}`$, and $`+\infty`$ on $`\mathsf{Wait} \wedge \mathsf{done} = 3`$ in both automaton states. One thing to hold before any number below is read: this chapter instances the machine at the paper's own range, with $`\mathsf{delay}`$ below $`2^8`$ and a box of $`4096`$ states, where [Project 3](03-the-modems-backoff-machine.md) reads the same machine down to $`\mathsf{delay}`$ below $`2^4`$ and $`256`$ states and says so. The two are different instances of one machine, so no count in this chapter, the box, the batch sizes or the solver's bounds, is comparable with [Project 3](03-the-modems-backoff-machine.md)'s published $`16`$, $`7976`$, $`5016`$ and $`8088`$, and a reader setting the two side by side should expect every figure here to be larger by the ratio of the two boxes. The set the certifier decides is
 
 ```math
 \mathrm{Acc}(\mathcal{M}, \mathcal{A}) = \{\, V \in \mathcal{V} \mid \mathsf{Cert}(\mathcal{M}, (\mathcal{A}, V)) = 1 \,\},
