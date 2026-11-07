@@ -1,0 +1,14 @@
+# zkmc: the Lean 4 development for the embedded-zkmc volume, chapter 14.
+#
+# NOT COMPILED. Written Friday 6 November 2026 on a machine with no Lean toolchain
+# installed. No part of this project has been elaborated, built or kernel checked.
+#
+# There is no Mathlib dependency on purpose: every tactic used in ZKMC/ is in core
+# Lean 4 (intro, induction, cases, refine, exact, rw, unfold, show, omega). See
+# README.md, section "Why there is no Mathlib dependency".
+
+name = "zkmc"
+defaultTargets = ["ZKMC"]
+
+[[lean_lib]]
+name = "ZKMC"

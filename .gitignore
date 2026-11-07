@@ -81,3 +81,11 @@ editor_*.md
 # The scratch file a hand-over writes a commit message into, because PowerShell has no
 # usable heredoc and git commit -F is the way in. The commit carries it; the tree does not.
 commit-message.txt
+
+# Lean build artifacts, from the development published under lean/
+.lake/
+lean/.lake/
+lean/build/
+*.olean
+*.ilean
+*.trace

@@ -145,6 +145,15 @@ either machine on this bench, so what follows is a proof written in a language a
 can check, and not a proof a machine has checked. The chapter says so in its own key facts,
 and this section says so because a reader scanning a contents list will not read them.
 
+**The development itself is published, unfinished, at [`lean/`](lean/).** It is 561 lines, it
+carries no `sorry` in any proof, it depends on no Mathlib, and it is pinned to
+`leanprover/lean4:v4.35.0`. It has never been compiled. A workflow runs `lake build` on it on
+every push that touches it, and **that workflow is expected to fail until the development
+compiles for the first time**, which is the point: an error count anyone can read is worth more
+than a development held back until it is green. [`lean/STATUS.md`](lean/STATUS.md) states what is
+claimed and what is not, including how this development differs from the listing printed in
+chapter 14, which declares one gap and builds against Mathlib.
+
 | Where | What Lean carries there |
 | --- | --- |
 | [Project 14](chapters/14-theorem-3-2-in-lean-4.md) | The whole chapter. The paper's Theorem 3.2, the fair-termination rule, written as four structures, a descent lemma and the rule itself. This is the only chapter whose language is Lean. |

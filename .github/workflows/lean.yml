@@ -1,0 +1,73 @@
+# Build the Lean development, and publish the result whatever it is.
+#
+# This workflow is EXPECTED TO FAIL until the development compiles for the first time. That is
+# deliberate and it is explained in lean/STATUS.md. Lean 4 is installed on neither machine this
+# volume is written on, so the kernel in this runner is the first one to read the development.
+# A red run here is a measurement: the error count is public, and it falls as the work is done.
+#
+# It is a separate workflow from checks.yml on purpose. checks.yml guards what is published and
+# must stay green; this one reports on something that is openly unfinished. Do not merge them,
+# and do not make this one pass by weakening what it runs.
+
+name: lean
+
+on:
+  push:
+    paths:
+      - 'lean/**'
+      - '.github/workflows/lean.yml'
+  pull_request:
+    paths:
+      - 'lean/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: lake build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Record what is being built
+        run: |
+          echo "toolchain pin:"
+          cat lean/lean-toolchain
+          echo
+          echo "files and line counts:"
+          find lean -name '*.lean' -print0 | xargs -0 wc -l
+
+      - name: Refuse a closed gap that was never checked
+        run: |
+          # The development claims no sorry and no Mathlib. Both are cheap to verify here, and
+          # a claim that is cheap to verify should never be left to a reader's trust. The word
+          # may appear in prose, so only proof positions are counted: a line whose first
+          # non-space token is the keyword.
+          bad=$(grep -rnE '^[[:space:]]*(sorry|admit|sorryAx|native_decide)\b' lean --include='*.lean' || true)
+          if [ -n "$bad" ]; then
+            echo "A proof position uses a placeholder:"; echo "$bad"; exit 1
+          fi
+          if grep -rniE 'mathlib' lean/lakefile.toml; then
+            echo "lakefile declares a Mathlib dependency, which STATUS.md says it does not"; exit 1
+          fi
+          echo "no placeholder in any proof position; no Mathlib dependency declared"
+
+      - name: Install elan
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o elan-init.sh
+          sh elan-init.sh -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Versions
+        working-directory: lean
+        run: |
+          elan --version
+          lean --version
+          lake --version
+
+      - name: lake build
+        working-directory: lean
+        run: lake build

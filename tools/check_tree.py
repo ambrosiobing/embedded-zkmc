@@ -63,6 +63,14 @@ ALLOWED = re.compile(
     # would open the tree to transcripts and captures, which belong with the bench record
     # and not here, so the exception is this one path.
     r"|^tools/no_trace_words\.txt$"
+    # The Lean development is published from Saturday 7 November 2026, unfinished and with a
+    # workflow that fails, because a development nobody can read is worth less than one whose
+    # error count is public. Two additions are needed for it: the source extension, and the
+    # toolchain pin, which is a file with no extension at all and so is admitted by its exact
+    # path like no_trace_words.txt above. Neither admits anything else: ".lean" is only Lean
+    # source, and the pin is one path.
+    r"|\.lean$"
+    r"|^lean/lean-toolchain$"
     r"|(^|/)Makefile$"
     r"|(^|/)CMakeLists\.txt$)"
 )
