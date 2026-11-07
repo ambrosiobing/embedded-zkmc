@@ -264,7 +264,7 @@ None. The driver sends exactly the bytes of the commitment; no text is generated
 
 - **have:** real: the Pi 4B, the SIM7070G HAT and its antenna, the PPK2, build laptop as its host; the ristretto255 group of [Project 1](01-the-price-list.md); the parser design of the sibling volume
 - **learn:** modelled: the AT sequence is exercised against a replayed log and is drawn dashed everywhere it appears; the PPK2 series position on the HAT's module supply, the PWRKEY timing, the UART jumper setting and the exact spelling of `AT+CNACT`, `AT+CAOPEN` and `AT+CASEND` are all to verify from the wiki \[[8](#references)\] and the AT manual before the first live run; every bar in the benchmark figure is the shape of Lemma **Lemma Z19.2** with assumed ratios
-- **absent:** absent: a SIM, so every energy and every attach time reads "not measured, no SIM"; a verifier endpoint reachable from a carrier network, so the proof's arrival is not checked here; a multimeter, so the rail voltage $`U`$ is a wiki figure until the PPK2's own source-meter mode is used to confirm it
+- **absent:** absent: a SIM, so every energy and every attach time reads "not measured, no SIM"; a verifier endpoint reachable from a carrier network, so the proof's arrival is not checked here; a second instrument independent of the MCC 118, so the rail voltage $`U`$ stays a wiki figure until it is read. The PPK2 cannot supply that reading: it sources a rail in source-meter mode and meters current in ampere-meter mode, and it has no voltage input, so it cannot measure the voltage at a node. The MCC 118 can, at eight single-ended inputs over plus or minus 10 V, and reading $`U`$ with it is what turns this row from a wiki figure into a measurement with one instrument named
 
 ## System architecture
 

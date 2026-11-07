@@ -70,7 +70,7 @@ Every version below was read from the source named in the bibliography entry on 
 
 | **Tool or library** | **Version this bench runs** | **Where it is needed** |
 | --- | --- | --- |
-| `ark-bls12-381` | 0.6.0 \[[16](#references)\] | every pairing and every KZG commitment: projects 1, 4, 6, 9 |
+| `ark-bls12-381` | 0.6.0 \[[16](#references)\] | every pairing and every KZG commitment in Rust: projects 1, 4 and 9. NOT project 6, which is written in Julia and whose own text records the commitment layer as absent for want of a pairing library in that language; a Rust crate does not answer it |
 | `curve25519-dalek` | 5.0.0 \[[18](#references)\], the group of RFC 9496 \[[37](#references)\] | every Pedersen commitment, and the only group the microcontroller build carries: projects 1, 2, 15 |
 | `bulletproofs`, `merlin` | 5.0.0 \[[17](#references)\] and 3.0.0 \[[43](#references)\] | the range proofs and their transcript: projects 5, 20 |
 | `nova-snark` | 0.76.0 \[[19](#references)\] | recursive folding against the one-shot schedule: project 9 |
