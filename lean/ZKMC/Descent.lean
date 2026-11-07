@@ -2,11 +2,13 @@
 ZKMC/Descent.lean: le_of_mono and no_infinite_descent, Lemma lem:z14_descent of
 sections/z14.tex.
 
-NOT COMPILED. Written Friday 6 November 2026 on a machine with no Lean toolchain
-installed. Nothing here has been elaborated, built or kernel checked.
+Builds. `lake build` passes on a clean checkout in GitHub Actions, pinned to
+leanprover/lean4:v4.35.0, with no Mathlib. A kernel has accepted every declaration
+here. That says the proofs elaborate, not that they state what they should: see
+STATUS.md, which records one theorem that compiled and proved nothing.
 
 The statements are the chapter's, unchanged. One proof script differs from the
-chapter's listing, and the reason is recorded here and in OPEN.md.
+chapter's listing, and the reason is recorded here and in STATUS.md.
 
   The chapter proves `le_of_mono` by `induction b` with `rcases Nat.lt_or_eq_of_le hab
   with h | h`. `rcases` is a Mathlib tactic, not a core Lean 4 tactic, and this project

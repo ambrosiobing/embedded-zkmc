@@ -140,19 +140,22 @@ cannot run.
 ## Where a proof assistant is used
 
 Lean 4 appears wherever the volume states something a machine could check rather than
-something a board could measure. **None of it has been checked.** Lean is not installed on
-either machine on this bench, so what follows is a proof written in a language a machine
-can check, and not a proof a machine has checked. The chapter says so in its own key facts,
-and this section says so because a reader scanning a contents list will not read them.
+something a board could measure. Two different things carry that name here, and a reader who
+runs them together will think one of them is lying.
 
-**The development itself is published, unfinished, at [`lean/`](lean/).** It is 561 lines, it
-carries no `sorry` in any proof, it depends on no Mathlib, and it is pinned to
-`leanprover/lean4:v4.35.0`. It has never been compiled. A workflow runs `lake build` on it on
-every push that touches it, and **that workflow is expected to fail until the development
-compiles for the first time**, which is the point: an error count anyone can read is worth more
-than a development held back until it is green. [`lean/STATUS.md`](lean/STATUS.md) states what is
-claimed and what is not, including how this development differs from the listing printed in
-chapter 14, which declares one gap and builds against Mathlib.
+**The development at [`lean/`](lean/) builds.** It is 561 lines, it carries no `sorry` in any
+proof, it depends on no Mathlib, and it is pinned to `leanprover/lean4:v4.35.0`. A workflow runs
+`lake build` on it on every push that touches it, and that build passes, so a kernel has
+accepted every declaration in it. **That is a verdict about elaboration and not about meaning.**
+The theorems still have to state what they should, which is settled by reading: a review of this
+development found one that compiled and proved nothing, because it assumed its own conclusion.
+[`lean/STATUS.md`](lean/STATUS.md) records that, names the run, and says plainly which parts of
+the paper's Theorem 3.2 are formalised and which are not.
+
+**The listing printed inside chapter 14 is a different development, and it has not been
+checked.** It declares one gap with a `sorry`, it builds against Mathlib, and no kernel has read
+it. The chapter says so in its own key facts. Where the two differ, `lean/STATUS.md` is the file
+that explains which is which.
 
 | Where | What Lean carries there |
 | --- | --- |

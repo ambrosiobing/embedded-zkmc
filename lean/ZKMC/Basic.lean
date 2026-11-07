@@ -1,8 +1,10 @@
 /-
 ZKMC/Basic.lean: the four structures of chapter 14, carried over from sections/z14.tex.
 
-NOT COMPILED. Written Friday 6 November 2026 on a machine with no Lean toolchain
-installed. Nothing here has been elaborated, built or kernel checked.
+Builds. `lake build` passes on a clean checkout in GitHub Actions, pinned to
+leanprover/lean4:v4.35.0, with no Mathlib. A kernel has accepted every declaration
+here. That says the proofs elaborate, not that they state what they should: see
+STATUS.md, which records one theorem that compiled and proved nothing.
 
 The field names are exactly those of the listing in sections/z14.tex, so that the
 chapter and this project name the same things: TS.init, TS.trans, TS.obs; NBA.init,
@@ -12,7 +14,7 @@ FairExec.step, FairExec.fairInf; Ranking.V, Ranking.c4, Ranking.c5, Ranking.c6.
 One notation change from the chapter. The chapter writes the existential quantifier
 in ASCII as `exists`. That spelling could not be confirmed without a toolchain, so
 the Unicode spelling is used here, which is certain. Everything else keeps the
-chapter's ASCII: `forall`, `->`, `<=`, `<`, `/\`, `\/`. Recorded in OPEN.md.
+chapter's ASCII: `forall`, `->`, `<=`, `<`, `/\`, `\/`. Recorded in STATUS.md.
 -/
 
 namespace ZKMC

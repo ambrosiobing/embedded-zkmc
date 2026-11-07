@@ -1,8 +1,10 @@
 /-
 ZKMC/Gaps.lean: two defects of the volume, stated so that a machine can check them.
 
-NOT COMPILED. Written Friday 6 November 2026 on a machine with no Lean toolchain
-installed. Nothing here has been elaborated, built or kernel checked.
+Builds. `lake build` passes on a clean checkout in GitHub Actions, pinned to
+leanprover/lean4:v4.35.0, with no Mathlib. A kernel has accepted every declaration
+here. That says the proofs elaborate, not that they state what they should: see
+STATUS.md, which records one theorem that compiled and proved nothing.
 
 Both defects belong to the review's cross-cutting theme T1 of
 review/editor_consolidation.md: a relation is written down, a theorem is applied under

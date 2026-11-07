@@ -2,8 +2,10 @@
 ZKMC/Theorem32.lean: the ranking-function rule, Theorem 3.2 of the paper, with the
 chapter's `sorry` closed.
 
-NOT COMPILED. Written Friday 6 November 2026 on a machine with no Lean toolchain
-installed. Nothing here has been elaborated, built or kernel checked. The word
+Builds. `lake build` passes on a clean checkout in GitHub Actions, pinned to
+leanprover/lean4:v4.35.0, with no Mathlib. A kernel has accepted every declaration
+here. That says the proofs elaborate, not that they state what they should: see
+STATUS.md, which records one theorem that compiled and proved nothing. The word
 "proved" below means "written out in full with no `sorry`", and nothing more: no
 kernel has seen any of it.
 
@@ -130,7 +132,7 @@ executions. `FairExec M A` carries data, so it lives in `Type` and cannot be put
 `Not`; the arrow into `False` is the same statement. The corollary of the paper, that
 the system satisfies the property, is the further step from emptiness of the
 intersection of the languages to satisfaction, which is Corollary cor:z03_mc of
-sections/z03.tex and is not formalised here; see OPEN.md. -/
+sections/z03.tex and is not formalised here; see STATUS.md. -/
 theorem fairExec_elim {S Q Sigma : Type} (M : TS S Sigma) (A : NBA Q Sigma)
     (R : Ranking M A) : FairExec M A -> False :=
   fun e => no_fair_execution M A R e

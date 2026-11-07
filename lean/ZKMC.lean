@@ -1,10 +1,11 @@
 /-
 ZKMC.lean: the library root.
 
-NOT COMPILED. Written Friday 6 November 2026 on a machine with no Lean toolchain
-installed. Nothing in this file or in the modules it imports has been elaborated,
-built or kernel checked. Every claim about what is proved below is a claim about a
-proof written on paper and transcribed, not about a verdict from a kernel.
+Builds. `lake build` passes on a clean checkout in GitHub Actions, pinned to
+leanprover/lean4:v4.35.0, with no Mathlib, so a kernel has accepted this file and
+every module it imports. That is a verdict about elaboration, not about meaning: the
+theorems still have to say what they should, and STATUS.md records one that compiled
+and proved nothing.
 -/
 
 import ZKMC.Basic

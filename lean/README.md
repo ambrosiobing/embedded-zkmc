@@ -1,25 +1,33 @@
 # zkmc: the Lean 4 development for the embedded-zkmc volume
 
 Written Friday 6 November 2026, published Saturday 7 November 2026. See
-[`STATUS.md`](STATUS.md) first: nothing here has been compiled, and the workflow that
-builds it is expected to fail until it is.
+[`STATUS.md`](STATUS.md) first: the build passes, and that file says what a passing
+build does and does not establish.
 
 ## The first thing to know
 
-**Nothing in this project has been compiled.** Lean 4 is not installed on the machine
-this was written on: `lean`, `lake` and `elan` are all absent, and there is no `.elan`
-directory. No file here has been elaborated, no proof term has been built, and no kernel
-has seen any of it. Every file carries that statement in its own header with this date.
+**This project builds.** `lake build` passes on a clean checkout in GitHub Actions,
+pinned to `leanprover/lean4:v4.35.0`, with no Mathlib and no placeholder proof. A kernel
+has accepted every declaration here. Lean is still installed on neither machine this
+volume is written on, so the runner is the only kernel that has read it.
 
-So the words used below are chosen carefully.
+So the words used below are chosen carefully, and the distinction they keep is now a
+different one.
 
-- **Written out in full** means the proof is complete on paper and transcribed into Lean
-  with no `sorry`. It does not mean checked.
-- **Machine checked** is used nowhere in this project, because nothing is.
+- **Elaborates** means the kernel accepted it: the statement is well formed, the term has
+  the type it claims, and nothing rests on an unproved step. That is what the build
+  establishes.
+- **Correct** means the theorem states what it was meant to state. The build cannot
+  establish that, and in this project it did not: a review found one theorem that compiled
+  and proved nothing, because it assumed its own conclusion. It is recorded in
+  [`STATUS.md`](STATUS.md) and corrected in place rather than removed.
+- **Theorem 3.2 is not formalised end to end.** What is proved here is the
+  ranking-function argument. The step to emptiness of the language intersection, and
+  Corollary 3.3 from there to satisfaction, are absent.
 
-The volume was corrected earlier on Friday 6 November 2026 because a chapter titled
-"machine checked" contained an unproved step. This project must not repeat that, so the
-distinction is kept in every file.
+The volume was corrected on Friday 6 November 2026 because a chapter titled "machine
+checked" contained an unproved step. A green build makes that mistake easier to repeat,
+not harder, which is why the three distinctions above are kept in every file.
 
 ## What is in it
 
@@ -33,7 +41,7 @@ lean/
   ZKMC/Theorem32.lean    Theorem 3.2, with the chapter's sorry closed
   ZKMC/Gaps.lean         two defects of the volume as non-implication theorems
   README.md              this file
-  OPEN.md                everything still open, and every risk in the above
+  STATUS.md              what is claimed, what is not, and everything still open
 ```
 
 ## What is written out in full, and what it says
@@ -158,7 +166,7 @@ Two consequences, both deliberate.
 2. The chapter's listing imports `Mathlib.Tactic` and uses `rcases`, which is a Mathlib
    tactic and not a core one. `ZKMC/Descent.lean` proves the same `le_of_mono` statement
    by a different core-only script, and says so in its header. This is a deviation from
-   the chapter and is listed in `OPEN.md`.
+   the chapter and is listed in `STATUS.md`.
 
 If a future addition does need Mathlib, the parts that would need it first are the
 Corollary `cor:z03_mc` step from emptiness to satisfaction, which wants a real treatment
