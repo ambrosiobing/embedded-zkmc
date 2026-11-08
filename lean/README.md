@@ -175,11 +175,11 @@ of omega-words, and anything about the finite field, which wants `ZMod` and
 
 ## How to check it
 
-Lean is not installed on this machine, so these commands have not been run.
+The `lean` workflow runs these on every push, and that runner is the only kernel that has
+read this project: Lean is installed on neither machine this volume is written on. To run
+them yourself, from a clone of this repository with `elan` installed:
 
-On the WSL side of the build laptop, with `elan` installed:
-
-    cd /mnt/c/Users/aquamarine/Desktop/MasterCatalog/04_Products_MVP_Catalog/ZeroKnowledge_Embedded_Top20_v2/lean
+    cd lean
     lake build 2>&1 | tee build.log
 
 The acceptance test, read from `build.log`:
@@ -196,19 +196,10 @@ chapter's protocol:
 
     lake env lean ZKMC/Theorem32.lean
 
-For Joseph, aquamarine, NO BOARD, PowerShell 5.1, one command per block:
-
-    cd C:\Users\aquamarine\Desktop\MasterCatalog\04_Products_MVP_Catalog\ZeroKnowledge_Embedded_Top20_v2\lean
-
-Then, once elan and a toolchain are installed on that machine:
-
-    cd C:\Users\aquamarine\Desktop\MasterCatalog\04_Products_MVP_Catalog\ZeroKnowledge_Embedded_Top20_v2\lean; lake build
-
 ## The toolchain pin
 
-`lean-toolchain` reads `leanprover/lean4:stable`. That is a deliberate placeholder and
-not a pin: the version current on Friday 6 November 2026 could not be read, because
-there is no toolchain on this machine and nothing was downloaded. Replace it with the
-exact version string on the day the project is first built, and record that string in
-the chapter beside the build log. Until then the build is not reproducible, only
-repeatable.
+`lean-toolchain` reads `leanprover/lean4:v4.35.0`, and that is a real pin rather than a
+placeholder. It was an earlier `leanprover/lean4:stable`, which is a moving target, until
+the first green build on Saturday 7 November 2026 made the exact version knowable. The
+build is therefore reproducible and not merely repeatable, and `lean/STATUS.md` records
+the run that established it.
