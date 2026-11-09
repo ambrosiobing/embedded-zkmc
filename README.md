@@ -100,6 +100,10 @@ time.
 | 23 | [Elixir and Nerves: the CAN node on the Erlang virtual machine](chapters/23-elixir-and-nerves.md) | Elixir and Rust | Pi 4B, WS-28164 |
 | 24 | [A one-bit model: ternary weights on the Pi](chapters/24-a-one-bit-model.md) | C and Python | Pi 4B, LCD, LEDs |
 
+[The appendix](chapters/25-appendix.md) comes after the twenty-four and is in
+neither this table nor the generated one: it is the page that says which of the
+chapters go together, so it is the one a reader planning a route wants.
+
 [`CONTENTS.md`](CONTENTS.md) is the generated version of this table, and
 [`PITFALLS.md`](PITFALLS.md) indexes all 152 pitfalls across the chapters.
 
