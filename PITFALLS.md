@@ -8,7 +8,7 @@ that owns it. Alphabetical, because by project is what the chapters already give
 
 | Pitfall | Project |
 |---|---|
-| $\|K\| \ge N - 1$ for every schedule, not only this one (Lemma ), so no choice of $C$ brings the certificate below... | [Project 6](chapters/06-folding-and-the-salem-spencer-schedule.md) |
+| $\|K\| \ge N - 1$ for every schedule, not only this one, so no choice of $C$ brings the certificate below $4(N - 1)$... | [Project 6](chapters/06-folding-and-the-salem-spencer-schedule.md) |
 | $n$ must be a power of two for the heap layout; a shorter log is padded with a fixed sentinel leaf, never by... | [Project 10](chapters/10-the-hardware-hash-unit-commits-to-a-transition.md) |
 | `!FG Wait` and `!F G Wait` parse the same; `!FGWait` parses as the negation of `F` of `GWait`, a proposition the... | [Project 17](chapters/17-from-a-sentence-to-a-b-uchi-automaton.md) |
 | `api.AssertIsLessOrEqual(v, bound)` with a constant bound decomposes $v$ over the field's full bit length (to... | [Project 12](chapters/12-a-plonk-gate-for-the-inductive-step.md) |

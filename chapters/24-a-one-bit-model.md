@@ -18,7 +18,7 @@
 > - **Secret:** none in this chapter's own proof; the replayed log, the features, every proposal and every verdict are public, and the point is what the quantisation costs
 > - **Public:** the four class names, the four public guards as closed bands on one feature, the grammar, every proposal, every verdict, the $`2 \times 2`$ agreement table
 > - **Model:** BitNet b1.58, whose every weight is in the set with the three values minus one, zero and one \[[2](#references)\], run by its own inference framework \[[3](#references)\]; beside it the volume's existing ladder, Qwen2.5-0.5B, as the small rung; the file size of each is read from its model card
-> - **Acceptance:** at least 100 windows per proposer, every line parsed by the grammar, every proposal certified or refused by the C guard check, the agreement table printed with both marginal rates, and the ternary layer's printed operation count equal to the count Lemma **Lemma Z24.2** predicts for the same weights, on every window
+> - **Acceptance:** at least 100 windows per proposer, every line parsed by the grammar, every proposal certified or refused by the C guard check, the agreement table printed with both marginal rates, and the ternary layer's printed operation count equal to the count **Lemma Z24.2** predicts for the same weights, on every window
 > - **Difficulty:** 3 of 5
 > - **Effort:** one evening for the decision path in C, one for the harness and the grammar, one afternoon on the Pi for the 100 windows per proposer
 
@@ -146,13 +146,13 @@ The signs differ. As $`\delta`$ rises to $`\varepsilon`$ the margin $`s(x) = \va
 
 (iii) If the entry is not clipped, $`w_j = \lfloor a_j/\beta \rceil`$, so $`|a_j/\beta - w_j| \le 1/2`$ by the definition of rounding to the nearest integer; multiplying by $`\beta > 0`$ gives $`|a_j - \beta w_j| \le \beta/2`$, that is $`|e_j| \le \beta/2`$. Then $`\|e\|_2 = (\sum_j e_j^2)^{1/2} \le (n \beta^2/4)^{1/2} = (\beta/2)\sqrt{n}`$, and (i) gives the stated safe margin. &#9632;
 
-**Remark Z24.5 (Why the guards are bands and not a boundary).** Proposition **Proposition Z24.4** is the reason the public guards of (24.2) are overlapping closed bands rather than three cut points. A proposer whose score sits within $`\|e\|_2\|x\|_2`$ of a cut point may name either side of it, and with cut points one of the two answers would be refused, which would make the measured acceptance rate a measurement of the quantisation and not of the proposer. With bands, both answers are admissible in the overlap and the certifier refuses only a class whose band the window is genuinely outside. The width of each overlap, 1.0 V, is a design choice recorded here and not derived from the bound, because the model's own $`\|e\|_2`$ is a property of weights this bench has not read.
+**Remark Z24.5 (Why the guards are bands and not a boundary).** **Proposition Z24.4** is the reason the public guards of (24.2) are overlapping closed bands rather than three cut points. A proposer whose score sits within $`\|e\|_2\|x\|_2`$ of a cut point may name either side of it, and with cut points one of the two answers would be refused, which would make the measured acceptance rate a measurement of the quantisation and not of the proposer. With bands, both answers are admissible in the overlap and the certifier refuses only a class whose band the window is genuinely outside. The width of each overlap, 1.0 V, is a design choice recorded here and not derived from the bound, because the model's own $`\|e\|_2`$ is a property of weights this bench has not read.
 
 **Proposition Z24.6 (Acceptance is independent of the proposer).** Let $`P`$ be any function into $`C`$: the quantised model of this chapter, the control rule, a person, or an adversary who has read the window. If $`c = P(\xi)`$ for some input $`\xi`$ and the certifier accepts, that is $`\phi(v)_1 \in G_c`$, then $`(c, v) \in \mathcal{R}_{\mathrm{cls}}`$.
 
 *Proof.* By (24.3), $`(c, v) \in \mathcal{R}_{\mathrm{cls}}`$ is by definition the condition $`\phi(v)_1 \in G_c`$, which is the condition the certifier evaluated. Neither $`P`$ nor $`\xi`$ occurs in it, so the membership is a property of the pair $`(c, v)`$ alone and holds whatever produced $`c`$. &#9632;
 
-**Remark Z24.7 (What is cited and what is not).** The proposition above is the analogue, for this chapter's static guard, of Theorem thm:z16\_independent of [Project 16](16-the-model-proposes-a-ranking-function-the-certifier.md), and it is proved here in two lines because it is a different statement. Theorem thm:z16\_independent concerns a certifier of ranking functions and concludes $`\mathcal{M} \models \phi`$ for a transition system and a temporal formula; this chapter has no transition system, no automaton, no ranking function and no temporal property, so that theorem's hypotheses are not instantiated here and its conclusion is not available. What carries over is only the shape of the argument, that a checked predicate on the pair does not mention the proposer. Nothing in this chapter weakens anything: the certifier here evaluates the public guard of (24.2) on the window and nothing else. What the quantisation can cost is completeness, which Proposition **Proposition Z24.4** bounds and the agreement table counts, and thm:z01\_hiding is the reason a committed window reveals nothing about the features to a verifier that checks only the guard.
+**Remark Z24.7 (What is cited and what is not).** The proposition above is the analogue, for this chapter's static guard, of Theorem thm:z16\_independent of [Project 16](16-the-model-proposes-a-ranking-function-the-certifier.md), and it is proved here in two lines because it is a different statement. Theorem thm:z16\_independent concerns a certifier of ranking functions and concludes $`\mathcal{M} \models \phi`$ for a transition system and a temporal formula; this chapter has no transition system, no automaton, no ranking function and no temporal property, so that theorem's hypotheses are not instantiated here and its conclusion is not available. What carries over is only the shape of the argument, that a checked predicate on the pair does not mention the proposer. Nothing in this chapter weakens anything: the certifier here evaluates the public guard of (24.2) on the window and nothing else. What the quantisation can cost is completeness, which **Proposition Z24.4** bounds and the agreement table counts, and thm:z01\_hiding is the reason a committed window reveals nothing about the features to a verifier that checks only the guard.
 
 ## The protocol
 
@@ -166,7 +166,7 @@ The signs differ. As $`\delta`$ rises to $`\varepsilon`$ the margin $`s(x) = \va
 
 ## The code
 
-The decision path is C17: the ternary layer with its weights packed two bits each, the control rule, the certifier's guard check and the operation count that Lemma **Lemma Z24.2** predicts. The count is printed on every window so that the lemma can fail on the bench rather than only on the page.
+The decision path is C17: the ternary layer with its weights packed two bits each, the control rule, the certifier's guard check and the operation count that **Lemma Z24.2** predicts. The count is printed on every window so that the lemma can fail on the bench rather than only on the page.
 
 ```c
 /* zk24_decide.c: the decision path of Z24. C17, no dynamic allocation.
@@ -340,7 +340,7 @@ The rule's own rate is printed on the same rows as the model's, because a model 
 
 ## Real, modelled, absent
 
-- **have:** real: the Pi 4B with 8 GB; the 3.5 inch LCD (A) and its two chip selects \[[7](#references)\]; the three Joy-it LEDs on BCM 17, 27 and 22, measured on Saturday 3 October 2026; the console cable; the operation counts of Lemma **Lemma Z24.2** and Example **Example Z24.3**, computed; the construction of Proposition **Proposition Z24.4**, which is arithmetic and needs no bench
+- **have:** real: the Pi 4B with 8 GB; the 3.5 inch LCD (A) and its two chip selects \[[7](#references)\]; the three Joy-it LEDs on BCM 17, 27 and 22, measured on Saturday 3 October 2026; the console cable; the operation counts of **Lemma Z24.2** and **Example Z24.3**, computed; the construction of **Proposition Z24.4**, which is arithmetic and needs no bench
 - **learn:** modelled: the equipment log is replayed from a file and is drawn dashed in every figure; the inference server's endpoint and its grammar field are to verify against the installed framework \[[3](#references)\]; the file size of each model is read from its model card; the weight packing the framework uses, and therefore the resident memory, is to verify rather than assumed from the information bound of the benchmark table
 - **absent:** absent: the equipment itself and every sensor on it, so no feature in this chapter was ever measured from a machine; any clinical or medical use, which the chapter does not have and does not claim; the display and the LEDs at the same time, because the display's connector takes header pins 1 to 26 and its carrier covers pins 27 to 40 and the bench has no stacking header; the MCC 118 and the CAN HAT, because SPI0 is the display's
 
@@ -421,10 +421,10 @@ stateDiagram-v2
 
 | **Quantity** | **Value** | **Kind** | **Instrument** |
 | --- | --- | --- | --- |
-| multiplications, dense 2048 by 2048 layer | 4194304 | computed | Example **Example Z24.3** |
-| multiplications, ternary 2048 by 2048 layer | 2048 | computed | Lemma **Lemma Z24.2**, one scale per row |
-| additive operations, either form | at most 4192256 | computed | Lemma **Lemma Z24.2** |
-| multiplications, the four by four layer in C | 4 against 16 | computed | Example **Example Z24.3**; the binary prints its own count |
+| multiplications, dense 2048 by 2048 layer | 4194304 | computed | **Example Z24.3** |
+| multiplications, ternary 2048 by 2048 layer | 2048 | computed | **Lemma Z24.2**, one scale per row |
+| additive operations, either form | at most 4192256 | computed | **Lemma Z24.2** |
+| multiplications, the four by four layer in C | 4 against 16 | computed | **Example Z24.3**; the binary prints its own count |
 | weights at 1.58 bits, 2.0 thousand million parameters | 0.395 GB | computed | $`2.0 \times 10^9 \times 1.58 / 8`$ |
 | weights at two-bit packing | 0.50 GB | computed, to verify | the framework's packing is read, not assumed \[[3](#references)\] |
 | weights at sixteen-bit floating point | 4.00 GB | computed | the same count at 2 bytes |
@@ -441,7 +441,7 @@ stateDiagram-v2
 
 **Step 3.** On the build laptop, fetch the ternary model and the small rung, read and record each file size from its model card, and start the inference server on port 8080; add the Windows portproxy and confirm it from the Pi with one POST.
 
-**Step 4.** On the Pi 4B over ssh, run the decision path alone on twenty windows and confirm that the printed operation count equals the count Lemma **Lemma Z24.2** predicts for the packed weights, computed by hand from the two-bit fields.
+**Step 4.** On the Pi 4B over ssh, run the decision path alone on twenty windows and confirm that the printed operation count equals the count **Lemma Z24.2** predicts for the packed weights, computed by hand from the two-bit fields.
 
 **Step 5.** On the Pi 4B in the display configuration, seat the display, confirm that no wire reaches the header, and run 100 windows against the ternary model; keep the log.
 
@@ -453,11 +453,11 @@ stateDiagram-v2
 
 ## Acceptance test
 
-The chapter passes when, for each proposer, 100 windows exist in the log; every line matched the grammar; the printed operation count equals the count Lemma **Lemma Z24.2** predicts, window by window, with no exception; a window deliberately placed in an overlap, with a peak to peak value of 4.5 V, is certified for both watch and service and refused for nominal and withdraw; the two-dimensional construction of Proposition **Proposition Z24.4** is evaluated by the same C arithmetic at $`\varepsilon = 0.5`$ and $`\delta = 0.25`$ and prints a dense score of $`0.375`$ and a quantised score of $`-0.1875`$, both computed; and the table prints $`n_{11}, n_{10}, n_{01}, n_{00}`$ with both marginal rates. It fails if any line failed to parse, if the operation count ever differs from the lemma's, if the overlap window is refused for a band it lies in, if a rate is printed without the rule's rate beside it, if the display and the LEDs are reported as seated at the same time, or if any cell of the benchmark table is filled from a computed figure and labelled as measured.
+The chapter passes when, for each proposer, 100 windows exist in the log; every line matched the grammar; the printed operation count equals the count **Lemma Z24.2** predicts, window by window, with no exception; a window deliberately placed in an overlap, with a peak to peak value of 4.5 V, is certified for both watch and service and refused for nominal and withdraw; the two-dimensional construction of **Proposition Z24.4** is evaluated by the same C arithmetic at $`\varepsilon = 0.5`$ and $`\delta = 0.25`$ and prints a dense score of $`0.375`$ and a quantised score of $`-0.1875`$, both computed; and the table prints $`n_{11}, n_{10}, n_{01}, n_{00}`$ with both marginal rates. It fails if any line failed to parse, if the operation count ever differs from the lemma's, if the overlap window is refused for a band it lies in, if a rate is printed without the rule's rate beside it, if the display and the LEDs are reported as seated at the same time, or if any cell of the benchmark table is filled from a computed figure and labelled as measured.
 
 ## Variants
 
-- **the ladder model as the proposer.** The ternary model is replaced by Qwen2.5-0.5B from the sibling volume's ladder, served by llama.cpp, with the same grammar, the same guards and the same certifier. What changes is the weight format and nothing else: the arithmetic of Lemma **Lemma Z24.2** no longer applies, because a four-bit quantisation multiplies. What it costs is roughly four and a half bits per weight instead of 1.58, which for five hundred million parameters is $`5.0 \times 10^8 \times 4.5 / 8 = 0.281`$ GB against $`5.0 \times 10^8 \times 1.58 / 8 = 0.099`$ GB for the same count ternary (both computed), so the saving is real but the model is also smaller. Choose it when the bench has already served the file and the question is about the certifier rather than about the quantisation, which is most of the time.
+- **the ladder model as the proposer.** The ternary model is replaced by Qwen2.5-0.5B from the sibling volume's ladder, served by llama.cpp, with the same grammar, the same guards and the same certifier. What changes is the weight format and nothing else: the arithmetic of **Lemma Z24.2** no longer applies, because a four-bit quantisation multiplies. What it costs is roughly four and a half bits per weight instead of 1.58, which for five hundred million parameters is $`5.0 \times 10^8 \times 4.5 / 8 = 0.281`$ GB against $`5.0 \times 10^8 \times 1.58 / 8 = 0.099`$ GB for the same count ternary (both computed), so the saving is real but the model is also smaller. Choose it when the bench has already served the file and the question is about the certifier rather than about the quantisation, which is most of the time.
 - **a decision tree in front of the model.** A small random forest \[[4](#references)\] proposes the class instead of a language model, trained on the same replayed log, with the certifier and the guards unchanged. What changes is that the proposal becomes a path through a tree rather than a line of text, so the grammar is not needed and no sampling temperature enters; the cost is a training step this chapter does not otherwise have, and the gain is a proposer whose decision can itself be committed and proved, which is the brief's own predictive-maintenance sketch \[[1](#references)\]. Choose it when the proposal must later be proved as well as checked.
 
 ## Pitfalls
@@ -468,7 +468,7 @@ The chapter passes when, for each proposer, 100 windows exist in the log; every 
 - The operation count is a check on the lemma and not decoration. If the printed count ever differs from $`\sum_i \max(k_i - 1, 0)`$ for the packed weights, either the packing or the accumulation is wrong, and no verdict from that build is trusted.
 - Two bit patterns, 0 and 3, encode the zero weight in the packing above. A reader who assumes a one-to-one encoding will compute a different count by hand and conclude the lemma failed; the encoding is written in the listing's comment for that reason.
 - The information bound of 1.58 bits per weight is not a file size. A framework stores ternary weights in whole bits, typically two, and carries scales, an embedding table and a vocabulary beside them; the benchmark table therefore marks the two-bit figure to verify and reads the file size from the model card rather than deriving it.
-- Proposition **Proposition Z24.4** is about one layer and one linear score. A model of many layers composes many such errors and the bound of part (i) does not compose into a useful end-to-end statement; the chapter does not claim one, and the guards are what make the verdict safe regardless.
+- **Proposition Z24.4** is about one layer and one linear score. A model of many layers composes many such errors and the bound of part (i) does not compose into a useful end-to-end statement; the chapter does not claim one, and the guards are what make the verdict safe regardless.
 - The replayed log is a file. A number taken from it is a property of a recording made once, and no cell of the benchmark table may be filled from it as if it were a measurement of equipment.
 
 ## Languages and libraries not chosen

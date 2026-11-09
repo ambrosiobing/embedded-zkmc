@@ -59,7 +59,7 @@ over ristretto255 with $`g, h`$ the generators of the crate's `PedersenGens` \[[
 
 *(20.2)*
 
-and Corollary **Corollary Z20.4** says this is equivalent to $`0 \le n \le B - 1`$.
+and **Corollary Z20.4** says this is equivalent to $`0 \le n \le B - 1`$.
 
 ## The mathematics
 
@@ -169,9 +169,9 @@ Third, expanding $`L^{x^2} P R^{x^{-2}}`$ with $`P = \mathbf{g}_1^{\mathbf{a}_1}
 
 **Corollary Z20.4 (The limit 16 from two 8-bit proofs).** Let $`B = 16`$ and let $`c = g^n h^r`$ and $`c' = g^{n'} h^{r'}`$ be commitments with $`c \cdot c' = g^{B - 1}`$. If both $`((n, r), (c, 8))`$ and $`((n', r'), (c', 8))`$ are in $`\mathcal{R}_{\mathrm{range}}`$, then $`0 \le n \le B - 1`$ as integers, under the discrete logarithm assumption of Theorem thm:z01\_binding. Conversely, for every integer $`0 \le n \le B - 1`$ and every $`r`$, the prover can set $`n' = B - 1 - n`$ and $`r' = -r`$ and both memberships hold with $`c \cdot c' = g^{B-1}`$. The two proofs together are $`2 \cdot 15 = 30`$ elements, $`960`$ bytes, plus the $`32`$ bytes of $`c`$ ($`c'`$ is computed by the verifier).
 
-*Proof.* From $`c \cdot c' = g^{n + n'} h^{r + r'} = g^{B-1} h^{0}`$ and Theorem thm:z01\_binding, $`n + n' = B - 1`$ in $`\mathbb{Z}_p`$ (an adversary who produced the two openings with $`n + n' \ne B - 1`$ would have computed $`\log_g h`$). Both $`n`$ and $`n'`$ lie in $`[0, 2^8)`$ as integers by Lemma **Lemma Z20.2**, so $`n + n' \in [0, 2^9 - 2]`$ as an integer, and since $`2^9 < p`$ the equation $`n + n' = B - 1`$ holds over the integers. Hence $`n = B - 1 - n' \le B - 1`$, and $`n \ge 0`$ from its own range. For the converse, $`n' = B - 1 - n \in [0, B - 1] \subset [0, 2^8)`$ when $`n \in [0, B - 1]`$, the ranges hold, and $`c \cdot c' = g^{n + n'} h^{r - r} = g^{B-1}`$. The count is twice the $`2 \log_2 8 + 9 = 15`$ elements of Theorem **Theorem Z20.3**(c). &#9632;
+*Proof.* From $`c \cdot c' = g^{n + n'} h^{r + r'} = g^{B-1} h^{0}`$ and Theorem thm:z01\_binding, $`n + n' = B - 1`$ in $`\mathbb{Z}_p`$ (an adversary who produced the two openings with $`n + n' \ne B - 1`$ would have computed $`\log_g h`$). Both $`n`$ and $`n'`$ lie in $`[0, 2^8)`$ as integers by **Lemma Z20.2**, so $`n + n' \in [0, 2^9 - 2]`$ as an integer, and since $`2^9 < p`$ the equation $`n + n' = B - 1`$ holds over the integers. Hence $`n = B - 1 - n' \le B - 1`$, and $`n \ge 0`$ from its own range. For the converse, $`n' = B - 1 - n \in [0, B - 1] \subset [0, 2^8)`$ when $`n \in [0, B - 1]`$, the ranges hold, and $`c \cdot c' = g^{n + n'} h^{r - r} = g^{B-1}`$. The count is twice the $`2 \log_2 8 + 9 = 15`$ elements of **Theorem Z20.3**(c). &#9632;
 
-**Remark Z20.7.** The computed sizes, each from Theorem **Theorem Z20.3**(c): $`m = 8`$ gives $`15`$ elements, $`480`$ bytes; $`m = 16`$ gives $`17`$ elements, $`544`$ bytes; $`m = 32`$ gives $`19`$, $`608`$ bytes; $`m = 64`$ gives $`21`$, $`672`$ bytes. An aggregated proof of $`k`$ values of $`m`$ bits replaces $`m`$ by $`k m`$ in the logarithm \[[4](#references)\], so the pair of 8-bit statements in one `prove_multiple` call would be $`2 \log_2 16 + 9 = 17`$ elements, $`544`$ bytes, against $`960`$ for the two single proofs the code below produces. Every one of these is a count, not a measurement.
+**Remark Z20.7.** The computed sizes, each from **Theorem Z20.3**(c): $`m = 8`$ gives $`15`$ elements, $`480`$ bytes; $`m = 16`$ gives $`17`$ elements, $`544`$ bytes; $`m = 32`$ gives $`19`$, $`608`$ bytes; $`m = 64`$ gives $`21`$, $`672`$ bytes. An aggregated proof of $`k`$ values of $`m`$ bits replaces $`m`$ by $`k m`$ in the logarithm \[[4](#references)\], so the pair of 8-bit statements in one `prove_multiple` call would be $`2 \log_2 16 + 9 = 17`$ elements, $`544`$ bytes, against $`960`$ for the two single proofs the code below produces. Every one of these is a count, not a measurement.
 
 ## The protocol
 
@@ -378,7 +378,7 @@ stateDiagram-v2
 
 ![Figure 20.4. Proof size in bytes, computed from the count of Theorem Theorem Z20.3 and drawn dashed because a computed figure is not a measured one; six bars from left to right: one 8-bit proof at 480, one 16-bit proof at 544, one 32-bit proof at 608, one 64-bit proof at 672, the two single 8-bit proofs of this chapter at 960, and the aggregated pair at 544.](../figures/z20_data.svg)
 
-*Figure 20.4. Proof size in bytes, computed from the count of Theorem **Theorem Z20.3** and drawn dashed because a computed figure is not a measured one; six bars from left to right: one 8-bit proof at 480, one 16-bit proof at 544, one 32-bit proof at 608, one 64-bit proof at 672, the two single 8-bit proofs of this chapter at 960, and the aggregated pair at 544. Timing bars are absent on purpose: no order of magnitude is claimed before the price list of Z1 exists, and the table below carries the timings as not measured with their instrument.*
+*Figure 20.4. Proof size in bytes, computed from the count of **Theorem Z20.3** and drawn dashed because a computed figure is not a measured one; six bars from left to right: one 8-bit proof at 480, one 16-bit proof at 544, one 32-bit proof at 608, one 64-bit proof at 672, the two single 8-bit proofs of this chapter at 960, and the aggregated pair at 544. Timing bars are absent on purpose: no order of magnitude is claimed before the price list of Z1 exists, and the table below carries the timings as not measured with their instrument.*
 
 | **Quantity** | **Pi 4B** | **Kind** | **Instrument** |
 | --- | --- | --- | --- |

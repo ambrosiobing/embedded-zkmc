@@ -156,7 +156,7 @@ The board's DRAM is $`512 \times 2^{20} = 512 \times 1048576 = 536870912 \approx
 
 so the weights alone need about seven and a half times the memory the board has. For $`b = 2`$ the floor halves to $`2.0 \times 10^{9}`$ bytes and the ratio is $`2.0 \times 10^{9} / 5.37 \times 10^{8} = 3.72`$. A ratio above one is a refusal, so both cases refuse, and the 8 GB of eMMC does not change this: paging weights from flash changes the latency per token by orders of magnitude and does not change the resident requirement that produced the ratio. &#9632;
 
-**Remark Z22.6.** Lemma **Lemma Z22.4** is why the brief's pairing of an on-device inference runtime \[[3](#references)\] with an 8B model on that board \[[2](#references)\] is corrected rather than followed. The ladder this bench actually runs is the sibling volume's: SmolLM2-360M at 4 bits is $`360 \times 10^{6} \times 4 / 8 = 1.8 \times 10^{8}`$ bytes, computed, which is about a third of the board's DRAM, and Qwen2.5-0.5B at 4 bits is $`2.5 \times 10^{8}`$ bytes, computed, which is about half. Neither of those is used in this chapter, which has no model at all; the arithmetic is recorded here because this is the chapter where the brief's claim lands.
+**Remark Z22.6.** **Lemma Z22.4** is why the brief's pairing of an on-device inference runtime \[[3](#references)\] with an 8B model on that board \[[2](#references)\] is corrected rather than followed. The ladder this bench actually runs is the sibling volume's: SmolLM2-360M at 4 bits is $`360 \times 10^{6} \times 4 / 8 = 1.8 \times 10^{8}`$ bytes, computed, which is about a third of the board's DRAM, and Qwen2.5-0.5B at 4 bits is $`2.5 \times 10^{8}`$ bytes, computed, which is about half. Neither of those is used in this chapter, which has no model at all; the arithmetic is recorded here because this is the chapter where the brief's claim lands.
 
 ## The protocol
 
@@ -281,13 +281,13 @@ The authoring laptop runs none of these lines. It writes the sources and the des
 
 ## The model, if any
 
-None. No language model proposes anything in this chapter. The brief's own model for this sketch is the one Lemma **Lemma Z22.4** rules out on the board the brief names, and the chapter does not substitute another: the question here is about a language, and adding a proposer would add a second variable to an experiment built to have one.
+None. No language model proposes anything in this chapter. The brief's own model for this sketch is the one **Lemma Z22.4** rules out on the board the brief names, and the chapter does not substitute another: the question here is about a language, and adding a proposer would add a second variable to an experiment built to have one.
 
 ## Real, modelled, absent
 
 - **have:** real: the NUCLEO-H7A3ZI-Q, the X-NUCLEO-IKS4A1 whose addresses were measured on a Pi I2C bus on Wednesday 30 September 2026, the Pi 4B, the Waveshare 3.5 inch LCD (A), the four Joy-it LEDs measured on Saturday 3 October 2026, and the build laptop as the only machine that compiles
 - **learn:** modelled: the Embedded Swift toolchain itself, which has not been built on the build laptop yet, so every generated name in the listing is marked to verify; and the bars of the benchmark figure, which are computed sizes and expected orders of magnitude and are drawn dashed
-- **absent:** absent: the aircraft of the brief's framing, which is not on this bench in any form and is therefore not drawn at all rather than drawn dotted; a second X-NUCLEO shield on the same header, because the three shields fit it one at a time; and an 8B model on the NanoPi NEO Air, absent by Lemma **Lemma Z22.4** rather than by preference
+- **absent:** absent: the aircraft of the brief's framing, which is not on this bench in any form and is therefore not drawn at all rather than drawn dotted; a second X-NUCLEO shield on the same header, because the three shields fit it one at a time; and an 8B model on the NanoPi NEO Air, absent by **Lemma Z22.4** rather than by preference
 
 ## System architecture
 
@@ -367,7 +367,7 @@ stateDiagram-v2
 | cycles per commitment | not measured | not applicable | the DWT counter with the MCC 118 as the witness, as in [Project 1](01-the-price-list.md); no capture exists |
 | window period | not measured | not measured | 64 samples at 10 ms is 640 ms per window, computed; the achieved period is unmeasured |
 | bytes per window | computed | computed | 4 plus 32 is 36 bytes by the protocol above |
-| weight floor, 8B at 4 bits | not applicable | not applicable | $`4.0 \times 10^{9}`$ bytes, computed in Lemma **Lemma Z22.4** |
+| weight floor, 8B at 4 bits | not applicable | not applicable | $`4.0 \times 10^{9}`$ bytes, computed in **Lemma Z22.4** |
 | NanoPi DRAM | not applicable | not applicable | $`5.37 \times 10^{8}`$ bytes from the board's own specification \[[11](#references)\] |
 | energy per commitment | not measured | no, the PPK2 cannot meter a Pi | the PPK2 can meter the Nucleo; no run exists |
 
@@ -391,17 +391,17 @@ stateDiagram-v2
 
 ## Acceptance test
 
-The chapter passes when, on one recorded day: the script over the description file reports zero accessors whose bit range meets a reserved range and zero overlapping fields, so the hypotheses of Proposition **Proposition Z22.2** are checked rather than assumed; the build prints an image size under 2 MB; the firmware stops with its own message when the shield is removed, and runs when it is seated; the Pi 4B records 100 consecutive windows whose sequence numbers increase by one with no gap over 7 seconds; ten openings verify and ten openings with one altered byte are refused; and the window period is reported as a measured figure with its instrument or as "not measured" with its reason. It fails if a reserved field is read anywhere, if any sample appears in any byte that crossed the CDC link, or if the chapter claims the type discipline as a property of the proof.
+The chapter passes when, on one recorded day: the script over the description file reports zero accessors whose bit range meets a reserved range and zero overlapping fields, so the hypotheses of **Proposition Z22.2** are checked rather than assumed; the build prints an image size under 2 MB; the firmware stops with its own message when the shield is removed, and runs when it is seated; the Pi 4B records 100 consecutive windows whose sequence numbers increase by one with no gap over 7 seconds; ten openings verify and ten openings with one altered byte are refused; and the window period is reported as a measured figure with its instrument or as "not measured" with its reason. It fails if a reserved field is read anywhere, if any sample appears in any byte that crossed the CDC link, or if the chapter claims the type discipline as a property of the proof.
 
 ## Variants
 
-**C with the vendor headers as the control arm.** The one thing swapped is the language: the same commitment, the same shield, the same 36 bytes, written in C17 against the vendor header set instead of a generated Swift module. What it buys is the comparison the chapter exists to make, because the firmware defect class of Proposition **Proposition Z22.2** is exactly the one a C macro cannot exclude; what it costs is the discipline moving from the compiler into review. The arithmetic figure is the image size: a bare-metal Swift image and a C image for the same peripheral set differ by the runtime each carries, a difference computed from the two build outputs and not yet available here, since neither has been built. Choose it when the toolchain for the target does not exist on the build laptop, which today it does not.
+**C with the vendor headers as the control arm.** The one thing swapped is the language: the same commitment, the same shield, the same 36 bytes, written in C17 against the vendor header set instead of a generated Swift module. What it buys is the comparison the chapter exists to make, because the firmware defect class of **Proposition Z22.2** is exactly the one a C macro cannot exclude; what it costs is the discipline moving from the compiler into review. The arithmetic figure is the image size: a bare-metal Swift image and a C image for the same peripheral set differ by the runtime each carries, a difference computed from the two build outputs and not yet available here, since neither has been built. Choose it when the toolchain for the target does not exist on the build laptop, which today it does not.
 
 **The same firmware on the STWIN.box.** The board is swapped for the STEVAL-STWINBX1, whose microcontroller is an STM32U585AI with TrustZone \[[6](#references)\], so the register description file changes and the generated module with it while the commitment and the relation stay fixed. What it buys is a second description file for the same generator, which is the only honest way to test that the acceptance script generalises; what it costs is that the STWIN.box is a USB-C device with no Arduino header, so no X-NUCLEO shield stacks on it and the window comes from its own IIS3DWB instead. Choose it when the question is the generator rather than the sensor. The brief stacks two shields on that board \[[2](#references)\]; the bench correction is that it has no header to stack them on.
 
 ## Pitfalls
 
-- Proposition **Proposition Z22.2** has two hypotheses and they live outside the compiler. A description file with overlapping fields, or a generator that emits an accessor for a reserved range, breaks the conclusion with no warning from the language, which is why the acceptance test checks the file and not the firmware.
+- **Proposition Z22.2** has two hypotheses and they live outside the compiler. A description file with overlapping fields, or a generator that emits an accessor for a reserved range, breaks the conclusion with no warning from the language, which is why the acceptance test checks the file and not the firmware.
 - The Nucleo is shared between volumes and carries whatever image was flashed last. A capture taken without reflashing first is a capture of another project, and the build stamp beats the application name as evidence of which image is running.
 - Three X-NUCLEO shields exist on this bench and the Arduino header takes one. A plan that needs two sensors at once needs flying leads to a Pi I2C bus, not a stack.
 - An accumulator in `Int32` holds 64 samples of a signed 16-bit range without overflow, because $`64 \times 2^{15} = 2^{21}`$ is far inside $`2^{31}`$, computed; a longer window or a wider sample needs the arithmetic redone before the type is chosen.
@@ -410,7 +410,7 @@ The chapter passes when, on one recorded day: the script over the description fi
 ## Languages and libraries not chosen
 
 - Rust `no_std` with `stm32h7xx-hal` 0.16.0 \[[8](#references)\] and `cortex-m-rt` 0.7.7 \[[9](#references)\]: the route of [Project 2](02-a-sensor-reading-committed-on-the-microcontroller.md), with typed registers from the same kind of description file and a toolchain that already builds on the build laptop; the delta is that it is already in the volume, so it cannot also be the variable under test.
-- C17 with the vendor header set: the shortest path to a working image and the control arm of the first variant above; the delta is the defect class of Proposition **Proposition Z22.2**.
+- C17 with the vendor header set: the shortest path to a working image and the control arm of the first variant above; the delta is the defect class of **Proposition Z22.2**.
 - TinyGo \[[4](#references)\]: another managed language that reaches a Cortex-M, used in a variant of [Project 12](12-a-plonk-gate-for-the-inductive-step.md); the delta is a garbage collector in the commit path, which puts a pause inside the 640 ms window.
 - Python in any form: there is no allocator here and no interpreter, and the volume's rule puts nothing in Python on a microcontroller.
 
@@ -418,7 +418,7 @@ The chapter passes when, on one recorded day: the script over the description fi
 
 - [swift.org, Embedded Swift](https://www.swift.org/get-started/embedded/) (to verify), the language subset and the SVD2Swift tool.
 - [rfc-editor.org/info/rfc9496](https://www.rfc-editor.org/info/rfc9496) (verified Friday 6 November 2026), the ristretto255 group the commitment uses.
-- [wiki.friendlyelec.com, NanoPi NEO Air](https://wiki.friendlyelec.com/wiki/index.php/NanoPi_NEO_Air) (to verify), the 512 MB figure of Lemma **Lemma Z22.4**.
+- [wiki.friendlyelec.com, NanoPi NEO Air](https://wiki.friendlyelec.com/wiki/index.php/NanoPi_NEO_Air) (to verify), the 512 MB figure of **Lemma Z22.4**.
 - [github.com/pytorch/executorch](https://github.com/pytorch/executorch) (verified Friday 6 November 2026), the runtime the brief pairs with that board.
 - [st.com, STM32U585AI](https://www.st.com/en/microcontrollers-microprocessors/stm32u585ai.html) (to verify), the part behind the second variant.
 - [arxiv.org/abs/2605.00487](https://arxiv.org/abs/2605.00487) (verified Friday 6 November 2026), the paper whose symbolic scheme supplies the commitment.

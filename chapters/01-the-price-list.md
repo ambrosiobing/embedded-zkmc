@@ -65,7 +65,7 @@ and the price list is a partial function $`\mathrm{cost} : \mathrm{Boards} \time
 
 **Definition Z1.2 (Pedersen commitment).** Let $`\mathbb{G}`$ be a cyclic group of prime order $`p`$ with generators $`g, h`$ such that $`\log_g h`$ is unknown. For $`v \in \mathbb{Z}_p`$ and $`r \in \mathbb{Z}_p`$, $`\mathsf{Com}(v; r) = g^v h^r`$ \[[3](#references)\].
 
-**Theorem Z1.3 (Pedersen is perfectly hiding).** For every $`v \in \mathbb{Z}_p`$ the random variable $`\mathsf{Com}(v; r)`$ with $`r`$ uniform in $`\mathbb{Z}_p`$ is uniform on $`\mathbb{G}`$. Hence the distributions of Definition **Definition Z1.1** are identical, not merely indistinguishable.
+**Theorem Z1.3 (Pedersen is perfectly hiding).** For every $`v \in \mathbb{Z}_p`$ the random variable $`\mathsf{Com}(v; r)`$ with $`r`$ uniform in $`\mathbb{Z}_p`$ is uniform on $`\mathbb{G}`$. Hence the distributions of **Definition Z1.1** are identical, not merely indistinguishable.
 
 *Proof.* Fix $`v`$. Because $`p`$ is prime and $`h \ne 1`$, $`h`$ generates $`\mathbb{G}`$, so the map $`\mathbb{Z}_p \to \mathbb{G}`$, $`r \mapsto h^r`$ is a bijection. Composition with the bijection $`x \mapsto g^v x`$ of $`\mathbb{G}`$ onto itself is again a bijection $`r \mapsto g^v h^r`$. The image of the uniform distribution on $`\mathbb{Z}_p`$ under a bijection onto $`\mathbb{G}`$ is the uniform distribution on $`\mathbb{G}`$, and it does not depend on $`v`$. &#9632;
 

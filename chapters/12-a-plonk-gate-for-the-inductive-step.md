@@ -276,7 +276,7 @@ None. The circuit is fixed by the relation and the witness is a transition the m
 
 *Figure 12.1. The data path from the Go source to the NanoPi's console line. Top row: the secret witness in the stop-coloured outline, the circuit's `Define` in grey, and the SRS stand-in in commitment blue with a dashed outline. Middle row: the Pi 4B as the prover in the yellow outline, a solid arrow over Wi-Fi carrying three binary files to the NanoPi NEO Air as the verifier in the green outline, and the `zk12` line in grey as what the NanoPi prints. Bottom row: the build laptop in grey cross-building both binaries, the verifying key in grey, and a dotted grey block for the absent header, Ethernet and ceremony party.*
 
-The NanoPi holds no secret and no proving key; what it holds is a verifying key and a binary, and Lemma **Lemma Z12.3** says what the binary's one random point buys.
+The NanoPi holds no secret and no proving key; what it holds is a verifying key and a binary, and **Lemma Z12.3** says what the binary's one random point buys.
 
 ## Wiring
 

@@ -300,7 +300,7 @@ None. A cost instrument has nothing for a model to propose.
 ## Real, modelled, absent
 
 - **have:** real: the two Pis, `blst` at v0.3.17 as read on Friday 6 November 2026 \[[7](#references)\], the Renkforce cable on the Pi 4B console, the bench LAN
-- **learn:** modelled: every bar in the benchmark figure is the order of magnitude that Theorem **Theorem Z11.2** and Lemma **Lemma Z11.6** predict from the counts and a guessed cost per group addition; it is drawn dashed and is replaced by a solid bar only when the run has happened; the generator $`7`$ and the headers’ C++ names are to verify on the day
+- **learn:** modelled: every bar in the benchmark figure is the order of magnitude that **Theorem Z11.2** and **Lemma Z11.6** predict from the counts and a guessed cost per group addition; it is drawn dashed and is replaced by a solid bar only when the run has happened; the generator $`7`$ and the headers’ C++ names are to verify on the day
 - **absent:** absent: a fan or heatsink for the Pi 3B+, so its cells above the 200 s running total read "not measured, thermal"; the NanoPi, whose 512 MB cannot hold $`2^{14}`$ Jacobian points with $`2^{10}`$ buckets beside them and which is not in this chapter; the Nucleo, where no chapter needs a multi-scalar multiplication
 
 ## System architecture

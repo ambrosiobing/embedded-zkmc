@@ -53,7 +53,7 @@ R_{\mathrm{eval}} = \mathsf{PoK}\Big\{\, \underbrace{(p, b_0, b_1)}_{w} ;\;
 
 *(4.1)*
 
-where $`n`$ is the order of the interpolation domain of [Project 3](03-the-modems-backoff-machine.md) ($`n = 256`$ for $`c_{S_0}`$, $`n = 65536`$ for $`c_T`$), $`E`$ is a subset of that domain, and $`(b_0, b_1)`$ is the mask of Remark rem:z03\_blind. The witness carries $`b_0`$ and $`b_1`$ and not a single opening scalar $`b`$, because the commitment of Definition **Definition Z4.2** is a deterministic function of its argument: all the randomness of this relation lives inside the committed polynomial. The degree bound belongs in the relation because the verifier cannot check it and the soundness argument of Remark **Remark Z4.5** needs it. The relation is read twice: once with $`u_1 = (c_{S_0}, E_{\mathrm{init}})`$ and $`\pi_{S_0}`$, once with $`u_2 = (c_T, E_{\mathrm{step}} \cup E_{\mathrm{fair}})`$ and $`\pi_T`$. The sets of this project are
+where $`n`$ is the order of the interpolation domain of [Project 3](03-the-modems-backoff-machine.md) ($`n = 256`$ for $`c_{S_0}`$, $`n = 65536`$ for $`c_T`$), $`E`$ is a subset of that domain, and $`(b_0, b_1)`$ is the mask of Remark rem:z03\_blind. The witness carries $`b_0`$ and $`b_1`$ and not a single opening scalar $`b`$, because the commitment of **Definition Z4.2** is a deterministic function of its argument: all the randomness of this relation lives inside the committed polynomial. The degree bound belongs in the relation because the verifier cannot check it and the soundness argument of **Remark Z4.5** needs it. The relation is read twice: once with $`u_1 = (c_{S_0}, E_{\mathrm{init}})`$ and $`\pi_{S_0}`$, once with $`u_2 = (c_T, E_{\mathrm{step}} \cup E_{\mathrm{fair}})`$ and $`\pi_T`$. The sets of this project are
 
 ```math
 \begin{gathered}
@@ -66,7 +66,7 @@ u \in \mathbb{G}_1 \times \mathbb{G}_1 \times 2^{\mathbb{F}_r} \times 2^{\mathbb
 
 and the verdict is $`\mathsf{Verify}(c_{S_0}, E_{\mathrm{init}}, \pi_{S_0}) \wedge \mathsf{Verify}(c_T, E_{\mathrm{step}} \cup E_{\mathrm{fair}}, \pi_T)`$. The sets $`E_\star`$ are not read from the file: the verifier recomputes them from the certificate exactly as [Project 3](03-the-modems-backoff-machine.md) does, and refuses if its counts differ from the prover's printed 16 and 8088.
 
-**What the verdict does and does not say.** The two checks decide that the polynomial behind $`c_T`$ vanishes on $`E_{\mathrm{step}} \cup E_{\mathrm{fair}}`$ and the polynomial behind $`c_{S_0}`$ on $`E_{\mathrm{init}}`$. They do not decide that either polynomial is the indicator function of a set, because nothing in Equation 4.2 constrains the committed polynomial's values away from $`E`$. A prover that commits the zero polynomial passes both checks: $`Z_E`$ divides $`0`$ for every $`E`$, so $`\pi = g_1^{0}`$ is accepted, and the "committed system" is then the one with no initial state and no transition, which satisfies every liveness property vacuously. The step from an accepted verdict to "the committed system satisfies $`\phi`$" therefore needs one further obligation, that $`p_{S_0}`$ and $`p_T`$ take values in $`\{0, 1\}`$ on the whole interpolation domain, which this chapter does not check and which the bench has no instrument for. Until it is added, read the verdict as a statement about whichever polynomial $`c_T`$ commits to, bound to the prover by Theorem thm:z01\_binding and no more. This is a separate gap from the ceremony of Remark **Remark Z4.5** and is not closed by a real ceremony.
+**What the verdict does and does not say.** The two checks decide that the polynomial behind $`c_T`$ vanishes on $`E_{\mathrm{step}} \cup E_{\mathrm{fair}}`$ and the polynomial behind $`c_{S_0}`$ on $`E_{\mathrm{init}}`$. They do not decide that either polynomial is the indicator function of a set, because nothing in Equation 4.2 constrains the committed polynomial's values away from $`E`$. A prover that commits the zero polynomial passes both checks: $`Z_E`$ divides $`0`$ for every $`E`$, so $`\pi = g_1^{0}`$ is accepted, and the "committed system" is then the one with no initial state and no transition, which satisfies every liveness property vacuously. The step from an accepted verdict to "the committed system satisfies $`\phi`$" therefore needs one further obligation, that $`p_{S_0}`$ and $`p_T`$ take values in $`\{0, 1\}`$ on the whole interpolation domain, which this chapter does not check and which the bench has no instrument for. Until it is added, read the verdict as a statement about whichever polynomial $`c_T`$ commits to, bound to the prover by Theorem thm:z01\_binding and no more. This is a separate gap from the ceremony of **Remark Z4.5** and is not closed by a real ceremony.
 
 ## The mathematics
 
@@ -134,8 +134,8 @@ The verifier's algorithm, each step refusing with the red LED on failure.
 2. Read the 192-byte proof file; decompress the four $`\mathbb{G}_1`$ elements and check each lies in the prime-order subgroup with `blst_p1_affine_in_g1`; a point that decompresses but is not in $`\mathbb{G}_1`$ is a refusal, not an input.
 3. Build the power table $`\omega^i`$ for $`i < 2^{16}`$ by $`65535`$ field multiplications; the $`256`$-th roots for $`e_1`$ are $`\omega^{256 i}`$.
 4. Enumerate $`B_{\mathrm{init}}`$ over $`S`$ and $`B_{\mathrm{step}} \cup B_{\mathrm{fair}}`$ over $`S \times S`$ from $`V`$ and the automaton, exactly the loops of [Project 3](03-the-modems-backoff-machine.md); print the two counts and compare with 16 and 8088.
-5. For each batch compute $`Z_E`$ and $`g_2^{Z_E(\tau)}`$ by Lemma **Lemma Z4.4**: 16 and 8088 roots, so 17 and 8089 scalar multiplications in $`\mathbb{G}_2`$ (computed).
-6. Two Miller loops per batch and one final verification: accept iff both equations of Theorem **Theorem Z4.3** hold.
+5. For each batch compute $`Z_E`$ and $`g_2^{Z_E(\tau)}`$ by **Lemma Z4.4**: 16 and 8088 roots, so 17 and 8089 scalar multiplications in $`\mathbb{G}_2`$ (computed).
+6. Two Miller loops per batch and one final verification: accept iff both equations of **Theorem Z4.3** hold.
 7. Drive BCM 17 high on accept, BCM 22 high on reject or on any earlier refusal; print the verdict and the elapsed time from `clock_gettime`.
 
 ## The code
@@ -252,7 +252,7 @@ None. A verifier that consulted a model would be a verifier with a second opinio
 
 - **have:** real: the Pi 4B, the Pi 3B, the two LEDs measured on BCM 17 and 22 on Saturday 3 October 2026 as anode on the signal pin and driven high, `blst` at the release read on Friday 6 November 2026, the proof file layout of 192 bytes
 - **learn:** modelled: the dashed bars in the benchmark figure are the orders of magnitude `blst`'s published aarch64 timings suggest for 8089 $`\mathbb{G}_2`$ scalar multiplications and two pairings on a Cortex-A72 and a Cortex-A53, not measured; the Pi 3B's card and OS word size are to be read on the day, and a 32-bit OS would need the portable `blst` build and a second binary
-- **absent:** absent: a setup ceremony, so Remark **Remark Z4.5** applies and the green LED is a computation, not a guarantee; a fan on the Pi 3B, which matters only if a run exceeds four minutes; a photograph of the LEDs, which is the record the acceptance test asks for and which does not yet exist
+- **absent:** absent: a setup ceremony, so **Remark Z4.5** applies and the green LED is a computation, not a guarantee; a fan on the Pi 3B, which matters only if a run exceeds four minutes; a photograph of the LEDs, which is the record the acceptance test asks for and which does not yet exist
 
 ## System architecture
 
@@ -331,8 +331,8 @@ stateDiagram-v2
 | --- | --- | --- | --- | --- |
 | verifier, total | 160 ms | not measured | not measured | `clock_gettime`, printed by the binary; the paper's figure is its machine's |
 | of which pairings | not printed | not measured | not measured | two Miller loops and one final verification per batch, timed separately in a second run |
-| $`\mathbb{G}_2`$ scalar multiplications | not printed | 8106 (computed) | 8106 (computed) | $`17 + 8089`$, Lemma **Lemma Z4.4** |
-| $`\mathbb{F}_r`$ multiplications for $`Z_E`$ | not printed | about $`3.3 \times 10^7`$ (computed) | same | $`8088 \cdot 8089 / 2`$ plus $`16 \cdot 17 / 2`$, Lemma **Lemma Z4.4** |
+| $`\mathbb{G}_2`$ scalar multiplications | not printed | 8106 (computed) | 8106 (computed) | $`17 + 8089`$, **Lemma Z4.4** |
+| $`\mathbb{F}_r`$ multiplications for $`Z_E`$ | not printed | about $`3.3 \times 10^7`$ (computed) | same | $`8088 \cdot 8089 / 2`$ plus $`16 \cdot 17 / 2`$, **Lemma Z4.4** |
 | proof read |  | 192 bytes | 192 bytes | computed; the file length is checked, not assumed |
 | setup read |  | 8089 $`\mathbb{G}_2`$ decompressions | same | `blst_p2_uncompress` |
 | throttle word |  | not read yet | not read yet | `vcgencmd get_throttled` before and after |
@@ -351,7 +351,7 @@ The paper's verifier column runs from 20 ms at $`|S| = 2^5`$ to 590 ms at $`|S| 
 
 **Step 5.** On the Pi 4B, flip one byte of a copy of the proof file with `printf` and `dd`, run again, photograph the red LED, keep the lines.
 
-**Step 6.** On the Pi 4B, forge: with the $`\tau`$ printed in [Project 3](03-the-modems-backoff-machine.md)'s setup log, let the Python write $`\pi_T' = g_1^{p'(\tau) / Z_E(\tau)}`$ for a $`p'`$ that is the indicator of a machine that does wait forever; run, and record that the green LED lights, which is Remark **Remark Z4.5** made visible.
+**Step 6.** On the Pi 4B, forge: with the $`\tau`$ printed in [Project 3](03-the-modems-backoff-machine.md)'s setup log, let the Python write $`\pi_T' = g_1^{p'(\tau) / Z_E(\tau)}`$ for a $`p'`$ that is the indicator of a machine that does wait forever; run, and record that the green LED lights, which is **Remark Z4.5** made visible.
 
 **Step 7.** On the Pi 3B over ssh, copy the binary and both files, wire its LEDs, and repeat the honest and the flipped runs; a run longer than four minutes is not measured, thermal.
 

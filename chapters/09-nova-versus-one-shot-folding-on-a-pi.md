@@ -37,7 +37,7 @@ The paper chooses its one-shot fold over Nova and says why in its related work: 
 
 ## The secret, the statement and the relation
 
-Fix the step circuit $`\mathsf{F}`$ that checks one obligation of [Project 5](05-farkas-witnesses-for-a-joystick-program.md): given the secret row block $`A_s`$, the witnesses $`\lambda_s, \mu_s, \delta_s`$ and the public block $`G_p, h_p`$, it enforces $`A_s^\top \lambda_s + G_p^\top \mu_s = 0`$ and $`\delta_s = -b_s^\top \lambda_s - h_p^\top \mu_s - 1`$ over the field, and the ranges $`\lambda_s, \mu_s, \delta_s \in [0, 2^{64})`$ by bit decomposition, and increments a counter carried in the public state $`z`$. Let $`(A, B, C)`$ be the R1CS matrices of $`\mathsf{F}`$ with $`m`$ constraints. For step $`i`$ the witness is $`W_i`$ (every allocated value: rows, witnesses, bits, products), the public input is $`x_i = (z_{i-1}, z_i)`$, and the pair $`(x_i, W_i)`$ satisfies the R1CS of Definition **Definition Z9.1** below. The relation Nova proves after $`N`$ steps is
+Fix the step circuit $`\mathsf{F}`$ that checks one obligation of [Project 5](05-farkas-witnesses-for-a-joystick-program.md): given the secret row block $`A_s`$, the witnesses $`\lambda_s, \mu_s, \delta_s`$ and the public block $`G_p, h_p`$, it enforces $`A_s^\top \lambda_s + G_p^\top \mu_s = 0`$ and $`\delta_s = -b_s^\top \lambda_s - h_p^\top \mu_s - 1`$ over the field, and the ranges $`\lambda_s, \mu_s, \delta_s \in [0, 2^{64})`$ by bit decomposition, and increments a counter carried in the public state $`z`$. Let $`(A, B, C)`$ be the R1CS matrices of $`\mathsf{F}`$ with $`m`$ constraints. For step $`i`$ the witness is $`W_i`$ (every allocated value: rows, witnesses, bits, products), the public input is $`x_i = (z_{i-1}, z_i)`$, and the pair $`(x_i, W_i)`$ satisfies the R1CS of **Definition Z9.1** below. The relation Nova proves after $`N`$ steps is
 
 ```math
 \mathcal{R}_{09} = \Big\{\, \big( \{W_i\}_{i=1}^{N} ;\; (z_0, z_N, N) \big) \;\Big|\;
@@ -88,7 +88,7 @@ z = z_1 + r z_2, \qquad\text{that is}\qquad
   W = W_1 + r W_2,\quad x = x_1 + r x_2,\quad u = u_1 + r u_2,
 ```
 
-and $`E = E_1 + r T + r^2 E_2`$ with $`T`$ as in Definition **Definition Z9.3**. Then $`(E, u, W, x)`$ satisfies Equation 9.2.
+and $`E = E_1 + r T + r^2 E_2`$ with $`T`$ as in **Definition Z9.3**. Then $`(E, u, W, x)`$ satisfies Equation 9.2.
 
 *Proof.* $`A`$, $`B`$ and $`C`$ are linear, so $`A z = A z_1 + r A z_2`$ and likewise for $`B`$ and $`C`$. The Hadamard product is bilinear, so
 
@@ -155,9 +155,9 @@ For [Project 5](05-farkas-witnesses-for-a-joystick-program.md)'s instance $`d = 
 
 Nova's incremental proof, as the crate exposes it, with the obligation circuit as the primary step and the trivial circuit on the secondary curve.
 
-1. **Setup (both parties).** `PublicParams::setup` on one instance of the step circuit and the trivial secondary circuit; the crate prints the constraint counts of both, which are the $`m`$ of Proposition **Proposition Z9.7**. Both parties run this from the same source, so the parameters are public and reproducible.
+1. **Setup (both parties).** `PublicParams::setup` on one instance of the step circuit and the trivial secondary circuit; the crate prints the constraint counts of both, which are the $`m`$ of **Proposition Z9.7**. Both parties run this from the same source, so the parameters are public and reproducible.
 2. **Start (prover).** `RecursiveSNARK::new` with $`z_0 = (0)`$ on the primary side and $`(0)`$ on the secondary.
-3. **Step (prover), $`N`$ times.** `prove_step` with the $`i`$-th obligation as the circuit instance: the prover computes $`T`$, commits to it, derives $`r_i`$ from the running instance, folds by Theorem **Theorem Z9.4**, and proves inside the next step's circuit that the fold was done correctly.
+3. **Step (prover), $`N`$ times.** `prove_step` with the $`i`$-th obligation as the circuit instance: the prover computes $`T`$, commits to it, derives $`r_i`$ from the running instance, folds by **Theorem Z9.4**, and proves inside the next step's circuit that the fold was done correctly.
 4. **Verify (verifier).** `verify` with $`N`$ and $`z_0`$: the verifier checks the hash chain and the final relaxed instance, returning $`z_N`$, which must read $`N`$.
 5. **Compress (optional).** `CompressedSNARK::prove` and `verify` turn the running instance into a succinct proof for a verifier that will not keep the public parameters; not needed on one board and marked **learn**.
 
@@ -269,7 +269,7 @@ None. The chapter compares two folds; nothing in it is proposed.
 
 ## Real, modelled, absent
 
-- **have:** real: the Pi 4B; the `nova-snark` crate at 0.76.0 read on Friday 6 November 2026; the 77 obligations and their witnesses from [Project 5](05-farkas-witnesses-for-a-joystick-program.md); the counts of Proposition **Proposition Z9.7** (i), (iii) and the $`|K|`$ side of (ii) and (iv), which are computed exactly
+- **have:** real: the Pi 4B; the `nova-snark` crate at 0.76.0 read on Friday 6 November 2026; the 77 obligations and their witnesses from [Project 5](05-farkas-witnesses-for-a-joystick-program.md); the counts of **Proposition Z9.7** (i), (iii) and the $`|K|`$ side of (ii) and (iv), which are computed exactly
 - **learn:** modelled: the recursion overhead of about $`10^4`$ constraints is a figure from the Nova paper, to verify against what `num_constraints` prints on this build; every crossover number that depends on it moves with it. The hash chain that carries the public rows is omitted from the listing. The compressed proof is not produced. Every timing bar below is drawn dashed
 - **absent:** absent: a measured fold time on any board; a second board as an independent verifier; a Pi 3B+ run, which the memory the public parameters need (recorded by the run, against the 3B+'s 905 MB) is expected to rule out before its thermal window does
 
@@ -306,7 +306,7 @@ sequenceDiagram
   P->>P: PublicParams::setup, print constraint counts
   P->>P: RecursiveSNARK::new with z0 = 0
   loop 77 obligations, one per step
-    P->>P: compute T, commit, derive r_i, fold (Theorem)
+    P->>P: compute T, commit, derive r_i, fold (Theorem Z9.4)
     P->>P: prove the previous fold inside this step
   end
   P->>V: the RecursiveSNARK object, on this board the same process
@@ -368,7 +368,7 @@ stateDiagram-v2
 
 **Step 3.** On the Pi 4B over ssh, read `vcgencmd get_throttled`, run `./zk09` under `/usr/bin/time -v`, read the register again, and keep the two `zk09` lines and the maximum resident set size.
 
-**Step 4.** On the Pi 4B, write the printed primary constraint count into Proposition **Proposition Z9.7**'s instance in place of $`11109`$, recompute $`m / d`$ and $`c_T m / (d n)`$, and say whether the crossover row of the table moved.
+**Step 4.** On the Pi 4B, write the printed primary constraint count into **Proposition Z9.7**'s instance in place of $`11109`$, recompute $`m / d`$ and $`c_T m / (d n)`$, and say whether the crossover row of the table moved.
 
 **Step 5.** On the Pi 4B, raise one $`\lambda`$ entry of one obligation by 1 in the JSON and run again: `prove_step` or `verify` must fail; a run that prints `ok=true` is a defect in the circuit, not a pass.
 
@@ -386,13 +386,13 @@ The chapter passes when the honest run prints `steps=77 ok=true` with the thrott
 
 - The step circuit must have the same shape at every step: the public parameters are built from one instance, so every obligation is padded to the same $`n`$ rows with zero rows and zero witnesses, which the ranges accept and the product ignores.
 - Everything not in $`z`$ is private, including the public rows $`G_p, h_p`$; a verifier that must know which obligations were checked needs the hash chain in $`z`$, and a listing without it proves that 77 products of something held.
-- The recursion overhead is paid per step however small the obligation; for Z5's four columns it is more than ninety percent of $`m`$ (computed from the two figures above), which is why Proposition **Proposition Z9.7** (ii) favours the one-shot fold here and would not for an obligation of a few thousand constraints.
+- The recursion overhead is paid per step however small the obligation; for Z5's four columns it is more than ninety percent of $`m`$ (computed from the two figures above), which is why **Proposition Z9.7** (ii) favours the one-shot fold here and would not for an obligation of a few thousand constraints.
 - A folded witness is uniform in the field; the ranges are enforced inside each step and never on the running instance, the same point as [Project 6](06-folding-and-the-salem-spencer-schedule.md)'s second pitfall from the other side.
 - `verify` returns the final $`z`$; a test that checks only `is_ok()` and not $`z_N = 77`$ would accept a run of the right shape and the wrong length.
 
 ## Languages and libraries not chosen
 
-- Rust with `ark-ff` and a hand-written fold: Theorem **Theorem Z9.4** is thirty lines, but the recursion that makes Nova incremental is the crate's whole value; a hand fold without it is [Project 6](06-folding-and-the-salem-spencer-schedule.md) in another language.
+- Rust with `ark-ff` and a hand-written fold: **Theorem Z9.4** is thirty lines, but the recursion that makes Nova incremental is the crate's whole value; a hand fold without it is [Project 6](06-folding-and-the-salem-spencer-schedule.md) in another language.
 - ProtoGalaxy \[[5](#references)\]: folds many instances under one challenge like the paper's scheme with a different cross-term structure; no pinned crate was read on Friday 6 November 2026, so it is a sentence here and not a chapter.
 - Go with `gnark`: no folding scheme in the release read; the PLONK route is [Project 12](12-a-plonk-gate-for-the-inductive-step.md).
 - Noir with Honk, [Project 13](13-the-obligation-in-noir.md): proves one obligation at a time, which is the unfolded baseline both folds are measured against.

@@ -56,9 +56,9 @@ The witness is the pair of polynomials that encode the secret initial states and
 
 *(3.1)*
 
-Two features of the written form are deliberate. The commitment is called with one argument, because $`\mathsf{Com}`$ of Definition def:z04\_kzg is a deterministic function of the polynomial handed to it: all the randomness of this relation lives inside the committed polynomial, as the mask of Remark **Remark Z3.10**, so the witness carries the two mask coefficients of each polynomial and not one opening scalar per polynomial. And the degree bounds belong in the relation because no verifier reads a degree off a single group element, while the soundness argument of [Project 4](04-two-group-elements.md)'s Remark rem:z04\_setup needs them.
+Two features of the written form are deliberate. The commitment is called with one argument, because $`\mathsf{Com}`$ of Definition def:z04\_kzg is a deterministic function of the polynomial handed to it: all the randomness of this relation lives inside the committed polynomial, as the mask of **Remark Z3.10**, so the witness carries the two mask coefficients of each polynomial and not one opening scalar per polynomial. And the degree bounds belong in the relation because no verifier reads a degree off a single group element, while the soundness argument of [Project 4](04-two-group-elements.md)'s Remark rem:z04\_setup needs them.
 
-**What the relation does not oblige.** Neither conjunct constrains $`p_{S_0}`$ or $`p_T`$ at any point outside the batches, so Equation 3.1 is satisfied by a prover who commits $`p_{S_0} = p_T = 0`$: the zero polynomial vanishes on every set, and the vanishing polynomial of every set divides it. The hypothesis of Lemma **Lemma Z3.9**, that $`p_T`$ satisfies the second half of Equation 3.6, is therefore a property of the honest prover's construction below and not an obligation the relation places on a prover. Equation 3.1 is the paper's relation \[[1](#references)\], and what the paper's relation leaves to the encoder is said here rather than left to a reader to notice: the well-formedness of the encoding, that $`p_{S_0}`$ and $`p_T`$ take values in $`\{0, 1\}`$ on the whole interpolation domain, is assumed of the honest prover and is proved nowhere in this volume. Read an accepted proof as a statement about whichever polynomials $`c_{S_0}`$ and $`c_T`$ commit to, and see [Project 4](04-two-group-elements.md) for the same point on the verifier's side.
+**What the relation does not oblige.** Neither conjunct constrains $`p_{S_0}`$ or $`p_T`$ at any point outside the batches, so Equation 3.1 is satisfied by a prover who commits $`p_{S_0} = p_T = 0`$: the zero polynomial vanishes on every set, and the vanishing polynomial of every set divides it. The hypothesis of **Lemma Z3.9**, that $`p_T`$ satisfies the second half of Equation 3.6, is therefore a property of the honest prover's construction below and not an obligation the relation places on a prover. Equation 3.1 is the paper's relation \[[1](#references)\], and what the paper's relation leaves to the encoder is said here rather than left to a reader to notice: the well-formedness of the encoding, that $`p_{S_0}`$ and $`p_T`$ take values in $`\{0, 1\}`$ on the whole interpolation domain, is assumed of the honest prover and is proved nowhere in this volume. Read an accepted proof as a statement about whichever polynomials $`c_{S_0}`$ and $`c_T`$ commit to, and see [Project 4](04-two-group-elements.md) for the same point on the verifier's side.
 
 The specific sets of this project are
 
@@ -131,7 +131,7 @@ s \in S_0 &\implies \big(q \in Q_0 \implies V(s, q) \ne \infty\big), \\
 
 which are the paper's Equations 4, 5 and 6 \[[1](#references)\]. Then $`\mathcal{L}_\mathcal{M} \cap \mathcal{L}_\mathcal{A} = \emptyset`$.
 
-*Proof.* Suppose, for a contradiction, that $`\sigma \in \mathcal{L}_\mathcal{M} \cap \mathcal{L}_\mathcal{A}`$. By Definition **Definition Z3.3** there is a fair execution $`((s_i, q_i))_{i \in \mathbb{N}}`$ of the composition whose $`S`$-component has trace $`\sigma`$: $`s_0 \in S_0`$, $`q_0 \in Q_0`$, $`(s_i, s_{i+1}) \in T`$ and $`(q_i, \langle\!\langle s_i \rangle\!\rangle, q_{i+1}) \in \delta`$ for all $`i`$, and the set $`I = \{\, i \mid (q_i, \langle\!\langle s_i \rangle\!\rangle, q_{i+1}) \in F \,\}`$ is infinite. Write $`v_i = V(s_i, q_i)`$.
+*Proof.* Suppose, for a contradiction, that $`\sigma \in \mathcal{L}_\mathcal{M} \cap \mathcal{L}_\mathcal{A}`$. By **Definition Z3.3** there is a fair execution $`((s_i, q_i))_{i \in \mathbb{N}}`$ of the composition whose $`S`$-component has trace $`\sigma`$: $`s_0 \in S_0`$, $`q_0 \in Q_0`$, $`(s_i, s_{i+1}) \in T`$ and $`(q_i, \langle\!\langle s_i \rangle\!\rangle, q_{i+1}) \in \delta`$ for all $`i`$, and the set $`I = \{\, i \mid (q_i, \langle\!\langle s_i \rangle\!\rangle, q_{i+1}) \in F \,\}`$ is infinite. Write $`v_i = V(s_i, q_i)`$.
 
 Step 1, the base case. Since $`s_0 \in S_0`$ and $`q_0 \in Q_0`$, condition (3.3) gives $`v_0 \ne \infty`$, so $`v_0 \in \mathbb{N}`$.
 
@@ -143,7 +143,7 @@ Step 4, the descent. Enumerate $`I`$ in increasing order as $`i_0 < i_1 < i_2 < 
 
 **Corollary Z3.6 (The paper's Corollary 3.3).** If $`\mathcal{A} = \mathcal{A}_{\neg\phi}`$ recognises $`\mathcal{L}_{\neg\phi} = \Sigma^\omega \setminus \mathcal{L}_\phi`$ and $`V`$ satisfies (3.3) to (3.3), then $`\mathcal{M} \models \phi`$.
 
-*Proof.* By Theorem **Theorem Z3.5**, $`\mathcal{L}_\mathcal{M} \cap \mathcal{L}_{\neg\phi} = \emptyset`$, so every trace of $`\mathcal{M}`$ lies outside $`\Sigma^\omega \setminus \mathcal{L}_\phi`$, that is, inside $`\mathcal{L}_\phi`$; and $`\mathcal{L}_\mathcal{M} \subseteq \mathcal{L}_\phi`$ is the definition of $`\mathcal{M} \models \phi`$. &#9632;
+*Proof.* By **Theorem Z3.5**, $`\mathcal{L}_\mathcal{M} \cap \mathcal{L}_{\neg\phi} = \emptyset`$, so every trace of $`\mathcal{M}`$ lies outside $`\Sigma^\omega \setminus \mathcal{L}_\phi`$, that is, inside $`\mathcal{L}_\phi`$; and $`\mathcal{L}_\mathcal{M} \subseteq \mathcal{L}_\phi`$ is the definition of $`\mathcal{M} \models \phi`$. &#9632;
 
 The certifier does not check (3.3) to (3.3) on the secret $`S_0`$ and $`T`$ directly; it negates the consequents and enumerates, from public data only, the states and transitions that would violate them. These are the paper's Equations 7, 8 and 9:
 
@@ -168,7 +168,7 @@ S_0 \cap B_{\mathrm{init}} = \emptyset, \qquad T \cap B_{\mathrm{step}} = \empty
 
 *(3.5)*
 
-For the modem machine the enumeration computed $`|B_{\mathrm{init}}| = 16`$ (the sixteen states Wait with done $`= 3`$), $`|B_{\mathrm{step}}| = 7976`$, $`|B_{\mathrm{fair}}| = 5016`$, $`|B_{\mathrm{step}} \cup B_{\mathrm{fair}}| = 8088`$, and all three intersections empty, on Friday 6 November 2026; so Corollary **Corollary Z3.6** applies and the modem never waits forever.
+For the modem machine the enumeration computed $`|B_{\mathrm{init}}| = 16`$ (the sixteen states Wait with done $`= 3`$), $`|B_{\mathrm{step}}| = 7976`$, $`|B_{\mathrm{fair}}| = 5016`$, $`|B_{\mathrm{step}} \cup B_{\mathrm{fair}}| = 8088`$, and all three intersections empty, on Friday 6 November 2026; so **Corollary Z3.6** applies and the modem never waits forever.
 
 **Definition Z3.7 (Embeddings and indicator polynomials).** Let $`r`$ be the order of the BLS12-381 scalar field $`\mathbb{F}_r`$; $`2^{32}`$ divides $`r - 1`$. Let $`\omega_1`$ be a primitive $`256`$-th and $`\omega_2`$ a primitive $`2^{16}`$-th root of unity in $`\mathbb{F}_r`$, and let $`\mathrm{idx} : S \to \{0, \dots, 255\}`$ be the bijection $`\mathrm{idx}(m, d, n) = 64\, m + 4\, d + n`$ with the modes numbered 0 to 3. The embeddings are
 
@@ -198,7 +198,7 @@ With $`n = 256`$, $`\omega = \omega_1`$ and $`J = \mathrm{idx}[S_0]`$ the lemma 
 
 *Proof.* Only if. Suppose $`p_T`$ vanishes on $`E`$ and, for a contradiction, that $`(s, s') \in T \cap B`$. Then $`e_2(s, s') \in E`$, so $`p_T(e_2(s, s')) = 0`$. But by (3.6), $`p_T(e_2(s, s')) = \mathbf{1}_T(s, s') = 1`$ because $`(s, s') \in T`$, and $`1 \ne 0`$ in a field. Hence $`T \cap B = \emptyset`$.
 
-If. Suppose $`T \cap B = \emptyset`$ and let $`e \in E`$. By definition of the image there is $`(s, s') \in B`$ with $`e = e_2(s, s')`$, and by injectivity it is the only pair in $`S \times S`$ with that image, so (3.6) speaks about this pair and no other: $`p_T(e) = p_T(e_2(s, s')) = \mathbf{1}_T(s, s')`$. Since $`(s, s') \in B`$ and $`T \cap B = \emptyset`$, $`(s, s') \notin T`$ and $`\mathbf{1}_T(s, s') = 0`$. So $`p_T(e) = 0`$ for every $`e \in E`$. Injectivity is also what makes a $`p_T`$ with (3.6) exist at all: Lemma **Lemma Z3.8** interpolates one value per distinct point, and two pairs with the same image but different indicator values would admit no polynomial. &#9632;
+If. Suppose $`T \cap B = \emptyset`$ and let $`e \in E`$. By definition of the image there is $`(s, s') \in B`$ with $`e = e_2(s, s')`$, and by injectivity it is the only pair in $`S \times S`$ with that image, so (3.6) speaks about this pair and no other: $`p_T(e) = p_T(e_2(s, s')) = \mathbf{1}_T(s, s')`$. Since $`(s, s') \in B`$ and $`T \cap B = \emptyset`$, $`(s, s') \notin T`$ and $`\mathbf{1}_T(s, s') = 0`$. So $`p_T(e) = 0`$ for every $`e \in E`$. Injectivity is also what makes a $`p_T`$ with (3.6) exist at all: **Lemma Z3.8** interpolates one value per distinct point, and two pairs with the same image but different indicator values would admit no polynomial. &#9632;
 
 **Remark Z3.10 (Blinding, and what this chapter does not prove).** A KZG commitment $`g_1^{p(\tau)}`$ to the plain indicator polynomial is binding \[[3](#references)\] but not hiding: with $`|S| = 256`$ a verifier could guess a transition relation, recompute its polynomial and compare commitments. The code adds to each polynomial the mask $`(b_0 + b_1 X)(X^n - 1)`$ with $`b_0, b_1`$ uniform in $`\mathbb{F}_r`$, the technique PLONK uses to blind its wire polynomials \[[4](#references)\]. The mask vanishes on every $`n`$-th root of unity, so (3.6) is unchanged, $`E \subset`$ the domain is still a set of roots, and the batch division of [Project 4](04-two-group-elements.md) stays exact. The hiding argument is short enough to write out. Write $`W = (X^{n} - 1) / Z_E`$, which is a polynomial because $`E`$ is a subset of the $`n`$-th roots of unity, and let $`q_0 = p_0 / Z_E`$ for the unmasked indicator $`p_0`$. The masked polynomial is $`p = p_0 + (b_0 + b_1 X)(X^{n} - 1)`$ and its quotient is $`q = q_0 + (b_0 + b_1 X) W`$, so the verifier's whole view of this polynomial is the pair
 
@@ -408,7 +408,7 @@ stateDiagram-v2
 | --- | --- | --- | --- | --- |
 | $`\vert S\vert `$ | $`2^{8.6}`$ | 256, $`2^{8}`$ | same | the paper's Table 1; the enumeration script |
 | $`\sum \vert E_\star\vert `$ | $`2^{13.8}`$ | 8104, $`2^{12.98}`$ | same | the paper's Table 1; the enumeration script, Friday 6 November 2026 |
-| $`\vert T\vert `$ | not printed | 61 | same | counted in Definition **Definition Z3.4** and by the script |
+| $`\vert T\vert `$ | not printed | 61 | same | counted in **Definition Z3.4** and by the script |
 | enumeration | 14 s | 0.09 s on the authoring laptop | not measured | `time.time` around the call; the paper's figure is its machine's |
 | setup | 3 s | 65538 $`\mathbb{G}_1`$ and 8089 $`\mathbb{G}_2`$ powers | not measured, expected hours in pure Python | wall clock of `zk03_setup.py` |
 | prover | 2 s | two commitments, two openings | not measured, expected hours | wall clock of `zk03_encode.py` |
@@ -425,7 +425,7 @@ The paper's row is for a machine with $`|S| = 2^{8.6}`$ and $`\sum|E_\star| = 2^
 
 **Step 3.** On the Pi 4B, run `zk03_encode.py` once with the curve part commented out and confirm the batch sizes 16, 7976, 5016 and 8088 match the laptop's.
 
-**Step 4.** On the Pi 4B, seat the SIM7020E HAT, set `enable_uart=1` and `dtoverlay=disable-bt`, remove the console from `cmdline.txt`, reboot, and replay `zk03_atlog.txt` through the driver; record the visited states and check each visited pair is in $`T`$ of Definition **Definition Z3.4**.
+**Step 4.** On the Pi 4B, seat the SIM7020E HAT, set `enable_uart=1` and `dtoverlay=disable-bt`, remove the console from `cmdline.txt`, reboot, and replay `zk03_atlog.txt` through the driver; record the visited states and check each visited pair is in $`T`$ of **Definition Z3.4**.
 
 **Step 5.** On the Pi 4B, run `zk03_setup.py` with a wall clock and the throttle register read before and after; the run is long and the Pi 4B has no thermal window to respect but the register must still read `0x0` at both ends.
 

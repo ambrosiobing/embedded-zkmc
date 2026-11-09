@@ -60,7 +60,7 @@ with the parse condition $`v < 2^{16}`$ checked beside it, a condition on the fo
 
 *(15.2)*
 
-and the question is whether $`n`$ group equations can be decided by one. In the paper's Figure 4 the verifier of `zkeq` checks products of commitments raised to the powers $`\rho, \rho^2, \dots, \rho^n`$ of one challenge drawn from the Fiat-Shamir hash \[[1](#references)\]; here the challenges are $`n`$ independent weights $`\rho_1, \dots, \rho_n`$ drawn by the verifier itself, which is the interactive form and a different scheme with a different error. The two errors are derived in this volume and the derivation is not read off the paper. Powers of one challenge make the acceptance condition $`\sum_i \rho^i d_i = 0`$, a univariate polynomial of degree at most $`n`$ in $`\rho`$, non-zero when some $`d_j \ne 0`$, so Lemma lem:z06\_sz bounds the error by $`n / p`$. Independent weights make it the multilinear $`\sum_i \rho_i d_i`$ of total degree 1, and Lemma **Lemma Z15.2** below gives exactly $`1/p`$. For $`n = 64`$ and ristretto255's $`p`$ the two bounds are $`2^{-246}`$ and $`2^{-252}`$ (computed), so nothing on this bench turns on the difference; the distinction matters because one challenge costs 32 bytes of transcript and $`n`$ independent weights cost $`32n`$, which is why the paper's verifier uses powers, and the lemma below is the reason the paper's verifier can afford a batch of obligations at all.
+and the question is whether $`n`$ group equations can be decided by one. In the paper's Figure 4 the verifier of `zkeq` checks products of commitments raised to the powers $`\rho, \rho^2, \dots, \rho^n`$ of one challenge drawn from the Fiat-Shamir hash \[[1](#references)\]; here the challenges are $`n`$ independent weights $`\rho_1, \dots, \rho_n`$ drawn by the verifier itself, which is the interactive form and a different scheme with a different error. The two errors are derived in this volume and the derivation is not read off the paper. Powers of one challenge make the acceptance condition $`\sum_i \rho^i d_i = 0`$, a univariate polynomial of degree at most $`n`$ in $`\rho`$, non-zero when some $`d_j \ne 0`$, so Lemma lem:z06\_sz bounds the error by $`n / p`$. Independent weights make it the multilinear $`\sum_i \rho_i d_i`$ of total degree 1, and **Lemma Z15.2** below gives exactly $`1/p`$. For $`n = 64`$ and ristretto255's $`p`$ the two bounds are $`2^{-246}`$ and $`2^{-252}`$ (computed), so nothing on this bench turns on the difference; the distinction matters because one challenge costs 32 bytes of transcript and $`n`$ independent weights cost $`32n`$, which is why the paper's verifier uses powers, and the lemma below is the reason the paper's verifier can afford a batch of obligations at all.
 
 ## The mathematics
 
@@ -93,7 +93,7 @@ so the check accepts if and only if $`\sum_{i=1}^{n} \rho_i d_i = 0`$ in $`\math
 
 **Proposition Z15.4 (Weights known in advance let a wrong opening pass).** If the prover learns $`\rho_1`$ and $`\rho_2`$ before sending its openings, it can send two openings of which at least one is wrong and still pass the batched check with certainty.
 
-*Proof.* Let $`(v_1, r_1)`$ and $`(v_2, r_2)`$ be the true openings of $`c_1`$ and $`c_2`$, and let $`\delta \in \mathbb{Z}_p`$, $`\delta \ne 0`$. The prover sends $`(v_1 + \delta, r_1)`$ for $`c_1`$ and $`(v_2 - \rho_1 \delta \rho_2^{-1}, r_2)`$ for $`c_2`$, with $`\rho_2 \ne 0`$ (if $`\rho_2 = 0`$ the second opening is unconstrained and any value passes). In the notation of the proof of Lemma **Lemma Z15.2**, $`e_1 = c_1 g^{-v_1 - \delta} h^{-r_1} = g^{-\delta}`$, so $`d_1 = -\delta`$, and $`e_2 = c_2 g^{-v_2 + \rho_1 \delta \rho_2^{-1}} h^{-r_2} = g^{\rho_1 \delta \rho_2^{-1}}`$, so $`d_2 = \rho_1 \delta \rho_2^{-1}`$. Then
+*Proof.* Let $`(v_1, r_1)`$ and $`(v_2, r_2)`$ be the true openings of $`c_1`$ and $`c_2`$, and let $`\delta \in \mathbb{Z}_p`$, $`\delta \ne 0`$. The prover sends $`(v_1 + \delta, r_1)`$ for $`c_1`$ and $`(v_2 - \rho_1 \delta \rho_2^{-1}, r_2)`$ for $`c_2`$, with $`\rho_2 \ne 0`$ (if $`\rho_2 = 0`$ the second opening is unconstrained and any value passes). In the notation of the proof of **Lemma Z15.2**, $`e_1 = c_1 g^{-v_1 - \delta} h^{-r_1} = g^{-\delta}`$, so $`d_1 = -\delta`$, and $`e_2 = c_2 g^{-v_2 + \rho_1 \delta \rho_2^{-1}} h^{-r_2} = g^{\rho_1 \delta \rho_2^{-1}}`$, so $`d_2 = \rho_1 \delta \rho_2^{-1}`$. Then
 
 ```math
 \rho_1 d_1 + \rho_2 d_2 = -\rho_1 \delta + \rho_2 \rho_1 \delta \rho_2^{-1}
@@ -306,21 +306,21 @@ stateDiagram-v2
 
 ![Figure 15.3. How to check what arrives.](../figures/z15_tree.svg)
 
-*Figure 15.3. How to check what arrives. The root diamond asks whether the verifier receives the opening (v, r) at all; no leads right to the leaf of a range proof in [Project 20](20-the-occupancy-counter-that-proves-its-committed-count.md), where the value stays hidden and only its bound is proved. Yes drops to a diamond asking whether one opening or many are to be checked; one leads right to the direct check of Lemma lem:z02\_open\_cost. Many drops to a diamond asking whether the weights are drawn after the last opening has arrived; yes leads right to the batched check of this chapter with $`n + 2`$ multiplications, no leads to the grey leaf that forbids batching, by Proposition **Proposition Z15.4**.*
+*Figure 15.3. How to check what arrives. The root diamond asks whether the verifier receives the opening (v, r) at all; no leads right to the leaf of a range proof in [Project 20](20-the-occupancy-counter-that-proves-its-committed-count.md), where the value stays hidden and only its bound is proved. Yes drops to a diamond asking whether one opening or many are to be checked; one leads right to the direct check of Lemma lem:z02\_open\_cost. Many drops to a diamond asking whether the weights are drawn after the last opening has arrived; yes leads right to the batched check of this chapter with $`n + 2`$ multiplications, no leads to the grey leaf that forbids batching, by **Proposition Z15.4**.*
 
 ## Benchmark
 
 ![Figure 15.4. Expected openings per second on the Pi 3B+, log scale, drawn as dashed bars because none has been measured: the single check, then the batched check for batches of 8, 64 and 512 openings, each bar the rate the counts of Lemma Lemma Z15.5 imply for one expected scalar multiplication time on a Cortex-A53 at 1.4 GHz.](../figures/z15_data.svg)
 
-*Figure 15.4. Expected openings per second on the Pi 3B+, log scale, drawn as dashed bars because none has been measured: the single check, then the batched check for batches of 8, 64 and 512 openings, each bar the rate the counts of Lemma **Lemma Z15.5** imply for one expected scalar multiplication time on a Cortex-A53 at 1.4 GHz. The batched bars approach twice the single rate and never exceed it. A solid bar replaces a dashed one when a run under 60 s with the throttle word unchanged has happened, and its caption names the record.*
+*Figure 15.4. Expected openings per second on the Pi 3B+, log scale, drawn as dashed bars because none has been measured: the single check, then the batched check for batches of 8, 64 and 512 openings, each bar the rate the counts of **Lemma Z15.5** imply for one expected scalar multiplication time on a Cortex-A53 at 1.4 GHz. The batched bars approach twice the single rate and never exceed it. A solid bar replaces a dashed one when a run under 60 s with the throttle word unchanged has happened, and its caption names the record.*
 
 | **Quantity** | **Expected** | **Pi 3B+** | **Instrument** |
 | --- | --- | --- | --- |
 | one opening check | under 2 ms | not measured | `std.time.Timer`, 64 repeats, median and median absolute deviation; run under 60 s |
 | batch of 64, one check | under 70 ms | not measured | the same timer around `verifyBatch`; run under 60 s |
 | openings per second, single | about $`10^3`$ | not measured | computed from the first row once it exists |
-| openings per second, batched | under twice the single rate | not measured | computed from the second row; Lemma **Lemma Z15.5** gives the ceiling |
-| scalar multiplications, 64 openings | 128 against 66 | computed | Lemma **Lemma Z15.5** |
+| openings per second, batched | under twice the single rate | not measured | computed from the second row; **Lemma Z15.5** gives the ceiling |
+| scalar multiplications, 64 openings | 128 against 66 | computed | **Lemma Z15.5** |
 | throttle word | `0x0` | not read yet | `vcgencmd get_throttled` before and after every run |
 
 The paper's Table 1 reports the symbolic verifier at 10 s for 217 obligations on its AWS `c6g.8xlarge`, a figure that contains thousands of weighted products of this kind and is attributed to that machine \[[1](#references)\]; no cell above borrows it.
@@ -353,7 +353,7 @@ The chapter passes when the two $`h`$ encodings are equal byte for byte, when 64
 
 - The identity refusal: the library's `mul` returns an error when the product is the identity, and a sample of $`v = 0`$ is legal; computing $`[v + 1]G - G`$ avoids it for $`v`$, and for $`r`$ an error is a correct rejection.
 - Two one-way maps: `fromUniform` here and `hash_from_bytes` on the Nucleo must agree, which is a property of two implementations of one specification and is not assumed; the generator check is the first line of every run.
-- Weights drawn early: Proposition **Proposition Z15.4** is the reason the batch code draws $`\rho`$ inside the loop over a slice that is already complete, and the reason the weights never appear on the CDC port or in the log.
+- Weights drawn early: **Proposition Z15.4** is the reason the batch code draws $`\rho`$ inside the loop over a slice that is already complete, and the reason the weights never appear on the CDC port or in the log.
 - `pinctrl` per LED event forks a process; at 10 Hz this is fine, in the timed loop the LEDs are off, because a fork inside a timed window is a measurement of the kernel, not of the check.
 - The four-minute window: a 60 s run per size with a pause between sizes keeps the board under its soft limit; the throttle word, read after, is the proof, and a sticky bit set earlier means reboot, not retry.
 - Two `ttyACM` devices appear if CN1 is also plugged into the Pi; keep CN1 on the build laptop.
