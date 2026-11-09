@@ -97,8 +97,30 @@ def main() -> int:
                         PROBLEMS.append("%s: no heading for #%s in %s"
                                         % (rel, frag, target or dest.name))
 
-    print("%d Markdown files, %d relative links checked, %d external links left alone"
-          % (len(files), checked, external))
+    # A link that resolves is only half of it. On Sunday 8 November 2026
+    # chapters/25-appendix.md was published and named by neither README.md nor
+    # CONTENTS.md, which is the table of the twenty-four numbered chapters, so
+    # it was reachable from no page at all. Every check here passed while that
+    # was true, because an orphan has no link to be broken. A dead link still
+    # reads as a link and somebody eventually clicks it; an orphan reads as
+    # nothing. The same defect was found in four sibling volumes the same day,
+    # all from one cause: the generated table carries the numbered chapters and
+    # every volume also publishes front matter and an appendix outside that
+    # range.
+    front = (ROOT / "README.md").read_text(encoding="utf-8")
+    contents = ROOT / "CONTENTS.md"
+    reachable = front + (
+        contents.read_text(encoding="utf-8") if contents.exists() else "")
+    chapters = sorted((ROOT / "chapters").glob("*.md"))
+    for page in chapters:
+        if page.name not in reachable:
+            PROBLEMS.append(
+                "chapters/%s is published and named by neither README.md nor "
+                "CONTENTS.md, so it is reachable from no page" % page.name)
+
+    print("%d Markdown files, %d relative links checked, %d external links left alone, "
+          "%d chapters all reachable from the front page or the contents table"
+          % (len(files), checked, external, len(chapters)))
     if PROBLEMS:
         print("\n%d problem(s):" % len(PROBLEMS))
         for p in PROBLEMS:
