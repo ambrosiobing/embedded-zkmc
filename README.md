@@ -185,7 +185,7 @@ The workflow reads the published tree, which is all a clone contains: the author
 are not here, so the checks that compare this Markdown against the LaTeX it came from run on
 the authoring machine instead.
 
-    python tools/check_links.py          every relative link resolves
+    python tools/check_links.py          every link resolves, and no page is an orphan
     python tools/check_tree.py           the file types, and nothing over four megabytes
     python tools/no_authoring_files.py   no .tex, .pdf, .html, tracked or not
 
@@ -209,6 +209,11 @@ after the push:
 | `figures/NAME.svg` | every figure rendered, committed because the Markdown draws nothing without them. The TikZ source is not published |
 | `CONTENTS.md` | the chapter table, generated, which the table above follows |
 | `PITFALLS.md` | every pitfall in the volume, generated, alphabetical across chapters |
+| [`lean/`](lean/) | the Lean 4 development, which builds under continuous integration; [`lean/STATUS.md`](lean/STATUS.md) says what a passing build does and does not establish |
+| [`BROCHURE.md`](BROCHURE.md) | the same work in plain words, for a reader with no background in any of it |
+| [`SOURCE.md`](SOURCE.md) | the paper this volume is built on, the repositories it grew out of, and what has and has not been checked |
+| [`AUTHORING.md`](AUTHORING.md) | the contract every chapter follows: the conventions, the bench inventory, and the honesty rules |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | the house rules, each one named beside the tool or hook that checks it |
 | `tools/` | the four guards and the hook installer |
 | `.githooks/` | the pre-commit and commit-message hooks, installed per clone |
 

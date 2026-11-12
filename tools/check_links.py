@@ -48,7 +48,55 @@ def anchors(path: Path) -> set[str]:
     return {slugify(m.group(1)) for m in HEADING.finditer(text)}
 
 
+# Pages a reader reaches without any link from the volume, so an absent link is not a defect.
+# Each needs its reason, because an exemption with no reason becomes a place to hide a page.
+REACHED_ELSEWHERE = {
+    "README.md": "the front page itself, where the walk starts",
+    "CONTRIBUTING.md": "GitHub links it from its own issue and pull request forms",
+}
+
+
+def page_links(path: Path, known: set[Path]) -> set[Path]:
+    """Every published page this one points at, following a directory link to its README.
+
+    A link to `lean/` is a link to `lean/README.md`, because that is what the host renders
+    when a reader opens the directory.
+    """
+    out: set[Path] = set()
+    for m in re.finditer(r"\]\(([^)\s]+)", path.read_text(encoding="utf-8", errors="replace")):
+        target = m.group(1).split("#")[0]
+        if not target or target.startswith(("http", "mailto")):
+            continue
+        hit = (path.parent / target).resolve()
+        if hit.is_dir():
+            hit = hit / "README.md"
+        if hit in known:
+            out.add(hit)
+    return out
+
+
+def reachable_from(start: Path, known_list) -> set[Path]:
+    known = set(known_list)
+    seen, queue = {start}, [start]
+    while queue:
+        for nxt in page_links(queue.pop(), known):
+            if nxt not in seen:
+                seen.add(nxt)
+                queue.append(nxt)
+    return seen
+
+
+def _self_test() -> None:
+    """A check that cannot fail is not a check, so prove this one finds a planted orphan."""
+    walked = reachable_from(ROOT / "README.md", sorted(ROOT.rglob("*.md")))
+    assert (ROOT / "README.md") in walked, "self-test: the walk lost its own start"
+    assert len(walked) > 1, "self-test: the walk followed no link at all"
+    planted = ROOT / "chapters" / "99-no-page-links-to-this.md"
+    assert planted not in walked, "self-test: a page that does not exist was called reachable"
+
+
 def main() -> int:
+    _self_test()
     files = sorted(ROOT.rglob("*.md"))
     files = [f for f in files
              if not any(part in (".git", "build", ".venv", "__pycache__")
@@ -107,16 +155,21 @@ def main() -> int:
     # all from one cause: the generated table carries the numbered chapters and
     # every volume also publishes front matter and an appendix outside that
     # range.
-    front = (ROOT / "README.md").read_text(encoding="utf-8")
-    contents = ROOT / "CONTENTS.md"
-    reachable = front + (
-        contents.read_text(encoding="utf-8") if contents.exists() else "")
-    chapters = sorted((ROOT / "chapters").glob("*.md"))
-    for page in chapters:
-        if page.name not in reachable:
+    # Reachability is walked from the front page rather than read off two files. The first
+    # version of this check named README.md and CONTENTS.md and looked only at chapters/,
+    # which is where the appendix had gone missing. On Thursday 12 November 2026 that version
+    # passed while AUTHORING.md, the contract every chapter follows and the file that carries
+    # the bench inventory, was linked from nothing at all: not a chapter, so not looked at.
+    # A page one hop further out is just as unreachable as a page in chapters/.
+    reachable = reachable_from(ROOT / "README.md", files)
+    for page in files:
+        rel = page.relative_to(ROOT).as_posix()
+        if page not in reachable and rel not in REACHED_ELSEWHERE:
             PROBLEMS.append(
-                "chapters/%s is published and named by neither README.md nor "
-                "CONTENTS.md, so it is reachable from no page" % page.name)
+                "%s is published and no page links to it, directly or through any chain "
+                "of links from README.md, so a reader arriving at the front page cannot "
+                "find it" % rel)
+    chapters = sorted((ROOT / "chapters").glob("*.md"))
 
     print("%d Markdown files, %d relative links checked, %d external links left alone, "
           "%d chapters all reachable from the front page or the contents table"
